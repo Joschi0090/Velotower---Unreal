@@ -951,6 +951,7 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 									bHudDragEditMode = false;
 									DraggingClusterIndex = 0;
 									if (AVTTowerGameMode* GM = GetTowerGM()) GM->SaveGameToDisk();
+									OpenModal(EVTModalOverlay::SettingsAndControls);
 									return FReply::Handled();
 								}))
 						]
@@ -1236,21 +1237,29 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 									[
 										SNew(SBorder)
 										.BorderImage(WhiteBrush)
-										.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.35f))
-										.Padding(FMargin(1.5f))
+										.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.65f))
+										.Padding(FMargin(2.0f))
 										[
 											SNew(SBorder)
 											.BorderImage(WhiteBrush)
-											.BorderBackgroundColor(FLinearColor(0.02f, 0.04f, 0.09f, 0.32f))
+											.BorderBackgroundColor(FLinearColor(0.015f, 0.04f, 0.09f, 0.65f))
 											[
 												SNew(SOverlay)
+												+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Top).Padding(0.0f, 4.0f, 0.0f, 0.0f)
+												[
+													SNew(STextBlock).Text(FText::FromString(TEXT("▲"))).Font(VTTheme::Font(8, true)).ColorAndOpacity(FLinearColor(0.0f, 0.961f, 0.831f, 0.60f))
+												]
+												+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(0.0f, 0.0f, 0.0f, 4.0f)
+												[
+													SNew(STextBlock).Text(FText::FromString(TEXT("▼"))).Font(VTTheme::Font(8, true)).ColorAndOpacity(FLinearColor(0.0f, 0.961f, 0.831f, 0.60f))
+												]
 												+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Center).Padding(6.0f, 0.0f, 0.0f, 0.0f)
 												[
-													SNew(STextBlock).Text(FText::FromString(TEXT("<"))).Font(VTTheme::Font(9, true)).ColorAndOpacity(FLinearColor(0.0f, 0.961f, 0.831f, 0.55f))
+													SNew(STextBlock).Text(FText::FromString(TEXT("◀"))).Font(VTTheme::Font(10, true)).ColorAndOpacity(VTTheme::Cyan)
 												]
 												+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Center).Padding(0.0f, 0.0f, 6.0f, 0.0f)
 												[
-													SNew(STextBlock).Text(FText::FromString(TEXT(">"))).Font(VTTheme::Font(9, true)).ColorAndOpacity(FLinearColor(0.0f, 0.961f, 0.831f, 0.55f))
+													SNew(STextBlock).Text(FText::FromString(TEXT("▶"))).Font(VTTheme::Font(10, true)).ColorAndOpacity(VTTheme::Cyan)
 												]
 												+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
 												[
@@ -1260,21 +1269,21 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 													.Padding(FMargin(0.0f))
 													[
 														SNew(SBox)
-														.WidthOverride(40.0f)
-														.HeightOverride(40.0f)
+														.WidthOverride(44.0f)
+														.HeightOverride(44.0f)
 														[
 															SNew(SBorder)
 															.BorderImage(WhiteBrush)
-															.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.70f))
-															.Padding(FMargin(1.5f))
+															.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.85f))
+															.Padding(FMargin(2.0f))
 															[
 																SNew(SBorder)
 																.BorderImage(WhiteBrush)
-																.BorderBackgroundColor(FLinearColor(0.04f, 0.12f, 0.22f, 0.65f))
+																.BorderBackgroundColor(FLinearColor(0.04f, 0.14f, 0.26f, 0.80f))
 																.HAlign(HAlign_Center)
 																.VAlign(VAlign_Center)
 																[
-																	SNew(STextBlock).Text(FText::FromString(TEXT("+"))).Font(VTTheme::Font(10, true)).ColorAndOpacity(VTTheme::Cyan)
+																	SNew(STextBlock).Text(FText::FromString(TEXT("●"))).Font(VTTheme::Font(12, true)).ColorAndOpacity(VTTheme::Cyan)
 																]
 															]
 														]
@@ -1286,62 +1295,150 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 								]
 							]
 						]
-						// Mode B: Subtle Classic D-Pad Left / Right Buttons
+						// Mode B: Sleek Cyberpunk Arcade Left / Right Directional Buttons
 						+ SVerticalBox::Slot().AutoHeight()
 						[
 							SAssignNew(ClassicDpadModeBox, SBorder)
 							.BorderImage(WhiteBrush)
 							.BorderBackgroundColor(FLinearColor::Transparent)
-							.Visibility(EVisibility::Collapsed)
+							.Visibility(EVisibility::Visible)
 							[
 								SNew(SHorizontalBox)
-								+ SHorizontalBox::Slot().AutoWidth().Padding(0.0f, 0.0f, 8.0f, 0.0f)
+								// LEFT BUTTON
+								+ SHorizontalBox::Slot().AutoWidth().Padding(0.0f, 0.0f, 10.0f, 0.0f)
 								[
-									SNew(SBox).WidthOverride(62.0f).HeightOverride(62.0f)
+									SNew(SBox).WidthOverride(76.0f).HeightOverride(72.0f)
 									[
 										SNew(SButton)
 										.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
 										.ContentPadding(FMargin(0.0f))
-										.OnPressed_Lambda([this]() { if (AVTPlayerController* PC = GetTowerPC()) { PC->bKeyLeft = true; PC->bKeyRight = false; PC->AnalogSteer = -1.0f; PC->TriggerHapticFeedback(12); } })
-										.OnReleased_Lambda([this]() { if (AVTPlayerController* PC = GetTowerPC()) { PC->bKeyLeft = false; PC->AnalogSteer = 0.0f; } })
+										.OnPressed_Lambda([this]()
+										{
+											if (bHudDragEditMode)
+											{
+												DraggingClusterIndex = 1;
+												if (AVTPlayerController* PC = GetTowerPC())
+												{
+													float MX = 0.0f, MY = 0.0f;
+													if (PC->GetMousePosition(MX, MY)) DragLastMousePos = FVector2D(MX, MY);
+												}
+											}
+											else if (AVTPlayerController* PC = GetTowerPC())
+											{
+												PC->bKeyLeft = true;
+												PC->bKeyRight = false;
+												PC->AnalogSteer = -1.0f;
+												PC->TriggerHapticFeedback(14);
+											}
+										})
+										.OnReleased_Lambda([this]()
+										{
+											if (bHudDragEditMode)
+											{
+												DraggingClusterIndex = 0;
+											}
+											else if (AVTPlayerController* PC = GetTowerPC())
+											{
+												PC->bKeyLeft = false;
+												PC->AnalogSteer = 0.0f;
+											}
+										})
 										[
 											SNew(SBorder)
 											.BorderImage(WhiteBrush)
-											.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.45f))
-											.Padding(FMargin(1.5f))
+											.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.80f))
+											.Padding(FMargin(2.0f))
 											[
 												SNew(SBorder)
 												.BorderImage(WhiteBrush)
-												.BorderBackgroundColor(FLinearColor(0.02f, 0.05f, 0.11f, 0.42f))
+												.BorderBackgroundColor(FLinearColor(0.015f, 0.045f, 0.09f, 0.75f))
 												.HAlign(HAlign_Center).VAlign(VAlign_Center)
 												[
-													SNew(STextBlock).Text(FText::FromString(TEXT("< LEFT"))).Font(VTTheme::Font(9, true)).ColorAndOpacity(VTTheme::Cyan)
+													SNew(SVerticalBox)
+													+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 4.0f, 0.0f, 0.0f)
+													[
+														SNew(STextBlock)
+														.Text(FText::FromString(TEXT("◀◀")))
+														.Font(VTTheme::Font(16, true))
+														.ColorAndOpacity(VTTheme::Cyan)
+													]
+													+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 1.0f, 0.0f, 4.0f)
+													[
+														SNew(STextBlock)
+														.Text(FText::FromString(TEXT("LINKS")))
+														.Font(VTTheme::Font(7, true))
+														.ColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.90f))
+													]
 												]
 											]
 										]
 									]
 								]
+								// RIGHT BUTTON
 								+ SHorizontalBox::Slot().AutoWidth()
 								[
-									SNew(SBox).WidthOverride(62.0f).HeightOverride(62.0f)
+									SNew(SBox).WidthOverride(76.0f).HeightOverride(72.0f)
 									[
 										SNew(SButton)
 										.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
 										.ContentPadding(FMargin(0.0f))
-										.OnPressed_Lambda([this]() { if (AVTPlayerController* PC = GetTowerPC()) { PC->bKeyRight = true; PC->bKeyLeft = false; PC->AnalogSteer = 1.0f; PC->TriggerHapticFeedback(12); } })
-										.OnReleased_Lambda([this]() { if (AVTPlayerController* PC = GetTowerPC()) { PC->bKeyRight = false; PC->AnalogSteer = 0.0f; } })
+										.OnPressed_Lambda([this]()
+										{
+											if (bHudDragEditMode)
+											{
+												DraggingClusterIndex = 1;
+												if (AVTPlayerController* PC = GetTowerPC())
+												{
+													float MX = 0.0f, MY = 0.0f;
+													if (PC->GetMousePosition(MX, MY)) DragLastMousePos = FVector2D(MX, MY);
+												}
+											}
+											else if (AVTPlayerController* PC = GetTowerPC())
+											{
+												PC->bKeyRight = true;
+												PC->bKeyLeft = false;
+												PC->AnalogSteer = 1.0f;
+												PC->TriggerHapticFeedback(14);
+											}
+										})
+										.OnReleased_Lambda([this]()
+										{
+											if (bHudDragEditMode)
+											{
+												DraggingClusterIndex = 0;
+											}
+											else if (AVTPlayerController* PC = GetTowerPC())
+											{
+												PC->bKeyRight = false;
+												PC->AnalogSteer = 0.0f;
+											}
+										})
 										[
 											SNew(SBorder)
 											.BorderImage(WhiteBrush)
-											.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.45f))
-											.Padding(FMargin(1.5f))
+											.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.80f))
+											.Padding(FMargin(2.0f))
 											[
 												SNew(SBorder)
 												.BorderImage(WhiteBrush)
-												.BorderBackgroundColor(FLinearColor(0.02f, 0.05f, 0.11f, 0.42f))
+												.BorderBackgroundColor(FLinearColor(0.015f, 0.045f, 0.09f, 0.75f))
 												.HAlign(HAlign_Center).VAlign(VAlign_Center)
 												[
-													SNew(STextBlock).Text(FText::FromString(TEXT("RIGHT >"))).Font(VTTheme::Font(9, true)).ColorAndOpacity(VTTheme::Cyan)
+													SNew(SVerticalBox)
+													+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 4.0f, 0.0f, 0.0f)
+													[
+														SNew(STextBlock)
+														.Text(FText::FromString(TEXT("▶▶")))
+														.Font(VTTheme::Font(16, true))
+														.ColorAndOpacity(VTTheme::Cyan)
+													]
+													+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 1.0f, 0.0f, 4.0f)
+													[
+														SNew(STextBlock)
+														.Text(FText::FromString(TEXT("RECHTS")))
+														.Font(VTTheme::Font(7, true))
+														.ColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.90f))
+													]
 												]
 											]
 										]
@@ -1354,7 +1451,7 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 
 				+ SHorizontalBox::Slot().FillWidth(1.0f) [ SNew(SSpacer) ]
 
-				// RIGHT CLUSTER: Subtle Draggable Jump Button
+				// RIGHT CLUSTER: Cyberpunk Apex Jump Booster Button (Freely Draggable!)
 				+ SHorizontalBox::Slot()
 				.AutoWidth()
 				.VAlign(VAlign_Bottom)
@@ -1365,8 +1462,8 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 					.Padding(FMargin(0.0f, 0.0f, 26.0f, 28.0f))
 					[
 						SAssignNew(RightClusterSizeBox, SBox)
-						.WidthOverride(92.0f)
-						.HeightOverride(92.0f)
+						.WidthOverride(96.0f)
+						.HeightOverride(96.0f)
 						[
 							SNew(SButton)
 							.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
@@ -1385,32 +1482,52 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 								else if (AVTPlayerController* PC = GetTowerPC())
 								{
 									PC->TriggerJumpAction();
-									PC->TriggerHapticFeedback(16);
+									PC->TriggerHapticFeedback(18);
 								}
 							})
 							.OnReleased_Lambda([this]()
 							{
-								DraggingClusterIndex = 0;
-								if (AVTPlayerController* PC = GetTowerPC()) PC->ReleaseJumpAction();
+								if (bHudDragEditMode)
+								{
+									DraggingClusterIndex = 0;
+								}
+								else if (AVTPlayerController* PC = GetTowerPC())
+								{
+									PC->ReleaseJumpAction();
+								}
 							})
 							[
 								SNew(SBorder)
 								.BorderImage(WhiteBrush)
-								.BorderBackgroundColor(FLinearColor(0.969f, 0.145f, 0.522f, 0.45f))
-								.Padding(FMargin(1.5f))
+								.BorderBackgroundColor(FLinearColor(0.98f, 0.12f, 0.55f, 0.85f))
+								.Padding(FMargin(2.0f))
 								[
 									SNew(SBorder)
 									.BorderImage(WhiteBrush)
-									.BorderBackgroundColor(FLinearColor(0.12f, 0.02f, 0.08f, 0.35f))
+									.BorderBackgroundColor(FLinearColor(0.08f, 0.015f, 0.045f, 0.72f))
+									.HAlign(HAlign_Center).VAlign(VAlign_Center)
 									[
 										SNew(SVerticalBox)
-										+ SVerticalBox::Slot().FillHeight(1.0f).HAlign(HAlign_Center).VAlign(VAlign_Center)
+										+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 6.0f, 0.0f, 0.0f)
 										[
-											SNew(STextBlock).Text(FText::FromString(TEXT("JUMP"))).Font(VTTheme::Font(12, true)).ColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.85f))
+											SNew(STextBlock)
+											.Text(FText::FromString(TEXT("▲▲")))
+											.Font(VTTheme::Font(18, true))
+											.ColorAndOpacity(FLinearColor(1.0f, 0.92f, 0.35f, 0.98f))
 										]
-										+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 0.0f, 0.0f, 6.0f)
+										+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 1.0f, 0.0f, 0.0f)
 										[
-											SNew(STextBlock).Text(FText::FromString(TEXT("TAP / HOLD"))).Font(VTTheme::Font(6, true)).ColorAndOpacity(FLinearColor(1.0f, 0.82f, 0.25f, 0.72f))
+											SNew(STextBlock)
+											.Text(FText::FromString(TEXT("JUMP")))
+											.Font(VTTheme::Font(12, true))
+											.ColorAndOpacity(VTTheme::Pink)
+										]
+										+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 1.0f, 0.0f, 6.0f)
+										[
+											SNew(STextBlock)
+											.Text(FText::FromString(TEXT("TAP / BOOST")))
+											.Font(VTTheme::Font(6, true))
+											.ColorAndOpacity(VTTheme::Gold)
 										]
 									]
 								]
@@ -2513,18 +2630,77 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 		+ SOverlay::Slot()
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
+		.Padding(FMargin(16.0f))
 		[
 			SAssignNew(DeadBannerOverlayBorder, SBorder)
 			.BorderImage(WhiteBrush)
-			.BorderBackgroundColor(FLinearColor::Transparent)
+			.BorderBackgroundColor(FLinearColor(1.0f, 0.08f, 0.32f, 0.95f))
+			.Padding(FMargin(2.5f))
 			.Visibility(EVisibility::Collapsed)
 			[
-				SNew(SBox)
-				.WidthOverride(560.0f)
-				.HeightOverride(300.0f)
+				SNew(SBorder)
+				.BorderImage(WhiteBrush)
+				.BorderBackgroundColor(FLinearColor(0.015f, 0.02f, 0.05f, 0.96f))
+				.Padding(FMargin(24.0f, 20.0f))
 				[
-					SNew(SImage)
-					.Image(BrushDeadBanner.IsValid() ? BrushDeadBanner.Get() : WhiteBrush)
+					SNew(SBox)
+					.WidthOverride(380.0f)
+					[
+						SNew(SVerticalBox)
+
+						// Hazard Header Bar
+						+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 0.0f, 0.0f, 8.0f)
+						[
+							SNew(SBorder)
+							.BorderImage(WhiteBrush)
+							.BorderBackgroundColor(FLinearColor(0.12f, 0.02f, 0.06f, 0.90f))
+							.Padding(FMargin(12.0f, 4.0f))
+							[
+								SNew(STextBlock)
+								.Text(FText::FromString(TEXT("⚠ // CRITICAL DESCENT // ⚠")))
+								.Font(VTTheme::Font(9, true))
+								.ColorAndOpacity(FLinearColor(1.0f, 0.30f, 0.45f, 1.0f))
+							]
+						]
+
+						// Giant Glitch "WIPEOUT" Headline
+						+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 2.0f, 0.0f, 4.0f)
+						[
+							SNew(STextBlock)
+							.Text(FText::FromString(TEXT("⚡ WIPEOUT ⚡")))
+							.Font(VTTheme::Font(28, true))
+							.ColorAndOpacity(FLinearColor::White)
+						]
+
+						// Subtitle: SIGNAL TERMINATED
+						+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 0.0f, 0.0f, 10.0f)
+						[
+							SNew(STextBlock)
+							.Text(FText::FromString(TEXT("SYSTEM SIGNAL TERMINATED")))
+							.Font(VTTheme::Font(10, true))
+							.ColorAndOpacity(VTTheme::Pink)
+						]
+
+						// Glowing Neon Divider Line
+						+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 4.0f)
+						[
+							SNew(SBox).HeightOverride(2.0f)
+							[
+								SNew(SBorder)
+								.BorderImage(WhiteBrush)
+								.BorderBackgroundColor(VTTheme::Cyan)
+							]
+						]
+
+						// Telemetry Info
+						+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 8.0f, 0.0f, 2.0f)
+						[
+							SNew(STextBlock)
+							.Text(FText::FromString(TEXT("IN DEN TURM-ABGRUND GESTÜRZT")))
+							.Font(VTTheme::Font(9, false))
+							.ColorAndOpacity(VTTheme::MutedText)
+						]
+					]
 				]
 			]
 		]
@@ -3618,7 +3794,7 @@ void UVTMainHUDWidget::RebuildModalContent()
 			]
 		];
 
-		// 2. SUBTLE MOBILE HUD OVERLAY EDITOR & SPEED PRESETS (Moved strictly inside Settings!)
+		// 2. TOUCH-BUTTON POSITIONIERUNG, EINSTELLUNGEN & SPIELTEMPO
 		ModalBodyBox->AddSlot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 8.0f)
 		[
 			SNew(SBorder)
@@ -3632,54 +3808,283 @@ void UVTMainHUDWidget::RebuildModalContent()
 				.Padding(FMargin(12.0f, 8.0f))
 				[
 					SNew(SVerticalBox)
+
+					// Section Title
 					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 6.0f)
 					[
 						SNew(STextBlock)
-						.Text(FText::FromString(TEXT("2. TOUCH-OVERLAY POSITIONIERUNG, SPIELTEMPO & KONTO:")))
+						.Text(FText::FromString(TEXT("2. TOUCH-BUTTONS FREI POSITIONIEREN & ANPASSEN:")))
 						.Font(VTTheme::Font(9, true))
 						.ColorAndOpacity(VTTheme::Gold)
+					]
+
+					// Prominent Live Drag & Drop Button
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 8.0f)
+					[
+						VTTheme::MakeButton(
+							TEXT("🖐 LIVE MIT DEM DAUMEN FREI VERSCHIEBEN (DRAG & DROP)"),
+							VTTheme::Gold, FLinearColor::White, 9, FMargin(10.0f, 8.0f),
+							FOnClicked::CreateLambda([this, GM]()
+							{
+								GM->PlayTowerSFX(TEXT("Click"));
+								bHudDragEditMode = true;
+								CloseModal();
+								return FReply::Handled();
+							}))
+					]
+
+					// POSITION CONTROLS FOR LINKS / RECHTS BUTTONS
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 2.0f, 0.0f, 2.0f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(FString::Printf(TEXT("STEUER-BUTTONS (LINKS/RECHTS) // X=%.0f px, Y=%.0f px:"),
+							GM->ActiveSaveGame ? GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX : 26.0f,
+							GM->ActiveSaveGame ? GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY : 28.0f)))
+						.Font(VTTheme::Font(8, true))
+						.ColorAndOpacity(VTTheme::Cyan)
+					]
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 4.0f)
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("◀ LINKS (-15)"), VTTheme::PillBg, VTTheme::Cyan, 7, FMargin(4.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX = FMath::Clamp(GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX - 15.0f, 4.0f, 420.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("RECHTS (+15) ▶"), VTTheme::PillBg, VTTheme::Cyan, 7, FMargin(4.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX = FMath::Clamp(GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX + 15.0f, 4.0f, 420.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("▲ HÖHER (+15)"), VTTheme::PillBg, VTTheme::Cyan, 7, FMargin(4.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY = FMath::Clamp(GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY + 15.0f, 4.0f, 400.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("TIEFER (-15) ▼"), VTTheme::PillBg, VTTheme::Cyan, 7, FMargin(4.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY = FMath::Clamp(GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY - 15.0f, 4.0f, 400.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+					]
+
+					// POSITION CONTROLS FOR JUMP BUTTON
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 4.0f, 0.0f, 2.0f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(FString::Printf(TEXT("JUMP-BUTTON // X=%.0f px, Y=%.0f px:"),
+							GM->ActiveSaveGame ? GM->ActiveSaveGame->HudConfig.RightClusterOffsetX : 26.0f,
+							GM->ActiveSaveGame ? GM->ActiveSaveGame->HudConfig.RightClusterOffsetY : 28.0f)))
+						.Font(VTTheme::Font(8, true))
+						.ColorAndOpacity(VTTheme::Pink)
 					]
 					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 6.0f)
 					[
 						SNew(SHorizontalBox)
-						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(3.0f, 0.0f)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
 						[
-							VTTheme::MakeButton(
-								TEXT("JOYSTICK & BUTTON OVERLAY FREI VERSCHIEBEN (DRAG & DROP)"),
-								VTTheme::Gold, FLinearColor::White, 8, FMargin(10.0f, 8.0f),
+							VTTheme::MakeButton(TEXT("◀ INNEN (+15)"), VTTheme::PillBg, VTTheme::Pink, 7, FMargin(4.0f, 5.0f),
 								FOnClicked::CreateLambda([this, GM]()
 								{
-									GM->PlayTowerSFX(TEXT("Click"));
-									bHudDragEditMode = true;
-									CloseModal();
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetX = FMath::Clamp(GM->ActiveSaveGame->HudConfig.RightClusterOffsetX + 15.0f, 4.0f, 420.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
 									return FReply::Handled();
 								}))
 						]
-						+ SHorizontalBox::Slot().AutoWidth().Padding(3.0f, 0.0f)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
 						[
-							VTTheme::MakeButton(
-								TEXT("OVERLAY DETAILS"),
-								VTTheme::PillBg, VTTheme::Cyan, 8, FMargin(10.0f, 8.0f),
+							VTTheme::MakeButton(TEXT("AUSSEN (-15) ▶"), VTTheme::PillBg, VTTheme::Pink, 7, FMargin(4.0f, 5.0f),
 								FOnClicked::CreateLambda([this, GM]()
 								{
-									GM->PlayTowerSFX(TEXT("Click"));
-									OpenModal(EVTModalOverlay::HudEditor);
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetX = FMath::Clamp(GM->ActiveSaveGame->HudConfig.RightClusterOffsetX - 15.0f, 4.0f, 420.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
 									return FReply::Handled();
 								}))
 						]
-						+ SHorizontalBox::Slot().AutoWidth().Padding(3.0f, 0.0f)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
 						[
-							VTTheme::MakeButton(
-								TEXT("KONTO & LOGIN WECHSELN"),
-								VTTheme::PillBg, VTTheme::Pink, 8, FMargin(10.0f, 8.0f),
+							VTTheme::MakeButton(TEXT("▲ HÖHER (+15)"), VTTheme::PillBg, VTTheme::Pink, 7, FMargin(4.0f, 5.0f),
 								FOnClicked::CreateLambda([this, GM]()
 								{
-									GM->PlayTowerSFX(TEXT("Click"));
-									CloseModal();
-									GM->BootFlowState = EVTBootFlowState::AccountGate;
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetY = FMath::Clamp(GM->ActiveSaveGame->HudConfig.RightClusterOffsetY + 15.0f, 4.0f, 400.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
 									return FReply::Handled();
 								}))
 						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("TIEFER (-15) ▼"), VTTheme::PillBg, VTTheme::Pink, 7, FMargin(4.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetY = FMath::Clamp(GM->ActiveSaveGame->HudConfig.RightClusterOffsetY - 15.0f, 4.0f, 400.0f);
+										GM->SaveGameToDisk();
+										GM->PlayTowerSFX(TEXT("Click"));
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+					]
+
+					// BUTTON SIZE CONTROLS
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 2.0f, 0.0f, 2.0f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(FString::Printf(TEXT("TASTEN-GROESSE (%d%%):"),
+							GM->ActiveSaveGame ? GM->ActiveSaveGame->HudConfig.SizePct : 100)))
+						.Font(VTTheme::Font(8, true))
+						.ColorAndOpacity(FLinearColor::White)
+					]
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 6.0f)
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("80% KLEIN"), (GM->ActiveSaveGame && GM->ActiveSaveGame->HudConfig.SizePct <= 85) ? VTTheme::Cyan : VTTheme::PillBg, FLinearColor::White, 7, FMargin(3.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]() { if (GM->ActiveSaveGame) { GM->ActiveSaveGame->HudConfig.SizePct = 80; GM->SaveGameToDisk(); RebuildModalContent(); } return FReply::Handled(); }))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("100% NORMAL"), (GM->ActiveSaveGame && GM->ActiveSaveGame->HudConfig.SizePct > 85 && GM->ActiveSaveGame->HudConfig.SizePct <= 110) ? VTTheme::Cyan : VTTheme::PillBg, FLinearColor::White, 7, FMargin(3.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]() { if (GM->ActiveSaveGame) { GM->ActiveSaveGame->HudConfig.SizePct = 100; GM->SaveGameToDisk(); RebuildModalContent(); } return FReply::Handled(); }))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("125% GROSS"), (GM->ActiveSaveGame && GM->ActiveSaveGame->HudConfig.SizePct > 110 && GM->ActiveSaveGame->HudConfig.SizePct <= 130) ? VTTheme::Cyan : VTTheme::PillBg, FLinearColor::White, 7, FMargin(3.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]() { if (GM->ActiveSaveGame) { GM->ActiveSaveGame->HudConfig.SizePct = 125; GM->SaveGameToDisk(); RebuildModalContent(); } return FReply::Handled(); }))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("140% XXL"), (GM->ActiveSaveGame && GM->ActiveSaveGame->HudConfig.SizePct > 130) ? VTTheme::Cyan : VTTheme::PillBg, FLinearColor::White, 7, FMargin(3.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]() { if (GM->ActiveSaveGame) { GM->ActiveSaveGame->HudConfig.SizePct = 140; GM->SaveGameToDisk(); RebuildModalContent(); } return FReply::Handled(); }))
+						]
+					]
+
+					// QUICK PRESETS
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 2.0f, 0.0f, 6.0f)
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("STANDARD ECKEN"), VTTheme::PillBg, VTTheme::Gold, 7, FMargin(3.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX = 26.0f;
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY = 28.0f;
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetX = 26.0f;
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetY = 28.0f;
+										GM->ActiveSaveGame->HudConfig.SizePct = 100;
+										GM->ActiveSaveGame->HudConfig.OpacityPct = 65;
+										GM->SaveGameToDisk();
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("DAUMEN ERHÖHT"), VTTheme::PillBg, VTTheme::Gold, 7, FMargin(3.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX = 32.0f;
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY = 90.0f;
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetX = 32.0f;
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetY = 90.0f;
+										GM->ActiveSaveGame->HudConfig.SizePct = 110;
+										GM->ActiveSaveGame->HudConfig.OpacityPct = 75;
+										GM->SaveGameToDisk();
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
+						[
+							VTTheme::MakeButton(TEXT("KOMPAKT INNEN"), VTTheme::PillBg, VTTheme::Gold, 7, FMargin(3.0f, 5.0f),
+								FOnClicked::CreateLambda([this, GM]()
+								{
+									if (GM->ActiveSaveGame)
+									{
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetX = 70.0f;
+										GM->ActiveSaveGame->HudConfig.LeftClusterOffsetY = 36.0f;
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetX = 70.0f;
+										GM->ActiveSaveGame->HudConfig.RightClusterOffsetY = 36.0f;
+										GM->SaveGameToDisk();
+										RebuildModalContent();
+									}
+									return FReply::Handled();
+								}))
+						]
+					]
+
+					// TEMPO SELECTION & ACCOUNT
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 4.0f, 0.0f, 2.0f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(TEXT("SPIELTEMPO / GESCHWINDIGKEIT:")))
+						.Font(VTTheme::Font(8, true))
+						.ColorAndOpacity(FLinearColor::White)
 					]
 					+ SVerticalBox::Slot().AutoHeight()
 					[
@@ -3696,7 +4101,7 @@ void UVTMainHUDWidget::RebuildModalContent()
 						]
 						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f)
 						[
-							VTTheme::MakeButton(TEXT("TEMPO: 100% PRO TURBO"), FMath::IsNearlyEqual(GM->BaseSpeedRatio, 1.00f, 0.05f) ? VTTheme::Gold : VTTheme::PillBg, FLinearColor::White, 8, FMargin(4.0f, 6.0f),
+							VTTheme::MakeButton(TEXT("TEMPO: 100% TURBO"), FMath::IsNearlyEqual(GM->BaseSpeedRatio, 1.00f, 0.05f) ? VTTheme::Gold : VTTheme::PillBg, FLinearColor::White, 8, FMargin(4.0f, 6.0f),
 								FOnClicked::CreateLambda([this, GM]() { GM->BaseSpeedRatio = 1.00f; GM->SaveGameToDisk(); GM->PlayTowerSFX(TEXT("Click")); RebuildModalContent(); return FReply::Handled(); }))
 						]
 					]

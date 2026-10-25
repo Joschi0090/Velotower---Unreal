@@ -254,7 +254,7 @@ public:
 	EVTGameState TowerRunState = EVTGameState::Menu;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
-	EVTControlMode CurrentControlMode = EVTControlMode::VirtualJoystick;
+	EVTControlMode CurrentControlMode = EVTControlMode::ClassicButtons;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
 	EVTGameModeType CurrentGameMode = EVTGameModeType::Arcade;

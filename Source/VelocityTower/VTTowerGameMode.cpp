@@ -2252,15 +2252,24 @@ void AVTTowerGameMode::SaveGameToDisk()
 
 bool AVTTowerGameMode::LoadWavClipFromDisk(const FString& Key, const FString& RelativeWavPath)
 {
+	const FString CleanFileName = FPaths::GetCleanFilename(RelativeWavPath);
+
 	TArray<FString> CandidatePaths;
+	// 1. Primary UFS pak mount on Android (Content/RawAudio staged into pak via DirectoriesToAlwaysStageAsUFS)
+	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("RawAudio"), CleanFileName));
+	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectContentDir(), RelativeWavPath));
+	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Audio"), CleanFileName));
+	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectContentDir(), CleanFileName));
+
+	// 2. Loose project directories (PC Editor / PIE / local dev)
 	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectDir(), RelativeWavPath));
+	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectDir(), TEXT("Content/RawAudio"), CleanFileName));
+	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectDir(), TEXT("RawAssets/Audio"), CleanFileName));
 	CandidatePaths.Add(FPaths::Combine(FPaths::LaunchDir(), RelativeWavPath));
 	CandidatePaths.Add(FPaths::Combine(FPaths::LaunchDir(), TEXT("VelocityTower"), RelativeWavPath));
-	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectDir(), TEXT("VelocityTower"), RelativeWavPath));
-	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectDir(), TEXT("RawAssets"), RelativeWavPath));
-	CandidatePaths.Add(FPaths::Combine(FPaths::ProjectContentDir(), TEXT(".."), RelativeWavPath));
 	CandidatePaths.Add(FPaths::Combine(FPaths::RootDir(), RelativeWavPath));
 	CandidatePaths.Add(FPaths::Combine(TEXT("E:/Projekte/Velocitytower"), RelativeWavPath));
+	CandidatePaths.Add(RelativeWavPath);
 
 	TArray<uint8> RawBytes;
 	FString FoundPath;
@@ -2338,7 +2347,41 @@ void AVTTowerGameMode::InitializeAudioEngine()
 	LoadWavClipFromDisk(TEXT("VO_HighScore"), TEXT("RawAssets/Audio/VO_HighScore.wav"));
 	LoadWavClipFromDisk(TEXT("VO_GameOver"), TEXT("RawAssets/Audio/VO_GameOver.wav"));
 
-	if (!EnvironmentHostActor) return;
+	// Procedural SFX Synthesis Fallback (Guarantees all SFX are audible even if a WAV is missing)
+	auto SynthesizeSfxFallback = [this](const FString& Key, float StartFreq, float EndFreq, float DurationSec, bool bHarmonics)
+	{
+		if (LoadedAudioClips.Contains(Key)) return;
+		const int32 SampleRate = 44100;
+		const int32 NumFrames = FMath::Clamp(FMath::RoundToInt(DurationSec * float(SampleRate)), 256, 44100);
+		FVTPcmClip Clip;
+		Clip.NumFrames = NumFrames;
+		Clip.StereoSamples.SetNumUninitialized(NumFrames * 2);
+		double Phase = 0.0;
+		for (int32 f = 0; f < NumFrames; ++f)
+		{
+			const float T = float(f) / float(NumFrames);
+			const float Freq = FMath::Lerp(StartFreq, EndFreq, T);
+			Phase += (double(Freq) * 2.0 * PI) / double(SampleRate);
+			const float Env = FMath::Pow(1.0f - T, 1.8f);
+			float S = FMath::Sin(float(Phase));
+			if (bHarmonics) S = (S + 0.35f * FMath::Sin(float(Phase * 2.0))) / 1.35f;
+			const int16 SampleVal = static_cast<int16>(FMath::Clamp(FMath::RoundToInt(S * Env * 28000.0f), -32767, 32767));
+			Clip.StereoSamples[f * 2]     = SampleVal;
+			Clip.StereoSamples[f * 2 + 1] = SampleVal;
+		}
+		LoadedAudioClips.Add(Key, MoveTemp(Clip));
+	};
+
+	SynthesizeSfxFallback(TEXT("Jump"), 280.0f, 780.0f, 0.08f, true);
+	SynthesizeSfxFallback(TEXT("SuperLaunch"), 180.0f, 1100.0f, 0.22f, true);
+	SynthesizeSfxFallback(TEXT("WallRicochet"), 980.0f, 320.0f, 0.06f, false);
+	SynthesizeSfxFallback(TEXT("CorePickup"), 580.0f, 880.0f, 0.10f, false);
+	SynthesizeSfxFallback(TEXT("ComboUp"), 440.0f, 660.0f, 0.12f, false);
+	SynthesizeSfxFallback(TEXT("Click"), 850.0f, 600.0f, 0.03f, false);
+	SynthesizeSfxFallback(TEXT("DeadImpact"), 140.0f, 32.0f, 0.28f, true);
+	SynthesizeSfxFallback(TEXT("FallScream"), 650.0f, 160.0f, 0.35f, false);
+	SynthesizeSfxFallback(TEXT("IceShatter"), 1200.0f, 220.0f, 0.14f, true);
+	SynthesizeSfxFallback(TEXT("LevelUp"), 523.0f, 784.0f, 0.25f, true);
 
 	ProceduralAudioStream = NewObject<USoundWaveProcedural>(this, TEXT("VTProceduralAudioStream"));
 	if (ProceduralAudioStream)
@@ -2351,17 +2394,17 @@ void AVTTowerGameMode::InitializeAudioEngine()
 		ProceduralAudioStream->bCanProcessAsync = true;
 	}
 
-	ProceduralAudioComp = NewObject<UAudioComponent>(EnvironmentHostActor, TEXT("VTProceduralAudioComp"));
-	if (ProceduralAudioComp && ProceduralAudioStream)
+	if (GetWorld())
 	{
-		ProceduralAudioComp->SetupAttachment(EnvironmentHostActor->GetRootComponent());
-		ProceduralAudioComp->bAutoActivate = true;
-		ProceduralAudioComp->bIsUISound = true;
-		ProceduralAudioComp->bAllowSpatialization = false;
-		ProceduralAudioComp->SetVolumeMultiplier(1.0f);
-		ProceduralAudioComp->SetSound(ProceduralAudioStream);
-		ProceduralAudioComp->RegisterComponent();
-		ProceduralAudioComp->Play();
+		ProceduralAudioComp = UGameplayStatics::CreateSound2D(GetWorld(), ProceduralAudioStream, 1.0f, 1.0f, 0.0f, nullptr, false, false);
+		if (ProceduralAudioComp)
+		{
+			ProceduralAudioComp->bAutoDestroy = false;
+			ProceduralAudioComp->bIsUISound = true;
+			ProceduralAudioComp->bAllowSpatialization = false;
+			ProceduralAudioComp->SetVolumeMultiplier(1.0f);
+			ProceduralAudioComp->Play();
+		}
 	}
 
 	// Pre-fill 120ms of audio buffer immediately so playback starts without underrun
@@ -2370,11 +2413,24 @@ void AVTTowerGameMode::InitializeAudioEngine()
 
 void AVTTowerGameMode::PumpProceduralAudioStream(float DeltaTime)
 {
-	if (!ProceduralAudioStream || !ProceduralAudioComp) return;
+	if (!ProceduralAudioStream) return;
 
-	if (!ProceduralAudioComp->IsPlaying())
+	if (!ProceduralAudioComp || !ProceduralAudioComp->IsPlaying())
 	{
-		ProceduralAudioComp->Play();
+		if (!ProceduralAudioComp && GetWorld())
+		{
+			ProceduralAudioComp = UGameplayStatics::CreateSound2D(GetWorld(), ProceduralAudioStream, 1.0f, 1.0f, 0.0f, nullptr, false, false);
+			if (ProceduralAudioComp)
+			{
+				ProceduralAudioComp->bAutoDestroy = false;
+				ProceduralAudioComp->bIsUISound = true;
+				ProceduralAudioComp->bAllowSpatialization = false;
+			}
+		}
+		if (ProceduralAudioComp)
+		{
+			ProceduralAudioComp->Play();
+		}
 	}
 
 	const bool bMuted = ActiveSaveGame ? ActiveSaveGame->bAudioMuted : false;
@@ -2412,6 +2468,34 @@ void AVTTowerGameMode::PumpProceduralAudioStream(float DeltaTime)
 				{
 					MusicReadFramePos = FMath::Fmod(MusicReadFramePos, double(MusicClip->NumFrames));
 				}
+			}
+			else
+			{
+				// Procedural Synthwave Fallback (dynamic cyber bass + synth arp)
+				static double SynthPhase = 0.0;
+				static double BassPhase = 0.0;
+				static int32 StepIndex = 0;
+				static double StepTimer = 0.0;
+
+				StepTimer += (1.0 / 44100.0) * MusicPitch;
+				if (StepTimer >= 0.125)
+				{
+					StepTimer -= 0.125;
+					StepIndex = (StepIndex + 1) % 16;
+				}
+
+				const float BassNotes[16] = { 82.4f, 82.4f, 98.0f, 82.4f, 110.0f, 82.4f, 123.5f, 98.0f, 82.4f, 82.4f, 98.0f, 82.4f, 146.8f, 130.8f, 123.5f, 98.0f };
+				const float LeadNotes[16] = { 329.6f, 392.0f, 440.0f, 493.9f, 587.3f, 659.3f, 493.9f, 392.0f, 440.0f, 392.0f, 329.6f, 293.7f, 329.6f, 440.0f, 493.9f, 659.3f };
+
+				BassPhase += (double(BassNotes[StepIndex]) * 2.0 * PI) / 44100.0;
+				SynthPhase += (double(LeadNotes[(StepIndex + 3) % 16]) * 2.0 * PI) / 44100.0;
+
+				const float BassSaw = float((FMath::Fmod(BassPhase, 2.0 * PI) / PI) - 1.0);
+				const float LeadSin = FMath::Sin(float(SynthPhase));
+				const float Env = FMath::Clamp(1.0f - float(StepTimer / 0.125), 0.0f, 1.0f);
+
+				MixL += (BassSaw * 0.26f + LeadSin * Env * 0.18f) * MusicVol;
+				MixR += (BassSaw * 0.26f + LeadSin * (1.0f - Env) * 0.18f) * MusicVol;
 			}
 
 			// 2. Active Pitch-Shifted Dopamine SFX Voices

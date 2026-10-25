@@ -32,7 +32,7 @@ public:
 	int32 PlayerXP = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Save")
-	EVTControlMode ControlMode = EVTControlMode::VirtualJoystick;
+	EVTControlMode ControlMode = EVTControlMode::ClassicButtons;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Save")
 	EVTGameModeType GameMode = EVTGameModeType::Arcade;
