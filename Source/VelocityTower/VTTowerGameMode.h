@@ -534,6 +534,15 @@ private:
 	TArray<UStaticMeshComponent*> RightWallSegments;
 
 	UPROPERTY()
+	TArray<UStaticMeshComponent*> LeftWallPillars;
+
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> RightWallPillars;
+
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> BackWallPanels;
+
+	UPROPERTY()
 	TArray<UStaticMeshComponent*> EqualizerBarMeshes;
 
 	UPROPERTY()

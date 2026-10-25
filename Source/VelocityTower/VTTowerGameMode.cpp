@@ -365,9 +365,13 @@ void AVTTowerGameMode::BeginPlay()
 		if (TowerCamera && TowerCamera->GetCameraComponent())
 		{
 			UCameraComponent* CamComp = TowerCamera->GetCameraComponent();
-			CamComp->SetFieldOfView(68.0f);
+			CamComp->SetFieldOfView(56.0f);
 			CamComp->SetAspectRatio(9.0f / 16.0f);
 			CamComp->SetConstraintAspectRatio(false); // Fill mobile/PIE portrait window cleanly without black bars
+			CamComp->PostProcessSettings.bOverride_AutoExposureMethod = true;
+			CamComp->PostProcessSettings.AutoExposureMethod = EAutoExposureMethod::AEM_Manual;
+			CamComp->PostProcessSettings.bOverride_AutoExposureBias = true;
+			CamComp->PostProcessSettings.AutoExposureBias = 0.0f;
 		}
 
 		if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
@@ -375,6 +379,8 @@ void AVTTowerGameMode::BeginPlay()
 			PC->bAutoManageActiveCameraTarget = false;
 			PC->SetViewTarget(TowerCamera);
 			PC->ConsoleCommand(TEXT("r.Lumen.TraceMeshSDFs 0"), false);
+			PC->ConsoleCommand(TEXT("r.DefaultFeature.AutoExposure 0"), false);
+			PC->ConsoleCommand(TEXT("r.EyeAdaptationQuality 0"), false);
 			PC->ConsoleCommand(TEXT("DISABLEALLSCREENMESSAGES"), false);
 			PC->ConsoleCommand(TEXT("au.SetAudioMuted 0"), false);
 		}
@@ -415,29 +421,65 @@ void AVTTowerGameMode::BuildTowerEnvironment3D()
 	RightWallMID->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(0.0f, 0.961f, 0.831f));
 	RightWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), FLinearColor(0.0f, 0.961f, 0.831f) * 6.0f);
 
-	// 1. Left & Right 3D Cyberpunk Tower Wall Segments (6 vertical segments each, scrolling infinitely with CameraZ)
+	LeftWallSegments.Empty();
+	RightWallSegments.Empty();
+	LeftWallPillars.Empty();
+	RightWallPillars.Empty();
+	BackWallPanels.Empty();
+
+	// 1. Solid Continuous Tower Shaft: Left/Right Pillars, Neon Ribs & Continuous Megastructure Back-Wall
 	for (int32 i = 0; i < 6; ++i)
 	{
+		// 1A. Solid Left Structural Pillar
+		UStaticMeshComponent* LPillar = NewObject<UStaticMeshComponent>(EnvironmentHostActor, *FString::Printf(TEXT("LeftPillar_%d"), i));
+		LPillar->SetupAttachment(Root);
+		LPillar->SetStaticMesh(CubeMesh);
+		LPillar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		LPillar->SetWorldScale3D(FVector(0.48f, 2.2f, 4.05f));
+		if (CustomWallMat) LPillar->SetMaterial(0, CustomWallMat);
+		LPillar->RegisterComponent();
+		LeftWallPillars.Add(LPillar);
+
+		// 1B. Left Neon Accent Rib
 		UStaticMeshComponent* LWall = NewObject<UStaticMeshComponent>(EnvironmentHostActor, *FString::Printf(TEXT("LeftWall_%d"), i));
 		LWall->SetupAttachment(Root);
 		LWall->SetStaticMesh(WallMesh ? WallMesh : CubeMesh);
 		LWall->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		if (!WallMesh) LWall->SetWorldScale3D(FVector(0.75f, 2.2f, 4.0f));
-		if (CustomWallMat) LWall->SetMaterial(0, CustomWallMat);
-		LWall->SetMaterial(FMath::Min(1, LWall->GetNumMaterials() - 1), LeftWallMID);
+		LWall->SetWorldScale3D(FVector(1.0f, 1.4f, 1.4f));
+		LWall->SetMaterial(0, LeftWallMID);
 		LWall->RegisterComponent();
 		LeftWallSegments.Add(LWall);
 
+		// 1C. Solid Right Structural Pillar
+		UStaticMeshComponent* RPillar = NewObject<UStaticMeshComponent>(EnvironmentHostActor, *FString::Printf(TEXT("RightPillar_%d"), i));
+		RPillar->SetupAttachment(Root);
+		RPillar->SetStaticMesh(CubeMesh);
+		RPillar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		RPillar->SetWorldScale3D(FVector(0.48f, 2.2f, 4.05f));
+		if (CustomWallMat) RPillar->SetMaterial(0, CustomWallMat);
+		RPillar->RegisterComponent();
+		RightWallPillars.Add(RPillar);
+
+		// 1D. Right Neon Accent Rib
 		UStaticMeshComponent* RWall = NewObject<UStaticMeshComponent>(EnvironmentHostActor, *FString::Printf(TEXT("RightWall_%d"), i));
 		RWall->SetupAttachment(Root);
 		RWall->SetStaticMesh(WallMesh ? WallMesh : CubeMesh);
 		RWall->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		RWall->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
-		if (!WallMesh) RWall->SetWorldScale3D(FVector(0.75f, 2.2f, 4.0f));
-		if (CustomWallMat) RWall->SetMaterial(0, CustomWallMat);
-		RWall->SetMaterial(FMath::Min(1, RWall->GetNumMaterials() - 1), RightWallMID);
+		RWall->SetWorldScale3D(FVector(1.0f, 1.4f, 1.4f));
+		RWall->SetMaterial(0, RightWallMID);
 		RWall->RegisterComponent();
 		RightWallSegments.Add(RWall);
+
+		// 1E. Solid Megastructure Tower Core Back-Plate (Eliminates pitch black void behind platforms!)
+		UStaticMeshComponent* BackPanel = NewObject<UStaticMeshComponent>(EnvironmentHostActor, *FString::Printf(TEXT("BackWallPanel_%d"), i));
+		BackPanel->SetupAttachment(Root);
+		BackPanel->SetStaticMesh(CubeMesh);
+		BackPanel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BackPanel->SetWorldScale3D(FVector(8.2f, 0.35f, 4.05f));
+		if (CustomWallMat) BackPanel->SetMaterial(0, CustomWallMat);
+		BackPanel->RegisterComponent();
+		BackWallPanels.Add(BackPanel);
 	}
 
 	// 2. 16-Band 3D Audio-Reactive Equalizer Towers in the background shaft (Y = +220cm depth)
@@ -658,7 +700,7 @@ void AVTTowerGameMode::StartNewRun()
 		ClimberPawn->ResetClimberForStart(0.0f, 44.0f, StartFloor, CInfo, TInfo.Color);
 	}
 
-	CameraZ = 380.0f;
+	CameraZ = 160.0f;
 	BonusScoreAccumulated = 0;
 	LastComboVoiceTier = 0;
 	NearDeathVoiceCooldownSec = 0.0f;
@@ -1594,30 +1636,48 @@ void AVTTowerGameMode::Update3DEnvironmentAndCamera(float DeltaTime)
 			}
 			else
 			{
-				// Dramatic low-angle 3D Hero Pedestal Camera looking up the glowing Megastructure Tower!
-				const float OrbitX = FMath::Sin(TimeSec * 0.45f) * 55.0f;
-				TowerCamera->SetActorLocation(FVector(OrbitX, -760.0f, 215.0f));
-				TowerCamera->SetActorRotation(FRotator(8.5f, 90.0f - OrbitX * 0.04f, 0.0f));
-				TowerCamera->GetCameraComponent()->SetFieldOfView(64.0f);
+				// Focused Hero Showcase Podium Camera in Lobby
+				const float OrbitX = FMath::Sin(TimeSec * 0.45f) * 35.0f;
+				TowerCamera->SetActorLocation(FVector(OrbitX * 0.35f, -480.0f, 75.0f));
+				TowerCamera->SetActorRotation(FRotator(-2.5f, 90.0f, 0.0f));
+				TowerCamera->GetCameraComponent()->SetFieldOfView(56.0f);
 			}
 		}
 		else
 		{
 			const float DynamicRoll = ClimberPawn ? FMath::Clamp(ClimberPawn->VelX * 0.18f, -2.5f, 2.5f) : 0.0f;
-			const float DynamicFov = 68.0f + FMath::Clamp(ClimberPawn ? FMath::Max(0.0f, ClimberPawn->VelZ) * 0.35f : 0.0f, 0.0f, 7.5f);
-			TowerCamera->SetActorLocation(FVector(ShakeX * 0.5f, -960.0f, CameraZ + ShakeZ));
-			TowerCamera->SetActorRotation(FRotator(3.5f, 90.0f, DynamicRoll));
+			const float DynamicFov = 54.0f + FMath::Clamp(ClimberPawn ? FMath::Max(0.0f, ClimberPawn->VelZ) * 0.25f : 0.0f, 0.0f, 4.0f);
+			TowerCamera->SetActorLocation(FVector(ShakeX * 0.5f, -620.0f, CameraZ + ShakeZ));
+			TowerCamera->SetActorRotation(FRotator(2.0f, 90.0f, DynamicRoll));
 			TowerCamera->GetCameraComponent()->SetFieldOfView(DynamicFov);
 		}
 	}
 
-	// Scroll 3D Left & Right Megastructure Tower Walls infinitely around CameraZ
+	// Scroll 3D Continuous Megastructure Shaft (Pillars, Back Wall & Neon Ribs) infinitely around CameraZ
 	const float BaseWallZ = FMath::FloorToFloat((CameraZ - 800.0f) / 400.0f) * 400.0f;
 	for (int32 i = 0; i < LeftWallSegments.Num(); ++i)
 	{
 		const float SegZ = BaseWallZ + float(i) * 400.0f;
-		if (LeftWallSegments[i]) LeftWallSegments[i]->SetWorldLocation(FVector(-PlayfieldHalfWidthCm - 32.0f, 0.0f, SegZ));
-		if (RightWallSegments[i]) RightWallSegments[i]->SetWorldLocation(FVector(PlayfieldHalfWidthCm + 32.0f, 0.0f, SegZ));
+		if (LeftWallPillars.IsValidIndex(i) && LeftWallPillars[i])
+		{
+			LeftWallPillars[i]->SetWorldLocation(FVector(-PlayfieldHalfWidthCm - 32.0f, 0.0f, SegZ));
+		}
+		if (LeftWallSegments[i])
+		{
+			LeftWallSegments[i]->SetWorldLocation(FVector(-PlayfieldHalfWidthCm - 12.0f, 0.0f, SegZ));
+		}
+		if (RightWallPillars.IsValidIndex(i) && RightWallPillars[i])
+		{
+			RightWallPillars[i]->SetWorldLocation(FVector(PlayfieldHalfWidthCm + 32.0f, 0.0f, SegZ));
+		}
+		if (RightWallSegments[i])
+		{
+			RightWallSegments[i]->SetWorldLocation(FVector(PlayfieldHalfWidthCm + 12.0f, 0.0f, SegZ));
+		}
+		if (BackWallPanels.IsValidIndex(i) && BackWallPanels[i])
+		{
+			BackWallPanels[i]->SetWorldLocation(FVector(0.0f, 260.0f, SegZ));
+		}
 	}
 
 	// Wall Neon Rail Dynamic Color (Cyan when wall bounce ready, Red when used, White flash on ricochet!)
