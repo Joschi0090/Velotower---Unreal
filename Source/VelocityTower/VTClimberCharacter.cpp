@@ -46,7 +46,7 @@ AVTClimberCharacter::AVTClimberCharacter()
 	static ConstructorHelpers::FObjectFinder<UAnimSequence> LandFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Land.MM_Land"));
 	if (LandFinder.Succeeded()) AnimMannyLand = LandFinder.Object;
 
-	static ConstructorHelpers::FObjectFinder<UAnimSequence> RollFinder(TEXT("/Game/Characters/Manny/Animations/Manny/VaultOver.VaultOver"));
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> RollFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Dash_Forward.MM_Dash_Forward"));
 	if (RollFinder.Succeeded()) AnimMannyRoll = RollFinder.Object;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineSphereFinder(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
