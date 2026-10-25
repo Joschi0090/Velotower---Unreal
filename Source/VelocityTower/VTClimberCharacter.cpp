@@ -136,6 +136,17 @@ AVTClimberCharacter::AVTClimberCharacter()
 	ClimberRimLight->SetAttenuationRadius(380.0f);
 	ClimberRimLight->SetLightColor(FLinearColor(0.0f, 0.961f, 0.831f));
 
+	// 9. Flowing Shinobi Headband with Physics-reactive Ribbons (MetaHuman)
+	HeadbandRingMesh = MakePart(TEXT("HeadbandRingMesh"), RootScene, CylMesh, FVector(0.0f, 0.0f, 32.0f), FRotator::ZeroRotator, FVector(0.24f, 0.24f, 0.045f));
+	HeadbandKnotMesh = MakePart(TEXT("HeadbandKnotMesh"), HeadbandRingMesh, SphereMesh, FVector(-22.0f, 0.0f, 0.0f), FRotator::ZeroRotator, FVector(0.35f, 0.35f, 0.35f));
+	HeadbandRibbonLeftMesh = MakePart(TEXT("HeadbandRibbonLeftMesh"), HeadbandKnotMesh, CubeMesh, FVector(-18.0f, -8.0f, -12.0f), FRotator(-15.0f, -8.0f, 0.0f), FVector(0.38f, 0.06f, 0.02f));
+	HeadbandRibbonRightMesh = MakePart(TEXT("HeadbandRibbonRightMesh"), HeadbandKnotMesh, CubeMesh, FVector(-22.0f, 8.0f, -16.0f), FRotator(-22.0f, 10.0f, 0.0f), FVector(0.48f, 0.06f, 0.02f));
+
+	if (HeadbandRingMesh) HeadbandRingMesh->SetVisibility(false);
+	if (HeadbandKnotMesh) HeadbandKnotMesh->SetVisibility(false);
+	if (HeadbandRibbonLeftMesh) HeadbandRibbonLeftMesh->SetVisibility(false);
+	if (HeadbandRibbonRightMesh) HeadbandRibbonRightMesh->SetVisibility(false);
+
 	// Create 7 3D Scarf Segments
 	for (int32 i = 0; i < 7; ++i)
 	{
@@ -169,6 +180,21 @@ AVTClimberCharacter::AVTClimberCharacter()
 void AVTClimberCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AVTClimberCharacter::PlaySkeletalAnim(UAnimSequence* NewAnim, bool bLoop, float PlayRate)
+{
+	if (!SkeletalClimberMesh || !NewAnim)
+	{
+		return;
+	}
+
+	if (CurrentPlayingAnim != NewAnim)
+	{
+		CurrentPlayingAnim = NewAnim;
+		SkeletalClimberMesh->PlayAnimation(NewAnim, bLoop);
+	}
+	SkeletalClimberMesh->SetPlayRate(PlayRate);
 }
 
 void AVTClimberCharacter::ResetClimberForStart(float StartX, float StartZ, int32 InStartFloor, const FVTClimberInfo& InClimberInfo, const FLinearColor& InTrailColor)
@@ -218,6 +244,15 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 	{
 		SkeletalClimberMesh->SetVisibility(true);
 		if (ClimberMesh) ClimberMesh->SetVisibility(false, true);
+		if (HeadMesh) HeadMesh->SetVisibility(false, true);
+		if (HeadgearMesh) HeadgearMesh->SetVisibility(false);
+		if (HeadgearAccentMesh) HeadgearAccentMesh->SetVisibility(false);
+
+		// Show dynamic Shinobi headband with physics ribbons on MetaHuman
+		if (HeadbandRingMesh) HeadbandRingMesh->SetVisibility(true);
+		if (HeadbandKnotMesh) HeadbandKnotMesh->SetVisibility(true);
+		if (HeadbandRibbonLeftMesh) HeadbandRibbonLeftMesh->SetVisibility(true);
+		if (HeadbandRibbonRightMesh) HeadbandRibbonRightMesh->SetVisibility(true);
 
 		for (int32 MatIdx = 0; MatIdx < SkeletalClimberMesh->GetNumMaterials(); ++MatIdx)
 		{
@@ -239,6 +274,11 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 	}
 	else
 	{
+		if (HeadbandRingMesh) HeadbandRingMesh->SetVisibility(false);
+		if (HeadbandKnotMesh) HeadbandKnotMesh->SetVisibility(false);
+		if (HeadbandRibbonLeftMesh) HeadbandRibbonLeftMesh->SetVisibility(false);
+		if (HeadbandRibbonRightMesh) HeadbandRibbonRightMesh->SetVisibility(false);
+
 		if (SkeletalClimberMesh) SkeletalClimberMesh->SetVisibility(false);
 		if (ClimberMesh) ClimberMesh->SetVisibility(true, true);
 	}
@@ -261,8 +301,8 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 		return MID;
 	};
 
-	// Distinct 3D Headgear & Silhouette geometry per Climber (#01..#20)
-	if (HeadgearMesh && HeadgearAccentMesh)
+	// Distinct 3D Headgear & Silhouette geometry per Climber (#01..#20) - ONLY for stylized climber models, NOT MetaHuman!
+	if (HeadgearMesh && HeadgearAccentMesh && !bUsingSkeletalMesh)
 	{
 		const int32 Variant = InClimberInfo.RosterNumber % 6;
 		HeadgearMesh->SetVisibility(true);
@@ -407,6 +447,15 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 		GuideRingMID->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(0.0f, 0.961f, 0.831f));
 		GuideRingMID->SetVectorParameterValue(TEXT("EmissiveColor"), FLinearColor(0.0f, 0.961f, 0.831f) * 8.0f);
 		JumpGuideRingMesh->SetMaterial(0, GuideRingMID);
+
+		if (bUsingSkeletalMesh)
+		{
+			UMaterialInstanceDynamic* HeadbandMID = MakeSolidMID(InClimberInfo.VisorColor, 8.0f);
+			if (HeadbandRingMesh && HeadbandMID) HeadbandRingMesh->SetMaterial(0, HeadbandMID);
+			if (HeadbandKnotMesh && HeadbandMID) HeadbandKnotMesh->SetMaterial(0, HeadbandMID);
+			if (HeadbandRibbonLeftMesh && HeadbandMID) HeadbandRibbonLeftMesh->SetMaterial(0, HeadbandMID);
+			if (HeadbandRibbonRightMesh && HeadbandMID) HeadbandRibbonRightMesh->SetMaterial(0, HeadbandMID);
+		}
 	}
 
 	if (ClimberRimLight)
@@ -448,9 +497,22 @@ void AVTClimberCharacter::UpdateShowroomStagePose(float TimeSec, float ShowroomY
 		SkeletalClimberMesh->SetRelativeRotation(FRotator(0.0f, ShowroomYawDeg, 0.0f));
 		SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -44.0f));
 		SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f * StageScale));
-		if (AnimMannyIdle)
+		PlaySkeletalAnim(AnimMannyIdle, true, 1.0f);
+
+		if (HeadbandRingMesh)
 		{
-			SkeletalClimberMesh->PlayAnimation(AnimMannyIdle, true);
+			const FVector HeadPos = SkeletalClimberMesh->DoesSocketExist(TEXT("head"))
+				? SkeletalClimberMesh->GetSocketLocation(TEXT("head")) + FVector(0.0f, 0.0f, 4.0f)
+				: FVector(0.0f, 0.0f, (bInCharSelect ? 48.0f : 44.0f) + BreathZ + 38.0f);
+			HeadbandRingMesh->SetWorldLocation(HeadPos);
+			HeadbandRingMesh->SetWorldRotation(FRotator(0.0f, ShowroomYawDeg, 0.0f));
+
+			if (HeadbandRibbonLeftMesh && HeadbandRibbonRightMesh)
+			{
+				const float GentleSway = FMath::Sin(TimeSec * 4.0f) * 6.0f;
+				HeadbandRibbonLeftMesh->SetRelativeRotation(FRotator(-15.0f + GentleSway, -8.0f, 0.0f));
+				HeadbandRibbonRightMesh->SetRelativeRotation(FRotator(-22.0f - GentleSway, 10.0f, 0.0f));
+			}
 		}
 	}
 
@@ -514,10 +576,7 @@ void AVTClimberCharacter::PlayAbyssFallPose(float FallProgress, float DeltaTime)
 	{
 		SkeletalClimberMesh->SetRelativeRotation(FRotator(TumblePitch, TumbleYaw, TumbleRoll));
 		SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f * DepthScale));
-		if (AnimMannyFall)
-		{
-			SkeletalClimberMesh->PlayAnimation(AnimMannyFall, true);
-		}
+		PlaySkeletalAnim(AnimMannyFall, true, 1.0f);
 	}
 
 	// Frantic limb flailing in panic!
@@ -569,59 +628,67 @@ void AVTClimberCharacter::UpdateVisualState(float DeltaTime, bool bShowJumpGuide
 		// SKELETAL METAHUMAN / NEXT-GEN MANNY VISUAL UPDATE
 		if (bFlipping)
 		{
-			// Acrobatic Parkour Somersault Roll Flip (360° Pitch Rotation)
-			SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+			// Acrobatic Parkour Somersault Roll Flip (360° Pitch Rotation, Tuck Scale)
+			SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -6.0f));
 			SkeletalClimberMesh->SetRelativeRotation(FRotator(PitchDeg, YawDeg, 0.0f));
-			if (AnimMannyRoll)
-			{
-				SkeletalClimberMesh->PlayAnimation(AnimMannyRoll, false);
-				SkeletalClimberMesh->SetPlayRate(2.4f);
-			}
-			else if (AnimMannyJump)
-			{
-				SkeletalClimberMesh->PlayAnimation(AnimMannyJump, false);
-			}
+			SkeletalClimberMesh->SetRelativeScale3D(FVector(0.45f));
+			PlaySkeletalAnim(AnimMannyRoll ? AnimMannyRoll : AnimMannyJump, false, 2.6f);
 		}
 		else
 		{
 			SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -44.0f));
 			SkeletalClimberMesh->SetRelativeRotation(FRotator(0.0f, YawDeg, RunBobRoll * 0.35f));
+			SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f));
 
 			if (!bOnGround)
 			{
-				if (VelZ > 20.0f)
+				if (VelZ > 10.0f)
 				{
-					if (AnimMannyJump)
-					{
-						SkeletalClimberMesh->PlayAnimation(AnimMannyJump, false);
-					}
+					PlaySkeletalAnim(AnimMannyJump, false, 1.25f);
 				}
 				else
 				{
-					if (AnimMannyFall)
-					{
-						SkeletalClimberMesh->PlayAnimation(AnimMannyFall, true);
-					}
+					PlaySkeletalAnim(AnimMannyFall, true, 1.0f);
 				}
 			}
 			else
 			{
-				if (FMath::Abs(VelX) > 12.0f)
+				if (FMath::Abs(VelX) > 10.0f)
 				{
-					if (AnimMannyRun)
-					{
-						SkeletalClimberMesh->PlayAnimation(AnimMannyRun, true);
-						SkeletalClimberMesh->SetPlayRate(FMath::Clamp(SpeedRatio * 1.6f, 0.8f, 2.2f));
-					}
+					PlaySkeletalAnim(AnimMannyRun, true, FMath::Clamp(SpeedRatio * 1.5f, 0.85f, 2.1f));
 				}
 				else
 				{
-					if (AnimMannyIdle)
-					{
-						SkeletalClimberMesh->PlayAnimation(AnimMannyIdle, true);
-						SkeletalClimberMesh->SetPlayRate(1.0f);
-					}
+					PlaySkeletalAnim(AnimMannyIdle, true, 1.0f);
 				}
+			}
+		}
+
+		// Update Shinobi Headband Position & Trailing Inertia Ribbon Physics on MetaHuman
+		if (HeadbandRingMesh)
+		{
+			const FVector HeadPos = SkeletalClimberMesh->DoesSocketExist(TEXT("head"))
+				? SkeletalClimberMesh->GetSocketLocation(TEXT("head")) + FVector(float(FacingDir) * 1.5f, 0.0f, 4.0f)
+				: FVector(PosX + float(FacingDir) * 1.5f, 0.0f, PosZ + 38.0f);
+
+			HeadbandRingMesh->SetWorldLocation(HeadPos);
+			HeadbandRingMesh->SetWorldRotation(FRotator(PitchDeg, YawDeg, 0.0f));
+
+			if (HeadbandRibbonLeftMesh && HeadbandRibbonRightMesh)
+			{
+				// Realistic spring-damper ribbon flutter reacting to jump/fall inertia
+				const float InertiaPitch = FMath::Clamp(-VelZ * 0.09f, -46.0f, 46.0f);
+				const float WindFlutter = FMath::Sin(GetWorld()->GetTimeSeconds() * 16.0f) * (5.0f + FMath::Abs(VelX) * 0.12f);
+				const float Flutter2 = FMath::Cos(GetWorld()->GetTimeSeconds() * 20.0f + 1.2f) * (6.0f + FMath::Abs(VelX) * 0.15f);
+
+				const float Damping = 0.84f;
+				const float SpringStiffness = 16.0f;
+				RibbonVelPitch += (InertiaPitch - RibbonPhysicsPitch) * SpringStiffness * DeltaTime;
+				RibbonVelPitch *= Damping;
+				RibbonPhysicsPitch += RibbonVelPitch * DeltaTime;
+
+				HeadbandRibbonLeftMesh->SetRelativeRotation(FRotator(RibbonPhysicsPitch - 15.0f + WindFlutter, -8.0f, WindFlutter * 0.4f));
+				HeadbandRibbonRightMesh->SetRelativeRotation(FRotator(RibbonPhysicsPitch - 24.0f + Flutter2, 10.0f, Flutter2 * 0.4f));
 			}
 		}
 	}

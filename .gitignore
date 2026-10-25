@@ -28,6 +28,7 @@ Plugins/*/Intermediate/
 *.VC.opendb
 
 # Packages & archives
+ArchivedBuilds/
 Build.rar
 *.rar
 *.zip

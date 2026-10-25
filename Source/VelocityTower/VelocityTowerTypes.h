@@ -225,16 +225,22 @@ struct FVTHudConfig
 	int32 HorizontalSpacingPx = 22; // 0..180
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeftClusterOffsetX = 26.0f;
+	float LeftClusterOffsetX = 24.0f; // Button LINKS X (from left)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LeftClusterOffsetY = 28.0f;
+	float LeftClusterOffsetY = 24.0f; // Button LINKS Y (from bottom)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightClusterOffsetX = 26.0f;
+	float RightSteerOffsetX = 108.0f; // Button RECHTS X (from left)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RightClusterOffsetY = 28.0f;
+	float RightSteerOffsetY = 24.0f; // Button RECHTS Y (from bottom)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RightClusterOffsetX = 24.0f; // Button JUMP X (from right)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RightClusterOffsetY = 24.0f; // Button JUMP Y (from bottom)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bSwapLeftRight = false;

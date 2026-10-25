@@ -1646,9 +1646,9 @@ void AVTTowerGameMode::Update3DEnvironmentAndCamera(float DeltaTime)
 		else
 		{
 			const float DynamicRoll = ClimberPawn ? FMath::Clamp(ClimberPawn->VelX * 0.18f, -2.5f, 2.5f) : 0.0f;
-			const float DynamicFov = 54.0f + FMath::Clamp(ClimberPawn ? FMath::Max(0.0f, ClimberPawn->VelZ) * 0.25f : 0.0f, 0.0f, 4.0f);
-			TowerCamera->SetActorLocation(FVector(ShakeX * 0.5f, -620.0f, CameraZ + ShakeZ));
-			TowerCamera->SetActorRotation(FRotator(2.0f, 90.0f, DynamicRoll));
+			const float DynamicFov = 68.0f + FMath::Clamp(ClimberPawn ? FMath::Max(0.0f, ClimberPawn->VelZ) * 0.15f : 0.0f, 0.0f, 6.0f);
+			TowerCamera->SetActorLocation(FVector(ShakeX * 0.5f, -920.0f, CameraZ + ShakeZ));
+			TowerCamera->SetActorRotation(FRotator(4.0f, 90.0f, DynamicRoll));
 			TowerCamera->GetCameraComponent()->SetFieldOfView(DynamicFov);
 		}
 	}
@@ -1696,24 +1696,34 @@ void AVTTowerGameMode::Update3DEnvironmentAndCamera(float DeltaTime)
 		RightWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), RCol * (6.0f + BeatPulse * 8.0f + RightWallFlash * 20.0f));
 	}
 
-	// Update 16-Band 3D Equalizer Pillars in the background shaft
+	// Update 16-Band Dynamic Chromatic Audio Visualizer / Music Spectrum in the background shaft
 	const float BarWidthCm = (PlayfieldHalfWidthCm * 2.0f) / 16.0f;
 	for (int32 i = 0; i < EqualizerBarMeshes.Num(); ++i)
 	{
 		if (!EqualizerBarMeshes[i]) continue;
-		const float SynthWave = FMath::Sin(TimeSec * 8.0f + float(i) * 0.45f) * 0.5f + 0.5f;
-		const float Level = FMath::Max(0.15f, SynthWave * 0.55f + BeatPulse * 0.45f);
-		const float BarHeightCm = Level * 340.0f * (float(CurrentBpm) / 120.0f);
+
+		// Harmonic frequency bands & high-energy beat reaction
+		const float FreqSpread = FMath::Sin(TimeSec * 10.0f + float(i) * 0.65f) * 0.5f + 0.5f;
+		const float BassKick = (i < 5) ? (BeatPulse * 1.5f) : (BeatPulse * 0.75f);
+		const float HighFlutter = (i > 10) ? (FMath::Sin(TimeSec * 24.0f + float(i) * 1.3f) * 0.25f + 0.25f) : 0.0f;
+		const float Level = FMath::Clamp(FreqSpread * 0.38f + BassKick * 0.62f + HighFlutter * 0.25f, 0.12f, 1.45f);
+
+		const float BarHeightCm = Level * 680.0f * (float(CurrentBpm) / 115.0f);
 		const float BarX = -PlayfieldHalfWidthCm + (float(i) + 0.5f) * BarWidthCm;
-		const float BarZ = CameraZ - 520.0f + BarHeightCm * 0.5f;
+		const float BarZ = CameraZ - 360.0f + BarHeightCm * 0.5f;
 
 		EqualizerBarMeshes[i]->SetWorldLocation(FVector(BarX, 240.0f, BarZ));
-		EqualizerBarMeshes[i]->SetWorldScale3D(FVector((BarWidthCm - 10.0f) / 100.0f, 0.35f, BarHeightCm / 100.0f));
+		EqualizerBarMeshes[i]->SetWorldScale3D(FVector((BarWidthCm - 8.0f) / 100.0f, 0.35f, BarHeightCm / 100.0f));
 
 		if (EqualizerBarMIDs.IsValidIndex(i) && EqualizerBarMIDs[i])
 		{
-			EqualizerBarMIDs[i]->SetVectorParameterValue(TEXT("BaseColor"), CurBiome.TopColor);
-			EqualizerBarMIDs[i]->SetVectorParameterValue(TEXT("EmissiveColor"), CurBiome.TopColor * (3.5f + BeatPulse * 5.0f));
+			// Dynamic chromatic neon spectrum hue (Cyan -> Electric Blue -> Magenta -> Hot Pink -> Gold -> Lime)
+			const float Hue = FMath::Fmod(float(i) / 16.0f * 290.0f + TimeSec * 28.0f, 360.0f);
+			const FLinearColor BarColor = FLinearColor(Hue, 0.96f, 1.0f).HSVToLinearRGB();
+			const float EmissiveBoost = 4.0f + BeatPulse * 16.0f + (Level > 0.85f ? 12.0f : 0.0f);
+
+			EqualizerBarMIDs[i]->SetVectorParameterValue(TEXT("BaseColor"), BarColor);
+			EqualizerBarMIDs[i]->SetVectorParameterValue(TEXT("EmissiveColor"), BarColor * EmissiveBoost);
 		}
 	}
 

@@ -56,6 +56,29 @@ public:
 	UPROPERTY()
 	UAnimSequence* AnimMannyRoll = nullptr;
 
+	UPROPERTY(Transient)
+	UAnimSequence* CurrentPlayingAnim = nullptr;
+
+	void PlaySkeletalAnim(UAnimSequence* NewAnim, bool bLoop, float PlayRate = 1.0f);
+
+	// Physics-Simulated Flowing Shinobi Headband (wraps MetaHuman forehead, flutters with jump inertia)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")
+	UStaticMeshComponent* HeadbandRingMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")
+	UStaticMeshComponent* HeadbandKnotMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")
+	UStaticMeshComponent* HeadbandRibbonLeftMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")
+	UStaticMeshComponent* HeadbandRibbonRightMesh;
+
+	float RibbonPhysicsPitch = 0.0f;
+	float RibbonPhysicsYaw = 0.0f;
+	float RibbonVelPitch = 0.0f;
+	float RibbonVelYaw = 0.0f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")
 	UStaticMeshComponent* ClimberMesh;
 

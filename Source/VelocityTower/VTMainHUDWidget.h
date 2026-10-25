@@ -114,7 +114,9 @@ private:
 
 	// Interactive HUD Overlay Drag-and-Drop State
 	bool bHudDragEditMode = false;
-	int32 DraggingClusterIndex = 0; // 0=None, 1=Left Joystick/D-Pad, 2=Right Jump Button
+	int32 DraggingClusterIndex = 0; // 0=None, 1=Links, 2=Rechts, 3=Jump
+	int32 SelectedEditButtonIndex = 1; // 1=Links, 2=Rechts, 3=Jump
+	bool bDragJustStarted = false;
 	FVector2D DragLastMousePos = FVector2D::ZeroVector;
 	bool bVirtualJoystickMouseDrag = false;
 	FVector2D VirtualJoystickMouseOrigin = FVector2D::ZeroVector;
@@ -181,12 +183,16 @@ private:
 	TSharedPtr<SBorder> TouchHudContainer;
 	TSharedPtr<SBorder> HudDragBannerBorder;
 	TSharedPtr<SBorder> LeftTouchClusterBorder;
+	TSharedPtr<SBorder> RightSteerClusterBorder;
 	TSharedPtr<SBorder> RightTouchClusterBorder;
 	TSharedPtr<SBox> LeftClusterSizeBox;
+	TSharedPtr<SBox> RightSteerSizeBox;
 	TSharedPtr<SBox> RightClusterSizeBox;
 	TSharedPtr<SBorder> VirtualJoystickModeBox;
 	TSharedPtr<SBorder> ClassicDpadModeBox;
 	TSharedPtr<SBorder> JoystickKnobBorder;
+	TSharedPtr<STextBlock> TxtEditorOpacity;
+	TSharedPtr<STextBlock> TxtEditorSize;
 
 	// Clean Guided Main Menu Overlay Pointers
 	TSharedPtr<SBorder> MainMenuOverlayBorder;

@@ -100,54 +100,40 @@ void AVTPlatformActor::InitializePlatform(
 	bBroken = false;
 	CrackTime = 0.0f;
 
-	// Try swapping specific custom 3D mesh for platform type if imported
-	FString DesiredMeshPath = TEXT("/Game/VelocityTower/Meshes/SM_Platform_Normal.SM_Platform_Normal");
-	if (bIsCheckpoint)
+	// Razor-Sharp Sleek Cyber-Arcade Deck (Crisp 10cm deck thickness, 52cm sleek depth)
+	if (UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube")))
 	{
-		DesiredMeshPath = TEXT("/Game/VelocityTower/Meshes/SM_Platform_Checkpoint.SM_Platform_Checkpoint");
-	}
-	else if (PlatType == EVTPlatformType::Boost)
-	{
-		DesiredMeshPath = TEXT("/Game/VelocityTower/Meshes/SM_Platform_Boost.SM_Platform_Boost");
-	}
-	else if (PlatType == EVTPlatformType::MirrorIce)
-	{
-		DesiredMeshPath = TEXT("/Game/VelocityTower/Meshes/SM_Platform_Ice.SM_Platform_Ice");
-	}
-	else if (PlatType == EVTPlatformType::QuantumPhase)
-	{
-		DesiredMeshPath = TEXT("/Game/VelocityTower/Meshes/SM_Platform_Phase.SM_Platform_Phase");
-	}
-
-	if (UStaticMesh* LoadedMesh = LoadObject<UStaticMesh>(nullptr, *DesiredMeshPath))
-	{
-		PlatformMesh->SetStaticMesh(LoadedMesh);
+		PlatformMesh->SetStaticMesh(CubeMesh);
+		TopNeonTrimMesh->SetStaticMesh(CubeMesh);
 	}
 
 	// Scale platform along X to match PlatformWidth (base mesh is 100cm wide)
 	const float ScaleX = PlatformWidth / 100.0f;
-	PlatformMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -12.0f));
-	PlatformMesh->SetRelativeScale3D(FVector(ScaleX, 1.15f, 0.85f));
+	PlatformMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -5.0f));
+	PlatformMesh->SetRelativeScale3D(FVector(ScaleX, 0.52f, 0.10f));
 
-	TopNeonTrimMesh->SetRelativeLocation(FVector(0.0f, -42.0f, -2.5f));
-	TopNeonTrimMesh->SetRelativeScale3D(FVector(ScaleX * 0.98f, 0.14f, 0.09f));
+	// Vibrant Front Neon Edge Rail
+	TopNeonTrimMesh->SetRelativeLocation(FVector(0.0f, -25.0f, 0.5f));
+	TopNeonTrimMesh->SetRelativeScale3D(FVector(ScaleX * 0.99f, 0.05f, 0.035f));
 
 	// Determine Top & Body Colors matching HTML logic
-	FLinearColor TopCol = bIsCheckpoint ? FLinearColor(1.0f, 0.745f, 0.043f) : BiomeInfo.TopColor;
-	if (PlatType == EVTPlatformType::Boost) TopCol = FLinearColor(1.0f, 0.745f, 0.043f);
-	else if (PlatType == EVTPlatformType::MirrorIce) TopCol = FLinearColor(0.878f, 0.949f, 0.996f);
-	else if (PlatType == EVTPlatformType::QuantumPhase) TopCol = FLinearColor(0.753f, 0.518f, 0.988f);
+	FLinearColor TopCol = bIsCheckpoint ? FLinearColor(1.0f, 0.78f, 0.05f) : BiomeInfo.TopColor;
+	if (PlatType == EVTPlatformType::Boost) TopCol = FLinearColor(1.0f, 0.08f, 0.54f);
+	else if (PlatType == EVTPlatformType::MirrorIce) TopCol = FLinearColor(0.0f, 0.96f, 0.88f);
+	else if (PlatType == EVTPlatformType::QuantumPhase) TopCol = FLinearColor(0.68f, 0.28f, 1.0f);
 
-	UMaterialInterface* CustomIceMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/VelocityTower/Materials/M_CyberIce_Master.M_CyberIce_Master"));
 	UMaterialInterface* CustomNeonMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/VelocityTower/Materials/M_NeonEmissive_Master.M_NeonEmissive_Master"));
+	UMaterialInterface* CustomMegastructureMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/VelocityTower/Materials/M_TowerMegastructure_Master.M_TowerMegastructure_Master"));
 	UMaterialInterface* FallbackMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	UMaterialInterface* DeckMat = CustomMegastructureMat ? CustomMegastructureMat : (CustomNeonMat ? CustomNeonMat : FallbackMat);
 
-	if (CustomIceMat || FallbackMat)
+	if (DeckMat)
 	{
-		BodyMID = UMaterialInstanceDynamic::Create(CustomIceMat ? CustomIceMat : FallbackMat, this);
-		BodyMID->SetVectorParameterValue(TEXT("BaseColor"), BiomeInfo.BodyColor);
-		BodyMID->SetVectorParameterValue(TEXT("Color"), BiomeInfo.BodyColor);
-		BodyMID->SetVectorParameterValue(TEXT("EmissiveColor"), TopCol * 2.5f);
+		BodyMID = UMaterialInstanceDynamic::Create(DeckMat, this);
+		const FLinearColor ObsidianDeckCol(0.035f, 0.055f, 0.095f, 1.0f);
+		BodyMID->SetVectorParameterValue(TEXT("BaseColor"), ObsidianDeckCol);
+		BodyMID->SetVectorParameterValue(TEXT("Color"), ObsidianDeckCol);
+		BodyMID->SetVectorParameterValue(TEXT("EmissiveColor"), TopCol * (bIsCheckpoint ? 3.0f : 1.2f));
 		for (int32 MatIdx = 0; MatIdx < PlatformMesh->GetNumMaterials(); ++MatIdx)
 		{
 			PlatformMesh->SetMaterial(MatIdx, BodyMID);
@@ -159,13 +145,13 @@ void AVTPlatformActor::InitializePlatform(
 		TrimMID = UMaterialInstanceDynamic::Create(CustomNeonMat ? CustomNeonMat : FallbackMat, this);
 		TrimMID->SetVectorParameterValue(TEXT("BaseColor"), TopCol);
 		TrimMID->SetVectorParameterValue(TEXT("Color"), TopCol);
-		TrimMID->SetVectorParameterValue(TEXT("EmissiveColor"), TopCol * 12.0f);
+		TrimMID->SetVectorParameterValue(TEXT("EmissiveColor"), TopCol * (bIsCheckpoint ? 18.0f : 14.0f));
 		TopNeonTrimMesh->SetMaterial(0, TrimMID);
 	}
 
 	NeonLight->SetLightColor(TopCol);
-	NeonLight->SetIntensity(bIsCheckpoint ? 5500.0f : 2600.0f);
-	NeonLight->SetRelativeLocation(FVector(0.0f, -55.0f, 12.0f));
+	NeonLight->SetIntensity(bIsCheckpoint ? 6000.0f : 2800.0f);
+	NeonLight->SetRelativeLocation(FVector(0.0f, -35.0f, 10.0f));
 
 	// Floor milestone holographic badge every 10 floors
 	if (FloorIndex > 0 && FloorIndex % 10 == 0)
