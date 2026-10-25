@@ -1,0 +1,45 @@
+# ==============================================================================
+# Unreal Engine 5 .gitignore for Velocity Tower
+# ==============================================================================
+
+# Unreal Engine generated binaries and caches
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.fleet/
+
+# Plugins build artifacts
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Visual Studio / Rider / VSCode temporary files & solutions
+.vs/
+.idea/
+.vscode/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Packages & archives
+Build.rar
+*.rar
+*.zip
+*.7z
+*.tar.gz
+
+# Crash logs, dumps & temp files
+*.log
+*.dmp
+*.crashinfo
+*.tmp
+
+# Windows / OS metadata
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

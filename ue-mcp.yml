@@ -1,0 +1,11 @@
+ue-mcp:
+  version: 1
+  editor:
+    path: "O:/Epic Games/UE_5.8/Engine/Binaries/Win64/UnrealEditor.exe"
+    buildToolPath: "O:/Epic Games/UE_5.8/Engine/Build/BatchFiles/Build.bat"
+  disable:
+    - feedback
+  contentRoots:
+    - /Game/
+tasks: {}
+flows: {}

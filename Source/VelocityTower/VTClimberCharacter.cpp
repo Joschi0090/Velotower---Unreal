@@ -1,0 +1,725 @@
+#include "VTClimberCharacter.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/PointLightComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimSequence.h"
+#include "Engine/World.h"
+
+AVTClimberCharacter::AVTClimberCharacter()
+{
+	PrimaryActorTick.bCanEverTick = true;
+
+	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
+	RootComponent = RootScene;
+
+	// High-Fidelity Next-Gen Humanoid / MetaHuman Mesh for Climber #01
+	SkeletalClimberMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalClimberMesh"));
+	SkeletalClimberMesh->SetupAttachment(RootScene);
+	SkeletalClimberMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkeletalClimberMesh->SetCastShadow(true);
+	SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -44.0f));
+	SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f, 0.50f, 0.50f));
+	SkeletalClimberMesh->SetVisibility(false);
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MannyMeshFinder(TEXT("/Game/Characters/Manny/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"));
+	if (MannyMeshFinder.Succeeded())
+	{
+		SkeletalClimberMesh->SetSkeletalMeshAsset(MannyMeshFinder.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> IdleFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Idle.MM_Idle"));
+	if (IdleFinder.Succeeded()) AnimMannyIdle = IdleFinder.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> RunFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Run_Fwd.MM_Run_Fwd"));
+	if (RunFinder.Succeeded()) AnimMannyRun = RunFinder.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> JumpFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Jump.MM_Jump"));
+	if (JumpFinder.Succeeded()) AnimMannyJump = JumpFinder.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> FallFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop"));
+	if (FallFinder.Succeeded()) AnimMannyFall = FallFinder.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> LandFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Land.MM_Land"));
+	if (LandFinder.Succeeded()) AnimMannyLand = LandFinder.Object;
+
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> RollFinder(TEXT("/Game/Characters/Manny/Animations/Manny/VaultOver.VaultOver"));
+	if (RollFinder.Succeeded()) AnimMannyRoll = RollFinder.Object;
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineSphereFinder(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineCylinderFinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineCubeFinder(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineConeFinder(TEXT("/Engine/BasicShapes/Cone.Cone"));
+
+	UStaticMesh* SphereMesh = EngineSphereFinder.Succeeded() ? EngineSphereFinder.Object : nullptr;
+	UStaticMesh* CylMesh = EngineCylinderFinder.Succeeded() ? EngineCylinderFinder.Object : nullptr;
+	UStaticMesh* CubeMesh = EngineCubeFinder.Succeeded() ? EngineCubeFinder.Object : nullptr;
+	UStaticMesh* ConeMesh = EngineConeFinder.Succeeded() ? EngineConeFinder.Object.Get() : CylMesh;
+
+	auto MakePart = [this](const FName& Name, USceneComponent* Parent, UStaticMesh* Mesh, const FVector& Loc, const FRotator& Rot, const FVector& Scale) -> UStaticMeshComponent*
+	{
+		UStaticMeshComponent* Comp = CreateDefaultSubobject<UStaticMeshComponent>(Name);
+		Comp->SetupAttachment(Parent);
+		Comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Comp->SetCastShadow(true);
+		if (Mesh) Comp->SetStaticMesh(Mesh);
+		Comp->SetRelativeLocation(Loc);
+		Comp->SetRelativeRotation(Rot);
+		Comp->SetRelativeScale3D(Scale);
+		return Comp;
+	};
+
+	// 1. Sculpted Cyber-Hoodie Torso (Root of articulated character body)
+	ClimberMesh = MakePart(TEXT("ClimberMesh"), RootScene, CylMesh, FVector(0.0f, 0.0f, 4.0f), FRotator::ZeroRotator, FVector(0.38f, 0.28f, 0.36f));
+
+	// 2. Sculpted 3D Cyber-Helmet Head & Wrap-Around Glowing Visor + Dual LED Eyes
+	HeadMesh = MakePart(TEXT("HeadMesh"), ClimberMesh, SphereMesh, FVector(0.0f, 0.0f, 84.0f), FRotator::ZeroRotator, FVector(0.88f, 1.12f, 0.82f));
+	VisorWrapMesh = MakePart(TEXT("VisorWrapMesh"), HeadMesh, CubeMesh, FVector(28.0f, 0.0f, 4.0f), FRotator(0.0f, 0.0f, 0.0f), FVector(0.36f, 0.82f, 0.32f));
+	LeftEyeGlowMesh = MakePart(TEXT("LeftEyeGlowMesh"), VisorWrapMesh, SphereMesh, FVector(42.0f, -24.0f, 4.0f), FRotator::ZeroRotator, FVector(0.28f, 0.22f, 0.28f));
+	RightEyeGlowMesh = MakePart(TEXT("RightEyeGlowMesh"), VisorWrapMesh, SphereMesh, FVector(42.0f, 24.0f, 4.0f), FRotator::ZeroRotator, FVector(0.28f, 0.22f, 0.28f));
+
+	// 3. Multi-Part 3D Headgear & Accent Crest (customized per character #01..#20)
+	HeadgearMesh = MakePart(TEXT("HeadgearMesh"), HeadMesh, ConeMesh, FVector(0.0f, 0.0f, 48.0f), FRotator::ZeroRotator, FVector(0.55f, 0.55f, 0.42f));
+	HeadgearAccentMesh = MakePart(TEXT("HeadgearAccentMesh"), HeadMesh, CylMesh, FVector(16.0f, 0.0f, 34.0f), FRotator(-12.0f, 0.0f, 0.0f), FVector(0.75f, 0.85f, 0.12f));
+
+	// 4. Glowing Chest Arc-Reactor Core & Tech-Belt
+	ChestCoreMesh = MakePart(TEXT("ChestCoreMesh"), ClimberMesh, CylMesh, FVector(38.0f, 0.0f, 16.0f), FRotator(90.0f, 0.0f, 0.0f), FVector(0.38f, 0.38f, 0.18f));
+	PelvisBeltMesh = MakePart(TEXT("PelvisBeltMesh"), ClimberMesh, CylMesh, FVector(0.0f, 0.0f, -44.0f), FRotator::ZeroRotator, FVector(1.06f, 1.06f, 0.16f));
+
+	// 5. Twin-Thruster Cyber-Jetpack on Back
+	BackpackJetMesh = MakePart(TEXT("BackpackJetMesh"), ClimberMesh, CubeMesh, FVector(-42.0f, 0.0f, 12.0f), FRotator::ZeroRotator, FVector(0.38f, 0.78f, 0.68f));
+	LeftThrusterMesh = MakePart(TEXT("LeftThrusterMesh"), BackpackJetMesh, ConeMesh, FVector(-22.0f, -32.0f, -42.0f), FRotator(180.0f, 0.0f, 0.0f), FVector(0.45f, 0.45f, 0.55f));
+	RightThrusterMesh = MakePart(TEXT("RightThrusterMesh"), BackpackJetMesh, ConeMesh, FVector(-22.0f, 32.0f, -42.0f), FRotator(180.0f, 0.0f, 0.0f), FVector(0.45f, 0.45f, 0.55f));
+
+	// 6. Armored Shoulder Pauldrons + Articulated Arms + Glowing Cyber-Gauntlets
+	LeftShoulderMesh = MakePart(TEXT("LeftShoulderMesh"), ClimberMesh, SphereMesh, FVector(0.0f, -66.0f, 32.0f), FRotator::ZeroRotator, FVector(0.52f, 0.58f, 0.46f));
+	RightShoulderMesh = MakePart(TEXT("RightShoulderMesh"), ClimberMesh, SphereMesh, FVector(0.0f, 66.0f, 32.0f), FRotator::ZeroRotator, FVector(0.52f, 0.58f, 0.46f));
+
+	LeftArmMesh = MakePart(TEXT("LeftArmMesh"), LeftShoulderMesh, CylMesh, FVector(6.0f, -18.0f, -54.0f), FRotator(14.0f, 0.0f, 10.0f), FVector(0.46f, 0.46f, 0.95f));
+	RightArmMesh = MakePart(TEXT("RightArmMesh"), RightShoulderMesh, CylMesh, FVector(6.0f, 18.0f, -54.0f), FRotator(-14.0f, 0.0f, -10.0f), FVector(0.46f, 0.46f, 0.95f));
+
+	LeftGauntletMesh = MakePart(TEXT("LeftGauntletMesh"), LeftArmMesh, CubeMesh, FVector(8.0f, 0.0f, -52.0f), FRotator::ZeroRotator, FVector(0.95f, 0.95f, 0.52f));
+	RightGauntletMesh = MakePart(TEXT("RightGauntletMesh"), RightArmMesh, CubeMesh, FVector(8.0f, 0.0f, -52.0f), FRotator::ZeroRotator, FVector(0.95f, 0.95f, 0.52f));
+
+	// 7. Articulated Cyber-Legs + Oversized High-Top Neon Sneakers / Hover-Boots
+	LeftLegMesh = MakePart(TEXT("LeftLegMesh"), ClimberMesh, CylMesh, FVector(0.0f, -28.0f, -78.0f), FRotator::ZeroRotator, FVector(0.36f, 0.44f, 0.52f));
+	RightLegMesh = MakePart(TEXT("RightLegMesh"), ClimberMesh, CylMesh, FVector(0.0f, 28.0f, -78.0f), FRotator::ZeroRotator, FVector(0.36f, 0.44f, 0.52f));
+
+	LeftShoeMesh = MakePart(TEXT("LeftShoeMesh"), LeftLegMesh, CubeMesh, FVector(18.0f, 0.0f, -52.0f), FRotator::ZeroRotator, FVector(1.45f, 1.08f, 0.44f));
+	RightShoeMesh = MakePart(TEXT("RightShoeMesh"), RightLegMesh, CubeMesh, FVector(18.0f, 0.0f, -52.0f), FRotator::ZeroRotator, FVector(1.45f, 1.08f, 0.44f));
+
+	// 8. 3D Showroom Stage Pedestal & Hologram Ring (visible during Character Select & Main Menu)
+	ShowroomPedestalMesh = MakePart(TEXT("ShowroomPedestalMesh"), RootScene, CylMesh, FVector(0.0f, 0.0f, -46.0f), FRotator::ZeroRotator, FVector(1.15f, 1.15f, 0.08f));
+	ShowroomHoloRingMesh = MakePart(TEXT("ShowroomHoloRingMesh"), RootScene, CylMesh, FVector(0.0f, 0.0f, -40.0f), FRotator::ZeroRotator, FVector(1.38f, 1.38f, 0.025f));
+
+	ShieldSphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldSphereMesh"));
+	ShieldSphereMesh->SetupAttachment(RootScene);
+	ShieldSphereMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ShieldSphereMesh->SetRelativeScale3D(FVector(1.35f));
+	ShieldSphereMesh->SetVisibility(false);
+	if (SphereMesh) ShieldSphereMesh->SetStaticMesh(SphereMesh);
+
+	JumpGuideRingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("JumpGuideRingMesh"));
+	JumpGuideRingMesh->SetupAttachment(RootScene);
+	JumpGuideRingMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	JumpGuideRingMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -42.0f));
+	JumpGuideRingMesh->SetRelativeScale3D(FVector(0.95f, 0.95f, 0.04f));
+	if (CylMesh) JumpGuideRingMesh->SetStaticMesh(CylMesh);
+
+	ClimberRimLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("ClimberRimLight"));
+	ClimberRimLight->SetupAttachment(RootScene);
+	ClimberRimLight->SetRelativeLocation(FVector(0.0f, -95.0f, 28.0f));
+	ClimberRimLight->SetIntensity(6200.0f);
+	ClimberRimLight->SetAttenuationRadius(380.0f);
+	ClimberRimLight->SetLightColor(FLinearColor(0.0f, 0.961f, 0.831f));
+
+	// Create 7 3D Scarf Segments
+	for (int32 i = 0; i < 7; ++i)
+	{
+		UStaticMeshComponent* Seg = CreateDefaultSubobject<UStaticMeshComponent>(*FString::Printf(TEXT("ScarfSeg_%d"), i));
+		Seg->SetupAttachment(RootScene);
+		Seg->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Seg->SetCastShadow(false);
+		if (SphereMesh) Seg->SetStaticMesh(SphereMesh);
+		const float ScaleFactor = FMath::Lerp(0.24f, 0.12f, float(i) / 6.0f);
+		Seg->SetWorldScale3D(FVector(ScaleFactor));
+		ScarfSegmentMeshes.Add(Seg);
+		ScarfPoints.Add(FVector::ZeroVector);
+	}
+
+	// Create 6 3D Ghost Trail Meshes for Aerial Somersaults & Overdrive
+	for (int32 i = 0; i < 6; ++i)
+	{
+		UStaticMeshComponent* Ghost = CreateDefaultSubobject<UStaticMeshComponent>(*FString::Printf(TEXT("GhostTrail_%d"), i));
+		Ghost->SetupAttachment(RootScene);
+		Ghost->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Ghost->SetCastShadow(false);
+		Ghost->SetVisibility(false);
+		if (SphereMesh) Ghost->SetStaticMesh(SphereMesh);
+		GhostTrailMeshes.Add(Ghost);
+		GhostLocations.Add(FVector::ZeroVector);
+		GhostRotations.Add(FRotator::ZeroRotator);
+		GhostAlphas.Add(0.0f);
+	}
+}
+
+void AVTClimberCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AVTClimberCharacter::ResetClimberForStart(float StartX, float StartZ, int32 InStartFloor, const FVTClimberInfo& InClimberInfo, const FLinearColor& InTrailColor)
+{
+	PosX = StartX;
+	PosZ = StartZ;
+	VelX = 0.0f;
+	VelZ = 0.0f;
+	FacingDir = 1;
+	bOnGround = true;
+	CurrentFloor = InStartFloor;
+	FlipAngleRad = 0.0f;
+	bFlipping = false;
+	RunPhase = 0.0f;
+	SquashScaleX = 1.0f;
+	SquashScaleZ = 1.0f;
+	CoyoteFrames = 7;
+	bWallBounceUsed = false;
+	bWasOverdrive = false;
+
+	SetActorLocation(FVector(PosX, 0.0f, PosZ));
+	if (ShowroomPedestalMesh) ShowroomPedestalMesh->SetVisibility(false);
+	if (ShowroomHoloRingMesh) ShowroomHoloRingMesh->SetVisibility(false);
+
+	for (int32 i = 0; i < ScarfPoints.Num(); ++i)
+	{
+		ScarfPoints[i] = FVector(PosX, 10.0f, PosZ + 16.0f);
+	}
+	for (int32 i = 0; i < GhostAlphas.Num(); ++i)
+	{
+		GhostAlphas[i] = 0.0f;
+		if (GhostTrailMeshes[i]) GhostTrailMeshes[i]->SetVisibility(false);
+	}
+
+	ApplyClimberVisuals(InClimberInfo, InTrailColor, false);
+}
+
+void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInfo, const FLinearColor& InTrailColor, bool bLockedSilhouette)
+{
+	const FLinearColor PitchBlack(0.0f, 0.0f, 0.0f, 1.0f);
+
+	// Character #01 Showcase: High-Fidelity Next-Gen Humanoid / MetaHuman Mesh!
+	const bool bIsFirstChar = (InClimberInfo.RosterNumber == 1 || InClimberInfo.Id == EVTClimberId::KidFlex);
+	bUsingSkeletalMesh = bIsFirstChar && SkeletalClimberMesh && (SkeletalClimberMesh->GetSkeletalMeshAsset() != nullptr);
+
+	if (bUsingSkeletalMesh)
+	{
+		SkeletalClimberMesh->SetVisibility(true);
+		if (ClimberMesh) ClimberMesh->SetVisibility(false, true);
+
+		for (int32 MatIdx = 0; MatIdx < SkeletalClimberMesh->GetNumMaterials(); ++MatIdx)
+		{
+			UMaterialInstanceDynamic* DynMat = SkeletalClimberMesh->CreateAndSetMaterialInstanceDynamic(MatIdx);
+			if (DynMat)
+			{
+				if (bLockedSilhouette)
+				{
+					DynMat->SetVectorParameterValue(TEXT("BaseColor"), PitchBlack);
+					DynMat->SetVectorParameterValue(TEXT("EmissiveColor"), PitchBlack);
+				}
+				else
+				{
+					DynMat->SetVectorParameterValue(TEXT("AccentColor"), InTrailColor);
+					DynMat->SetVectorParameterValue(TEXT("EmissiveColor"), InTrailColor * 1.25f);
+				}
+			}
+		}
+	}
+	else
+	{
+		if (SkeletalClimberMesh) SkeletalClimberMesh->SetVisibility(false);
+		if (ClimberMesh) ClimberMesh->SetVisibility(true, true);
+	}
+
+	UMaterialInterface* CustomNeonMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/VelocityTower/Materials/M_NeonEmissive_Master.M_NeonEmissive_Master"));
+	UMaterialInterface* CustomClimberMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/VelocityTower/Materials/M_Climber_Master.M_Climber_Master"));
+	UMaterialInterface* FallbackMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	UMaterialInterface* BaseMat = CustomClimberMat ? CustomClimberMat : (CustomNeonMat ? CustomNeonMat : FallbackMat);
+	UMaterialInterface* NeonOrBaseMat = CustomNeonMat ? CustomNeonMat : BaseMat;
+
+	auto MakeSolidMID = [&](const FLinearColor& Col, float EmissiveBoost = 1.6f) -> UMaterialInstanceDynamic*
+	{
+		if (!BaseMat) return nullptr;
+		UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(BaseMat, this);
+		const FLinearColor FinalCol = bLockedSilhouette ? PitchBlack : Col;
+		const FLinearColor FinalEmissive = bLockedSilhouette ? PitchBlack : (Col * EmissiveBoost);
+		MID->SetVectorParameterValue(TEXT("BaseColor"), FinalCol);
+		MID->SetVectorParameterValue(TEXT("Color"), FinalCol);
+		MID->SetVectorParameterValue(TEXT("EmissiveColor"), FinalEmissive);
+		return MID;
+	};
+
+	// Distinct 3D Headgear & Silhouette geometry per Climber (#01..#20)
+	if (HeadgearMesh && HeadgearAccentMesh)
+	{
+		const int32 Variant = InClimberInfo.RosterNumber % 6;
+		HeadgearMesh->SetVisibility(true);
+		HeadgearAccentMesh->SetVisibility(true);
+
+		if (InClimberInfo.RosterNumber == 1)
+		{
+			// #01 Kid Flex: Street Snapback Cap + Forward Brim + DJ Headphones
+			HeadgearMesh->SetRelativeLocation(FVector(-4.0f, 0.0f, 36.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.86f, 0.92f, 0.36f));
+
+			HeadgearAccentMesh->SetRelativeLocation(FVector(26.0f, 0.0f, 24.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.72f, 0.88f, 0.10f));
+		}
+		else if (Variant == 0)
+		{
+			// Cyber-Emperor Floating Halo + Crown Spike
+			HeadgearMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 52.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator::ZeroRotator);
+			HeadgearMesh->SetRelativeScale3D(FVector(0.45f, 0.45f, 0.65f));
+
+			HeadgearAccentMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 74.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator::ZeroRotator);
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(1.25f, 1.25f, 0.08f));
+		}
+		else if (Variant == 1)
+		{
+			// Samurai Ronin Crest + Wide Battle-Horns
+			HeadgearMesh->SetRelativeLocation(FVector(10.0f, 0.0f, 54.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator(25.0f, 0.0f, 0.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.28f, 1.15f, 0.55f));
+
+			HeadgearAccentMesh->SetRelativeLocation(FVector(-6.0f, 0.0f, 38.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 90.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.26f, 1.35f, 0.16f));
+		}
+		else if (Variant == 2)
+		{
+			// Cyber-Kitsune / Twin Fox Ears + Visor Fin
+			HeadgearMesh->SetRelativeLocation(FVector(0.0f, -26.0f, 52.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, -18.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.38f, 0.38f, 0.68f));
+
+			HeadgearAccentMesh->SetRelativeLocation(FVector(0.0f, 26.0f, 52.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 18.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.38f, 0.38f, 0.68f));
+		}
+		else if (Variant == 3)
+		{
+			// Synthwave DJ Headphones + Tall Cyber-Mohawk Fin
+			HeadgearMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 56.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator::ZeroRotator);
+			HeadgearMesh->SetRelativeScale3D(FVector(0.88f, 0.22f, 0.62f));
+
+			HeadgearAccentMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 8.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.52f, 0.52f, 1.32f));
+		}
+		else
+		{
+			// Valkyrie Cyber-Wings + Horned Visor
+			HeadgearMesh->SetRelativeLocation(FVector(-8.0f, 0.0f, 44.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator(-18.0f, 0.0f, 0.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.42f, 1.48f, 0.28f));
+
+			HeadgearAccentMesh->SetRelativeLocation(FVector(18.0f, 0.0f, 48.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(32.0f, 0.0f, 0.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.32f, 0.32f, 0.58f));
+		}
+	}
+
+	UMaterialInstanceDynamic* HoodieMID = MakeSolidMID(InClimberInfo.HoodieColor, 2.2f);
+	UMaterialInstanceDynamic* PantsMID = MakeSolidMID(InClimberInfo.PantsColor, 1.6f);
+	UMaterialInstanceDynamic* ShoesMID = MakeSolidMID(InClimberInfo.ShoesColor, 3.8f);
+	UMaterialInstanceDynamic* VisorMID = MakeSolidMID(InClimberInfo.VisorColor, 12.0f);
+	UMaterialInstanceDynamic* EyeMID = MakeSolidMID(FLinearColor::White, 18.0f);
+	UMaterialInstanceDynamic* DarkArmorMID = MakeSolidMID(InClimberInfo.PantsColor * 0.45f, 0.8f);
+
+	if (ClimberMesh && HoodieMID) ClimberMesh->SetMaterial(0, HoodieMID);
+	if (HeadMesh && DarkArmorMID) HeadMesh->SetMaterial(0, DarkArmorMID);
+	if (VisorWrapMesh && VisorMID) VisorWrapMesh->SetMaterial(0, VisorMID);
+	if (LeftEyeGlowMesh && EyeMID) LeftEyeGlowMesh->SetMaterial(0, EyeMID);
+	if (RightEyeGlowMesh && EyeMID) RightEyeGlowMesh->SetMaterial(0, EyeMID);
+	if (HeadgearMesh && HoodieMID) HeadgearMesh->SetMaterial(0, HoodieMID);
+	if (HeadgearAccentMesh && VisorMID) HeadgearAccentMesh->SetMaterial(0, VisorMID);
+	if (ChestCoreMesh && VisorMID) ChestCoreMesh->SetMaterial(0, VisorMID);
+	if (PelvisBeltMesh && DarkArmorMID) PelvisBeltMesh->SetMaterial(0, DarkArmorMID);
+	if (BackpackJetMesh && DarkArmorMID) BackpackJetMesh->SetMaterial(0, DarkArmorMID);
+	if (LeftThrusterMesh && ShoesMID) LeftThrusterMesh->SetMaterial(0, ShoesMID);
+	if (RightThrusterMesh && ShoesMID) RightThrusterMesh->SetMaterial(0, ShoesMID);
+	if (LeftShoulderMesh && HoodieMID) LeftShoulderMesh->SetMaterial(0, HoodieMID);
+	if (RightShoulderMesh && HoodieMID) RightShoulderMesh->SetMaterial(0, HoodieMID);
+	if (LeftArmMesh && HoodieMID) LeftArmMesh->SetMaterial(0, HoodieMID);
+	if (RightArmMesh && HoodieMID) RightArmMesh->SetMaterial(0, HoodieMID);
+	if (LeftGauntletMesh && VisorMID) LeftGauntletMesh->SetMaterial(0, VisorMID);
+	if (RightGauntletMesh && VisorMID) RightGauntletMesh->SetMaterial(0, VisorMID);
+	if (LeftLegMesh && PantsMID) LeftLegMesh->SetMaterial(0, PantsMID);
+	if (RightLegMesh && PantsMID) RightLegMesh->SetMaterial(0, PantsMID);
+	if (LeftShoeMesh && ShoesMID) LeftShoeMesh->SetMaterial(0, ShoesMID);
+	if (RightShoeMesh && ShoesMID) RightShoeMesh->SetMaterial(0, ShoesMID);
+
+	// Pedestal is ALWAYS lit so even a pitch-black locked silhouette stands on a glowing hologram stage!
+	if (NeonOrBaseMat && ShowroomPedestalMesh && ShowroomHoloRingMesh)
+	{
+		UMaterialInstanceDynamic* PedMID = UMaterialInstanceDynamic::Create(NeonOrBaseMat, this);
+		const FLinearColor PedCol = bLockedSilhouette ? FLinearColor(0.08f, 0.14f, 0.24f, 1.0f) : (InClimberInfo.HoodieColor * 0.35f);
+		PedMID->SetVectorParameterValue(TEXT("BaseColor"), PedCol);
+		PedMID->SetVectorParameterValue(TEXT("EmissiveColor"), PedCol * 3.0f);
+		ShowroomPedestalMesh->SetMaterial(0, PedMID);
+
+		UMaterialInstanceDynamic* RingMID = UMaterialInstanceDynamic::Create(NeonOrBaseMat, this);
+		const FLinearColor RingCol = bLockedSilhouette ? FLinearColor(1.0f, 0.78f, 0.10f, 1.0f) : InClimberInfo.VisorColor;
+		RingMID->SetVectorParameterValue(TEXT("BaseColor"), RingCol);
+		RingMID->SetVectorParameterValue(TEXT("EmissiveColor"), RingCol * 10.0f);
+		ShowroomHoloRingMesh->SetMaterial(0, RingMID);
+	}
+
+	if (NeonOrBaseMat)
+	{
+		ScarfMID = UMaterialInstanceDynamic::Create(NeonOrBaseMat, this);
+		const FLinearColor ScarfCol = bLockedSilhouette ? PitchBlack : InClimberInfo.ScarfColor;
+		ScarfMID->SetVectorParameterValue(TEXT("BaseColor"), ScarfCol);
+		ScarfMID->SetVectorParameterValue(TEXT("Color"), ScarfCol);
+		ScarfMID->SetVectorParameterValue(TEXT("EmissiveColor"), bLockedSilhouette ? PitchBlack : (InClimberInfo.ScarfColor * 10.0f));
+		for (UStaticMeshComponent* Seg : ScarfSegmentMeshes)
+		{
+			if (Seg) Seg->SetMaterial(0, ScarfMID);
+		}
+
+		UMaterialInstanceDynamic* GhostMID = UMaterialInstanceDynamic::Create(NeonOrBaseMat, this);
+		GhostMID->SetVectorParameterValue(TEXT("BaseColor"), InTrailColor);
+		GhostMID->SetVectorParameterValue(TEXT("Color"), InTrailColor);
+		GhostMID->SetVectorParameterValue(TEXT("EmissiveColor"), InTrailColor * 8.0f);
+		for (UStaticMeshComponent* Ghost : GhostTrailMeshes)
+		{
+			if (Ghost) Ghost->SetMaterial(0, GhostMID);
+		}
+
+		GuideRingMID = UMaterialInstanceDynamic::Create(NeonOrBaseMat, this);
+		GuideRingMID->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(0.0f, 0.961f, 0.831f));
+		GuideRingMID->SetVectorParameterValue(TEXT("EmissiveColor"), FLinearColor(0.0f, 0.961f, 0.831f) * 8.0f);
+		JumpGuideRingMesh->SetMaterial(0, GuideRingMID);
+	}
+
+	if (ClimberRimLight)
+	{
+		if (bLockedSilhouette)
+		{
+			ClimberRimLight->SetIntensity(0.0f);
+		}
+		else
+		{
+			ClimberRimLight->SetRelativeLocation(FVector(0.0f, -95.0f, 28.0f));
+			ClimberRimLight->SetLightColor(InClimberInfo.HoodieColor);
+			ClimberRimLight->SetIntensity(6800.0f);
+		}
+	}
+}
+
+void AVTClimberCharacter::UpdateShowroomStagePose(float TimeSec, float ShowroomYawDeg, bool bInCharSelect)
+{
+	if (ShowroomPedestalMesh) ShowroomPedestalMesh->SetVisibility(bInCharSelect);
+	if (ShowroomHoloRingMesh)
+	{
+		ShowroomHoloRingMesh->SetVisibility(bInCharSelect);
+		const float RingPulse = 1.32f + FMath::Sin(TimeSec * 4.5f) * 0.08f;
+		ShowroomHoloRingMesh->SetRelativeScale3D(FVector(RingPulse, RingPulse, 0.025f));
+	}
+	if (JumpGuideRingMesh) JumpGuideRingMesh->SetVisibility(false);
+
+	// Heroic breathing & articulated limb animation on the 3D Showroom Stage
+	const float BreathZ = FMath::Sin(TimeSec * 3.2f) * 2.5f;
+	SetActorLocation(FVector(0.0f, 0.0f, (bInCharSelect ? 48.0f : 44.0f) + BreathZ));
+
+	const float StageScale = bInCharSelect ? 1.12f : 1.0f;
+	ClimberMesh->SetRelativeRotation(FRotator(0.0f, ShowroomYawDeg, 0.0f));
+	ClimberMesh->SetRelativeScale3D(FVector(0.38f * StageScale, 0.28f * StageScale, 0.36f * StageScale));
+
+	if (bUsingSkeletalMesh && SkeletalClimberMesh)
+	{
+		SkeletalClimberMesh->SetRelativeRotation(FRotator(0.0f, ShowroomYawDeg, 0.0f));
+		SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -44.0f));
+		SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f * StageScale));
+		if (AnimMannyIdle)
+		{
+			SkeletalClimberMesh->PlayAnimation(AnimMannyIdle, true);
+		}
+	}
+
+	if (HeadMesh)
+	{
+		const float HeadNod = FMath::Sin(TimeSec * 2.4f) * 5.0f;
+		const float HeadTurn = FMath::Cos(TimeSec * 1.6f) * 8.0f;
+		HeadMesh->SetRelativeRotation(FRotator(HeadNod, HeadTurn, 0.0f));
+	}
+	if (LeftShoulderMesh && RightShoulderMesh)
+	{
+		const float ArmSwing = FMath::Sin(TimeSec * 3.2f) * 10.0f;
+		LeftShoulderMesh->SetRelativeRotation(FRotator(12.0f + ArmSwing, 0.0f, 14.0f));
+		RightShoulderMesh->SetRelativeRotation(FRotator(-12.0f - ArmSwing, 0.0f, -14.0f));
+	}
+	if (LeftLegMesh && RightLegMesh)
+	{
+		LeftLegMesh->SetRelativeRotation(FRotator(6.0f, -8.0f, 4.0f));
+		RightLegMesh->SetRelativeRotation(FRotator(-6.0f, 8.0f, -4.0f));
+	}
+
+	// Update flowing 3D Scarf on stage
+	for (int32 i = 0; i < ScarfSegmentMeshes.Num(); ++i)
+	{
+		if (ScarfSegmentMeshes[i])
+		{
+			const float WaveX = FMath::Sin(TimeSec * 5.0f + float(i) * 0.6f) * (4.0f + float(i) * 2.2f);
+			const float BaseZ = (bInCharSelect ? 76.0f : 44.0f) + 18.0f - float(i) * 5.5f;
+			ScarfSegmentMeshes[i]->SetWorldLocation(FVector(WaveX - float(i) * 4.0f, 16.0f + float(i) * 2.5f, BaseZ));
+		}
+	}
+}
+
+void AVTClimberCharacter::SetShieldVisualActive(bool bActive)
+{
+	if (ShieldSphereMesh)
+	{
+		ShieldSphereMesh->SetVisibility(bActive);
+	}
+}
+
+void AVTClimberCharacter::PlayAbyssFallPose(float FallProgress, float DeltaTime)
+{
+	if (ShowroomPedestalMesh) ShowroomPedestalMesh->SetVisibility(false);
+	if (ShowroomHoloRingMesh) ShowroomHoloRingMesh->SetVisibility(false);
+	if (JumpGuideRingMesh) JumpGuideRingMesh->SetVisibility(false);
+	if (ShieldSphereMesh) ShieldSphereMesh->SetVisibility(false);
+
+	SetActorLocation(FVector(PosX, 0.0f, PosZ));
+
+	// Frantic tumbling spin & shrinking depth scaling as character plunges into the dark abyss
+	const float TumblePitch = FMath::RadiansToDegrees(FlipAngleRad);
+	const float TumbleYaw = FMath::Sin(FallProgress * 28.0f) * 45.0f;
+	const float TumbleRoll = FMath::Cos(FallProgress * 32.0f) * 60.0f;
+	ClimberMesh->SetRelativeRotation(FRotator(TumblePitch, TumbleYaw, TumbleRoll));
+
+	const float DepthScale = FMath::Max(0.06f, 1.0f - FallProgress * 0.82f);
+	ClimberMesh->SetRelativeScale3D(FVector(0.38f * DepthScale, 0.28f * DepthScale, 0.36f * DepthScale));
+
+	if (bUsingSkeletalMesh && SkeletalClimberMesh)
+	{
+		SkeletalClimberMesh->SetRelativeRotation(FRotator(TumblePitch, TumbleYaw, TumbleRoll));
+		SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f * DepthScale));
+		if (AnimMannyFall)
+		{
+			SkeletalClimberMesh->PlayAnimation(AnimMannyFall, true);
+		}
+	}
+
+	// Frantic limb flailing in panic!
+	if (LeftShoulderMesh && RightShoulderMesh && LeftLegMesh && RightLegMesh)
+	{
+		const float FlailArm1 = FMath::Sin(FallProgress * 40.0f) * 45.0f;
+		const float FlailArm2 = FMath::Cos(FallProgress * 44.0f) * 45.0f;
+		LeftShoulderMesh->SetRelativeRotation(FRotator(130.0f + FlailArm1, 0.0f, 35.0f));
+		RightShoulderMesh->SetRelativeRotation(FRotator(130.0f + FlailArm2, 0.0f, -35.0f));
+
+		const float KickLeg1 = FMath::Sin(FallProgress * 35.0f) * 40.0f;
+		const float KickLeg2 = FMath::Cos(FallProgress * 38.0f) * 40.0f;
+		LeftLegMesh->SetRelativeRotation(FRotator(-20.0f + KickLeg1, 0.0f, -15.0f));
+		RightLegMesh->SetRelativeRotation(FRotator(-20.0f + KickLeg2, 0.0f, 15.0f));
+	}
+
+	if (HeadMesh)
+	{
+		// Looking down in panic
+		HeadMesh->SetRelativeRotation(FRotator(-35.0f, FMath::Sin(FallProgress * 30.0f) * 15.0f, 0.0f));
+	}
+
+	// Trailing scarf falling behind
+	for (int32 i = 0; i < ScarfSegmentMeshes.Num(); ++i)
+	{
+		if (ScarfSegmentMeshes[i])
+		{
+			const float LagZ = PosZ + 20.0f + float(i) * 12.0f;
+			const float FlutterX = PosX + FMath::Sin(FallProgress * 30.0f + float(i)) * (8.0f + float(i) * 4.0f);
+			ScarfSegmentMeshes[i]->SetWorldLocation(FVector(FlutterX, 0.0f, LagZ));
+		}
+	}
+}
+
+void AVTClimberCharacter::UpdateVisualState(float DeltaTime, bool bShowJumpGuide, float SpeedRatio, bool bNearWallReady)
+{
+	if (ShowroomPedestalMesh) ShowroomPedestalMesh->SetVisibility(false);
+	if (ShowroomHoloRingMesh) ShowroomHoloRingMesh->SetVisibility(false);
+
+	SetActorLocation(FVector(PosX, 0.0f, PosZ));
+
+	// Convert FlipAngleRad & FacingDir into 3D rotation
+	const float PitchDeg = FMath::RadiansToDegrees(FlipAngleRad);
+	const float YawDeg = (FacingDir >= 0) ? 18.0f : 162.0f;
+	const float RunBobRoll = bOnGround ? FMath::Sin(RunPhase) * 8.0f : 0.0f;
+
+	if (bUsingSkeletalMesh && SkeletalClimberMesh)
+	{
+		// SKELETAL METAHUMAN / NEXT-GEN MANNY VISUAL UPDATE
+		if (bFlipping)
+		{
+			// Acrobatic Parkour Somersault Roll Flip (360° Pitch Rotation)
+			SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+			SkeletalClimberMesh->SetRelativeRotation(FRotator(PitchDeg, YawDeg, 0.0f));
+			if (AnimMannyRoll)
+			{
+				SkeletalClimberMesh->PlayAnimation(AnimMannyRoll, false);
+				SkeletalClimberMesh->SetPlayRate(2.4f);
+			}
+			else if (AnimMannyJump)
+			{
+				SkeletalClimberMesh->PlayAnimation(AnimMannyJump, false);
+			}
+		}
+		else
+		{
+			SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -44.0f));
+			SkeletalClimberMesh->SetRelativeRotation(FRotator(0.0f, YawDeg, RunBobRoll * 0.35f));
+
+			if (!bOnGround)
+			{
+				if (VelZ > 20.0f)
+				{
+					if (AnimMannyJump)
+					{
+						SkeletalClimberMesh->PlayAnimation(AnimMannyJump, false);
+					}
+				}
+				else
+				{
+					if (AnimMannyFall)
+					{
+						SkeletalClimberMesh->PlayAnimation(AnimMannyFall, true);
+					}
+				}
+			}
+			else
+			{
+				if (FMath::Abs(VelX) > 12.0f)
+				{
+					if (AnimMannyRun)
+					{
+						SkeletalClimberMesh->PlayAnimation(AnimMannyRun, true);
+						SkeletalClimberMesh->SetPlayRate(FMath::Clamp(SpeedRatio * 1.6f, 0.8f, 2.2f));
+					}
+				}
+				else
+				{
+					if (AnimMannyIdle)
+					{
+						SkeletalClimberMesh->PlayAnimation(AnimMannyIdle, true);
+						SkeletalClimberMesh->SetPlayRate(1.0f);
+					}
+				}
+			}
+		}
+	}
+	else if (ClimberMesh)
+	{
+		// ARTICULATED CYBER-RUNNER DUMMY WITH AUTHENTIC SOMERSAULT TUCK-AND-ROLL (NO BALL!)
+		ClimberMesh->SetRelativeRotation(FRotator(PitchDeg, YawDeg, RunBobRoll));
+
+		if (LeftShoulderMesh && RightShoulderMesh && LeftLegMesh && RightLegMesh)
+		{
+			if (bFlipping)
+			{
+				// Acrobatic Parkour Somersault Tuck Pose (Knees to chest, arms gripping shins, head tucked)
+				ClimberMesh->SetRelativeScale3D(FVector(0.38f, 0.28f, 0.36f)); // Stable athletic proportions
+
+				LeftLegMesh->SetRelativeLocation(FVector(10.0f, -22.0f, -38.0f));
+				RightLegMesh->SetRelativeLocation(FVector(10.0f, 22.0f, -38.0f));
+				LeftLegMesh->SetRelativeRotation(FRotator(95.0f, 0.0f, 0.0f));
+				RightLegMesh->SetRelativeRotation(FRotator(95.0f, 0.0f, 0.0f));
+
+				LeftShoulderMesh->SetRelativeLocation(FVector(12.0f, -52.0f, 18.0f));
+				RightShoulderMesh->SetRelativeLocation(FVector(12.0f, 52.0f, 18.0f));
+				LeftShoulderMesh->SetRelativeRotation(FRotator(72.0f, 0.0f, 16.0f));
+				RightShoulderMesh->SetRelativeRotation(FRotator(72.0f, 0.0f, -16.0f));
+				LeftArmMesh->SetRelativeRotation(FRotator(40.0f, 0.0f, 20.0f));
+				RightArmMesh->SetRelativeRotation(FRotator(40.0f, 0.0f, -20.0f));
+
+				if (HeadMesh) HeadMesh->SetRelativeRotation(FRotator(25.0f, 0.0f, 0.0f));
+			}
+			else
+			{
+				// Reset limbs to natural anatomical origins
+				ClimberMesh->SetRelativeScale3D(FVector(0.38f * SquashScaleX, 0.28f * SquashScaleX, 0.36f * SquashScaleZ));
+
+				LeftLegMesh->SetRelativeLocation(FVector(0.0f, -28.0f, -78.0f));
+				RightLegMesh->SetRelativeLocation(FVector(0.0f, 28.0f, -78.0f));
+				LeftShoulderMesh->SetRelativeLocation(FVector(0.0f, -66.0f, 32.0f));
+				RightShoulderMesh->SetRelativeLocation(FVector(0.0f, 66.0f, 32.0f));
+				if (HeadMesh) HeadMesh->SetRelativeRotation(FRotator::ZeroRotator);
+
+				if (!bOnGround)
+				{
+					// Heroic Aerial Jump Pose
+					LeftShoulderMesh->SetRelativeRotation(FRotator(42.0f, 0.0f, 22.0f));
+					RightShoulderMesh->SetRelativeRotation(FRotator(-35.0f, 0.0f, -22.0f));
+					LeftLegMesh->SetRelativeRotation(FRotator(-24.0f, 0.0f, 0.0f));
+					RightLegMesh->SetRelativeRotation(FRotator(28.0f, 0.0f, 0.0f));
+				}
+				else
+				{
+					const float Stride = FMath::Sin(RunPhase * 1.4f) * (10.0f + SpeedRatio * 34.0f);
+					LeftShoulderMesh->SetRelativeRotation(FRotator(-Stride, 0.0f, 10.0f));
+					RightShoulderMesh->SetRelativeRotation(FRotator(Stride, 0.0f, -10.0f));
+					LeftLegMesh->SetRelativeRotation(FRotator(Stride, 0.0f, 0.0f));
+					RightLegMesh->SetRelativeRotation(FRotator(-Stride, 0.0f, 0.0f));
+				}
+			}
+		}
+	}
+
+	// Update 7-segment 3D Scarf positions in world space
+	for (int32 i = 0; i < ScarfSegmentMeshes.Num(); ++i)
+	{
+		if (ScarfSegmentMeshes[i] && ScarfPoints.IsValidIndex(i))
+		{
+			ScarfSegmentMeshes[i]->SetWorldLocation(ScarfPoints[i]);
+		}
+	}
+
+	// Note: Ghost spheres removed to prevent dummy ball artifact during rolls!
+
+	// Kinetic Jump Guide Ring under Climber
+	if (JumpGuideRingMesh)
+	{
+		const bool bCanGroundJump = bOnGround || CoyoteFrames > 0;
+		if (bShowJumpGuide && bCanGroundJump)
+		{
+			JumpGuideRingMesh->SetVisibility(true);
+			const float Pulse = (FMath::Sin(GetWorld()->GetTimeSeconds() * 15.0f) + 1.0f) * 0.5f;
+			const float RingRadiusScale = 0.75f + SpeedRatio * 0.55f + Pulse * 0.18f;
+			JumpGuideRingMesh->SetRelativeScale3D(FVector(RingRadiusScale, RingRadiusScale, 0.04f));
+			if (GuideRingMID)
+			{
+				const FLinearColor GuideCol = bNearWallReady
+					? FLinearColor(1.0f, 0.82f, 0.4f)
+					: (SpeedRatio > 0.6f ? FLinearColor(1.0f, 0.745f, 0.043f) : FLinearColor(0.0f, 0.961f, 0.831f));
+				GuideRingMID->SetVectorParameterValue(TEXT("BaseColor"), GuideCol);
+				GuideRingMID->SetVectorParameterValue(TEXT("EmissiveColor"), GuideCol * (10.0f + Pulse * 8.0f));
+			}
+		}
+		else
+		{
+			JumpGuideRingMesh->SetVisibility(false);
+		}
+	}
+}
+
+void AVTClimberCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
