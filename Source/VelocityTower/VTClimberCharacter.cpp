@@ -23,6 +23,8 @@ AVTClimberCharacter::AVTClimberCharacter()
 	SkeletalClimberMesh->SetCastShadow(true);
 	SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -44.0f));
 	SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f, 0.50f, 0.50f));
+	SkeletalClimberMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+	SkeletalClimberMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	SkeletalClimberMesh->SetVisibility(false);
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MannyMeshFinder(TEXT("/Game/Characters/Manny/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"));
@@ -192,9 +194,19 @@ void AVTClimberCharacter::PlaySkeletalAnim(UAnimSequence* NewAnim, bool bLoop, f
 	if (CurrentPlayingAnim != NewAnim)
 	{
 		CurrentPlayingAnim = NewAnim;
-		SkeletalClimberMesh->PlayAnimation(NewAnim, bLoop);
+		SkeletalClimberMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		SkeletalClimberMesh->SetAnimation(NewAnim);
+		SkeletalClimberMesh->SetPlayRate(PlayRate);
+		SkeletalClimberMesh->Play(bLoop);
 	}
-	SkeletalClimberMesh->SetPlayRate(PlayRate);
+	else
+	{
+		SkeletalClimberMesh->SetPlayRate(PlayRate);
+		if (!SkeletalClimberMesh->IsPlaying())
+		{
+			SkeletalClimberMesh->Play(bLoop);
+		}
+	}
 }
 
 void AVTClimberCharacter::ResetClimberForStart(float StartX, float StartZ, int32 InStartFloor, const FVTClimberInfo& InClimberInfo, const FLinearColor& InTrailColor)
@@ -237,12 +249,28 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 	const FLinearColor PitchBlack(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Character #01 Showcase: High-Fidelity Next-Gen Humanoid / MetaHuman Mesh!
+	if (SkeletalClimberMesh && !SkeletalClimberMesh->GetSkeletalMeshAsset())
+	{
+		SkeletalClimberMesh->SetSkeletalMeshAsset(LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Characters/Manny/Meshes/SKM_Manny_Simple.SKM_Manny_Simple")));
+	}
+	if (!AnimMannyIdle) AnimMannyIdle = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Idle.MM_Idle"));
+	if (!AnimMannyRun) AnimMannyRun = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Run_Fwd.MM_Run_Fwd"));
+	if (!AnimMannyJump) AnimMannyJump = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Jump.MM_Jump"));
+	if (!AnimMannyFall) AnimMannyFall = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop"));
+	if (!AnimMannyLand) AnimMannyLand = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Land.MM_Land"));
+	if (!AnimMannyRoll) AnimMannyRoll = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Jump.MM_Jump"));
+
 	const bool bIsFirstChar = (InClimberInfo.RosterNumber == 1 || InClimberInfo.Id == EVTClimberId::KidFlex);
 	bUsingSkeletalMesh = bIsFirstChar && SkeletalClimberMesh && (SkeletalClimberMesh->GetSkeletalMeshAsset() != nullptr);
 
 	if (bUsingSkeletalMesh)
 	{
 		SkeletalClimberMesh->SetVisibility(true);
+		SkeletalClimberMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+		if (AnimMannyIdle)
+		{
+			PlaySkeletalAnim(AnimMannyIdle, true, 1.0f);
+		}
 		if (ClimberMesh) ClimberMesh->SetVisibility(false, true);
 		if (HeadMesh) HeadMesh->SetVisibility(false, true);
 		if (HeadgearMesh) HeadgearMesh->SetVisibility(false);
@@ -548,9 +576,15 @@ void AVTClimberCharacter::UpdateShowroomStagePose(float TimeSec, float ShowroomY
 
 void AVTClimberCharacter::SetShieldVisualActive(bool bActive)
 {
+	// NEVER show an opaque sphere that conceals the player character into a metallic ball!
 	if (ShieldSphereMesh)
 	{
-		ShieldSphereMesh->SetVisibility(bActive);
+		ShieldSphereMesh->SetVisibility(false);
+	}
+	if (ClimberRimLight)
+	{
+		ClimberRimLight->SetLightColor(bActive ? FLinearColor(0.0f, 1.0f, 0.85f) : FLinearColor(0.0f, 0.961f, 0.831f));
+		ClimberRimLight->SetIntensity(bActive ? 14000.0f : 6200.0f);
 	}
 }
 

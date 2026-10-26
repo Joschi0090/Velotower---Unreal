@@ -193,6 +193,13 @@ private:
 	TSharedPtr<SBorder> JoystickKnobBorder;
 	TSharedPtr<STextBlock> TxtEditorOpacity;
 	TSharedPtr<STextBlock> TxtEditorSize;
+	TSharedPtr<SBorder> TabBorderBtnLinks;
+	TSharedPtr<SBorder> TabBorderBtnRechts;
+	TSharedPtr<SBorder> TabBorderBtnJump;
+	TSharedPtr<STextBlock> TxtActiveButtonTitle;
+	TSharedPtr<SBorder> LeftButtonHighlightBorder;
+	TSharedPtr<SBorder> RightButtonHighlightBorder;
+	TSharedPtr<SBorder> JumpButtonHighlightBorder;
 
 	// Clean Guided Main Menu Overlay Pointers
 	TSharedPtr<SBorder> MainMenuOverlayBorder;
