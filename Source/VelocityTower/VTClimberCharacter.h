@@ -162,6 +162,9 @@ public:
 	UPointLightComponent* ClimberRimLight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")
+	UPointLightComponent* ClimberBackLight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")
 	TArray<UStaticMeshComponent*> ScarfSegmentMeshes;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Climber")

@@ -20,6 +20,7 @@ enum class EVTModalOverlay : uint8
 	None,
 	ModeSelect,
 	CharacterSelect,
+	ThemeSelect,
 	SettingsAndControls,
 	ControlPreview,
 	HudEditor,
@@ -51,6 +52,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "VelocityTower|UI")
 	void OpenCharacterSelectModal();
+
+	UFUNCTION(BlueprintCallable, Category = "VelocityTower|UI")
+	void OpenThemeSelectModal();
 
 	UFUNCTION(BlueprintCallable, Category = "VelocityTower|UI")
 	void OpenLeaderboardModal(bool bFriendsTab = false);
@@ -145,6 +149,13 @@ private:
 	TSharedPtr<STextBlock> TxtCoresVal;
 	TSharedPtr<SBorder> AdminBadgeBorder;
 
+	// Prominent Live Tower Altitude & Height Elevation HUD
+	TSharedPtr<SBorder> LiveAltitudeHudBorder;
+	TSharedPtr<STextBlock> TxtLiveFloorNumber;
+	TSharedPtr<STextBlock> TxtLiveAltitudeMeters;
+	int32 LastRecordedFloorForAltitudePulse = 0;
+	float AltitudePulseTimerSec = 0.0f;
+
 	// Left Top Bar: Dual-Telemetry Combo-Stick & Multiplier Escalation Bar
 	TSharedPtr<SBorder> TopComboBarBorder;
 	TSharedPtr<SBox> TopComboFillBox;
@@ -207,6 +218,7 @@ private:
 	TSharedPtr<STextBlock> TxtHomeAccountBadge;
 	TSharedPtr<STextBlock> TxtHomeCores;
 	TSharedPtr<STextBlock> TxtHomeRosterProgress;
+	TSharedPtr<STextBlock> TxtHomeThemeProgress;
 	TSharedPtr<STextBlock> TxtHomeLevelTitle;
 	TSharedPtr<STextBlock> TxtHomeXpProgress;
 	TSharedPtr<SBox> HomeXpFillBox;

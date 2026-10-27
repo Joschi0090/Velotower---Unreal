@@ -36,6 +36,7 @@ public:
 	void TriggerLandingTouch();
 	void ShatterPlatform();
 	void CollectItem();
+	void ApplyTheme(const FVTGameThemeInfo& Theme);
 
 	bool IsSolidAtTime(float CurrentTimeSeconds) const;
 
@@ -56,6 +57,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Platform")
 	UTextRenderComponent* FloorLabelText;
+
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> ThemeDecorations;
+
+	UPROPERTY()
+	TArray<UMaterialInstanceDynamic*> ThemeDecorationMIDs;
+
+	EVTGameThemeId CurrentThemeId = EVTGameThemeId::CyberpunkDefault;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Platform")
 	int32 FloorIndex = 0;

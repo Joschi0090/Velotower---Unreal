@@ -48,7 +48,7 @@ AVTClimberCharacter::AVTClimberCharacter()
 	static ConstructorHelpers::FObjectFinder<UAnimSequence> LandFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Land.MM_Land"));
 	if (LandFinder.Succeeded()) AnimMannyLand = LandFinder.Object;
 
-	static ConstructorHelpers::FObjectFinder<UAnimSequence> RollFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Jump.MM_Jump"));
+	static ConstructorHelpers::FObjectFinder<UAnimSequence> RollFinder(TEXT("/Game/Characters/Manny/Animations/Manny/MM_Land.MM_Land"));
 	if (RollFinder.Succeeded()) AnimMannyRoll = RollFinder.Object;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineSphereFinder(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
@@ -134,9 +134,16 @@ AVTClimberCharacter::AVTClimberCharacter()
 	ClimberRimLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("ClimberRimLight"));
 	ClimberRimLight->SetupAttachment(RootScene);
 	ClimberRimLight->SetRelativeLocation(FVector(0.0f, -95.0f, 28.0f));
-	ClimberRimLight->SetIntensity(6200.0f);
-	ClimberRimLight->SetAttenuationRadius(380.0f);
+	ClimberRimLight->SetIntensity(11000.0f);
+	ClimberRimLight->SetAttenuationRadius(550.0f);
 	ClimberRimLight->SetLightColor(FLinearColor(0.0f, 0.961f, 0.831f));
+
+	ClimberBackLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("ClimberBackLight"));
+	ClimberBackLight->SetupAttachment(RootScene);
+	ClimberBackLight->SetRelativeLocation(FVector(0.0f, 95.0f, 32.0f));
+	ClimberBackLight->SetIntensity(14500.0f);
+	ClimberBackLight->SetAttenuationRadius(650.0f);
+	ClimberBackLight->SetLightColor(FLinearColor(0.0f, 0.961f, 0.831f));
 
 	// 9. Flowing Shinobi Headband with Physics-reactive Ribbons (MetaHuman)
 	HeadbandRingMesh = MakePart(TEXT("HeadbandRingMesh"), RootScene, CylMesh, FVector(0.0f, 0.0f, 32.0f), FRotator::ZeroRotator, FVector(0.24f, 0.24f, 0.045f));
@@ -258,7 +265,7 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 	if (!AnimMannyJump) AnimMannyJump = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Jump.MM_Jump"));
 	if (!AnimMannyFall) AnimMannyFall = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Fall_Loop.MM_Fall_Loop"));
 	if (!AnimMannyLand) AnimMannyLand = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Land.MM_Land"));
-	if (!AnimMannyRoll) AnimMannyRoll = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Jump.MM_Jump"));
+	if (!AnimMannyRoll) AnimMannyRoll = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/Manny/Animations/Manny/MM_Land.MM_Land"));
 
 	const bool bIsFirstChar = (InClimberInfo.RosterNumber == 1 || InClimberInfo.Id == EVTClimberId::KidFlex);
 	bUsingSkeletalMesh = bIsFirstChar && SkeletalClimberMesh && (SkeletalClimberMesh->GetSkeletalMeshAsset() != nullptr);
@@ -276,11 +283,11 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 		if (HeadgearMesh) HeadgearMesh->SetVisibility(false);
 		if (HeadgearAccentMesh) HeadgearAccentMesh->SetVisibility(false);
 
-		// Show dynamic Shinobi headband with physics ribbons on MetaHuman
-		if (HeadbandRingMesh) HeadbandRingMesh->SetVisibility(true);
-		if (HeadbandKnotMesh) HeadbandKnotMesh->SetVisibility(true);
-		if (HeadbandRibbonLeftMesh) HeadbandRibbonLeftMesh->SetVisibility(true);
-		if (HeadbandRibbonRightMesh) HeadbandRibbonRightMesh->SetVisibility(true);
+		// Hide headband ribbon blocks so Manny's head stays clean and free of strange floating objects
+		if (HeadbandRingMesh) HeadbandRingMesh->SetVisibility(false);
+		if (HeadbandKnotMesh) HeadbandKnotMesh->SetVisibility(false);
+		if (HeadbandRibbonLeftMesh) HeadbandRibbonLeftMesh->SetVisibility(false);
+		if (HeadbandRibbonRightMesh) HeadbandRibbonRightMesh->SetVisibility(false);
 
 		for (int32 MatIdx = 0; MatIdx < SkeletalClimberMesh->GetNumMaterials(); ++MatIdx)
 		{
@@ -290,12 +297,20 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 				if (bLockedSilhouette)
 				{
 					DynMat->SetVectorParameterValue(TEXT("BaseColor"), PitchBlack);
+					DynMat->SetVectorParameterValue(TEXT("Color"), PitchBlack);
+					DynMat->SetVectorParameterValue(TEXT("Tint"), PitchBlack);
 					DynMat->SetVectorParameterValue(TEXT("EmissiveColor"), PitchBlack);
+					DynMat->SetVectorParameterValue(TEXT("Emissive"), PitchBlack);
 				}
 				else
 				{
+					// Crisp high-contrast cyberpunk hero material: bright cyber base + vibrant trail emissive
+					DynMat->SetVectorParameterValue(TEXT("Tint"), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f));
+					DynMat->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f));
+					DynMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f));
 					DynMat->SetVectorParameterValue(TEXT("AccentColor"), InTrailColor);
-					DynMat->SetVectorParameterValue(TEXT("EmissiveColor"), InTrailColor * 1.25f);
+					DynMat->SetVectorParameterValue(TEXT("EmissiveColor"), InTrailColor * 3.5f);
+					DynMat->SetVectorParameterValue(TEXT("Emissive"), InTrailColor * 3.5f);
 				}
 			}
 		}
@@ -496,7 +511,23 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 		{
 			ClimberRimLight->SetRelativeLocation(FVector(0.0f, -95.0f, 28.0f));
 			ClimberRimLight->SetLightColor(InClimberInfo.HoodieColor);
-			ClimberRimLight->SetIntensity(6800.0f);
+			ClimberRimLight->SetIntensity(11500.0f);
+			ClimberRimLight->SetAttenuationRadius(550.0f);
+		}
+	}
+
+	if (ClimberBackLight)
+	{
+		if (bLockedSilhouette)
+		{
+			ClimberBackLight->SetIntensity(0.0f);
+		}
+		else
+		{
+			ClimberBackLight->SetRelativeLocation(FVector(0.0f, 95.0f, 32.0f));
+			ClimberBackLight->SetLightColor(InTrailColor);
+			ClimberBackLight->SetIntensity(14500.0f);
+			ClimberBackLight->SetAttenuationRadius(650.0f);
 		}
 	}
 }
@@ -527,21 +558,10 @@ void AVTClimberCharacter::UpdateShowroomStagePose(float TimeSec, float ShowroomY
 		SkeletalClimberMesh->SetRelativeScale3D(FVector(0.50f * StageScale));
 		PlaySkeletalAnim(AnimMannyIdle, true, 1.0f);
 
-		if (HeadbandRingMesh)
-		{
-			const FVector HeadPos = SkeletalClimberMesh->DoesSocketExist(TEXT("head"))
-				? SkeletalClimberMesh->GetSocketLocation(TEXT("head")) + FVector(0.0f, 0.0f, 4.0f)
-				: FVector(0.0f, 0.0f, (bInCharSelect ? 48.0f : 44.0f) + BreathZ + 38.0f);
-			HeadbandRingMesh->SetWorldLocation(HeadPos);
-			HeadbandRingMesh->SetWorldRotation(FRotator(0.0f, ShowroomYawDeg, 0.0f));
-
-			if (HeadbandRibbonLeftMesh && HeadbandRibbonRightMesh)
-			{
-				const float GentleSway = FMath::Sin(TimeSec * 4.0f) * 6.0f;
-				HeadbandRibbonLeftMesh->SetRelativeRotation(FRotator(-15.0f + GentleSway, -8.0f, 0.0f));
-				HeadbandRibbonRightMesh->SetRelativeRotation(FRotator(-22.0f - GentleSway, 10.0f, 0.0f));
-			}
-		}
+		if (HeadbandRingMesh) HeadbandRingMesh->SetVisibility(false);
+		if (HeadbandKnotMesh) HeadbandKnotMesh->SetVisibility(false);
+		if (HeadbandRibbonLeftMesh) HeadbandRibbonLeftMesh->SetVisibility(false);
+		if (HeadbandRibbonRightMesh) HeadbandRibbonRightMesh->SetVisibility(false);
 	}
 
 	if (HeadMesh)
@@ -662,11 +682,17 @@ void AVTClimberCharacter::UpdateVisualState(float DeltaTime, bool bShowJumpGuide
 		// SKELETAL METAHUMAN / NEXT-GEN MANNY VISUAL UPDATE
 		if (bFlipping)
 		{
-			// Acrobatic Parkour Somersault Roll Flip (360° Pitch Rotation, Tuck Scale)
-			SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -6.0f));
+			// Acrobatic Parkour Somersault Roll Flip with Cowered / Tucked Body (Zusammengekauert)
+			// Compress body into a tight aerodynamic tuck ball centered at rotation pivot
+			SkeletalClimberMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 6.0f));
 			SkeletalClimberMesh->SetRelativeRotation(FRotator(PitchDeg, YawDeg, 0.0f));
-			SkeletalClimberMesh->SetRelativeScale3D(FVector(0.45f));
-			PlaySkeletalAnim(AnimMannyRoll ? AnimMannyRoll : AnimMannyJump, false, 2.6f);
+			// Tight spherical tuck scale: Body curls tight into a compact ball
+			SkeletalClimberMesh->SetRelativeScale3D(FVector(0.40f, 0.38f, 0.30f));
+			PlaySkeletalAnim(AnimMannyLand ? AnimMannyLand : (AnimMannyRoll ? AnimMannyRoll : AnimMannyJump), false, 1.4f);
+
+			if (HeadbandRingMesh) HeadbandRingMesh->SetVisibility(false);
+			if (HeadbandRibbonLeftMesh) HeadbandRibbonLeftMesh->SetVisibility(false);
+			if (HeadbandRibbonRightMesh) HeadbandRibbonRightMesh->SetVisibility(false);
 		}
 		else
 		{

@@ -8,6 +8,7 @@ UVTSaveGame::UVTSaveGame()
 	bMigratedTo20Roster = true;
 
 	UnlockedTrails.AddUnique(TEXT("cyan"));
+	UnlockedThemes.AddUnique(EVTGameThemeId::CyberpunkDefault);
 
 	// Initialize 3 Daily Quests
 	{

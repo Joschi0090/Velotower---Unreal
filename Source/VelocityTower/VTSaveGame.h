@@ -47,6 +47,12 @@ public:
 	FString SelectedTrail = TEXT("cyan");
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Save")
+	EVTGameThemeId SelectedTheme = EVTGameThemeId::CyberpunkDefault;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Save")
+	TArray<EVTGameThemeId> UnlockedThemes;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Save")
 	int32 StartFloor = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Save")

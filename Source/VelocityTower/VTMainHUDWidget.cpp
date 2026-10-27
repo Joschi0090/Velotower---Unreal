@@ -326,6 +326,11 @@ void UVTMainHUDWidget::OpenCharacterSelectModal()
 	OpenModal(EVTModalOverlay::CharacterSelect);
 }
 
+void UVTMainHUDWidget::OpenThemeSelectModal()
+{
+	OpenModal(EVTModalOverlay::ThemeSelect);
+}
+
 void UVTMainHUDWidget::OpenLeaderboardModal(bool bFriendsTab)
 {
 	bLeaderboardFriendsOnly = bFriendsTab;
@@ -464,22 +469,22 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 								[
 									SNew(SBorder)
 									.BorderImage(WhiteBrush)
-									.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.45f))
-									.Padding(FMargin(1.0f))
+									.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.65f))
+									.Padding(FMargin(1.5f))
 									[
 										SNew(SBorder)
 										.BorderImage(WhiteBrush)
 										.BorderBackgroundColor(VTTheme::PillBg)
-										.Padding(FMargin(6.0f, 2.5f))
+										.Padding(FMargin(9.0f, 3.0f))
 										[
 											SNew(SVerticalBox)
 											+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)
 											[
-												SNew(STextBlock).Text(FText::FromString(TEXT("ETAGE"))).Font(VTTheme::Font(6, true)).ColorAndOpacity(VTTheme::MutedText)
+												SNew(STextBlock).Text(FText::FromString(TEXT("TURM-ETAGE"))).Font(VTTheme::Font(7, true)).ColorAndOpacity(VTTheme::MutedText)
 											]
 											+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)
 											[
-												SAssignNew(TxtFloorVal, STextBlock).Text(FText::FromString(TEXT("0"))).Font(VTTheme::Font(10, true)).ColorAndOpacity(VTTheme::Cyan)
+												SAssignNew(TxtFloorVal, STextBlock).Text(FText::FromString(TEXT("0"))).Font(VTTheme::Font(14, true)).ColorAndOpacity(VTTheme::Cyan)
 											]
 										]
 									]
@@ -714,6 +719,70 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 				]
 			]
 		]
+			]
+		]
+
+		// 1C-ALTITUDE: DEDICATED PROMINENT LIVE TOWER HEIGHT OVERLAY (Always prominent during climb)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.HAlign(HAlign_Center)
+		.Padding(0.0f, 6.0f, 0.0f, 2.0f)
+		[
+			SAssignNew(LiveAltitudeHudBorder, SBorder)
+			.BorderImage(WhiteBrush)
+			.BorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.85f))
+			.Padding(FMargin(1.5f))
+			.Visibility(EVisibility::Collapsed)
+			[
+				SNew(SBorder)
+				.BorderImage(WhiteBrush)
+				.BorderBackgroundColor(FLinearColor(0.012f, 0.024f, 0.055f, 0.94f))
+				.Padding(FMargin(18.0f, 5.0f))
+				[
+					SNew(SHorizontalBox)
+					// Neon Elevation Arrow Icon
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					.Padding(0.0f, 0.0f, 8.0f, 0.0f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(TEXT("▲")))
+						.Font(VTTheme::Font(15, true))
+						.ColorAndOpacity(VTTheme::Cyan)
+					]
+					// Large Bold Floor Indicator
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					[
+						SAssignNew(TxtLiveFloorNumber, STextBlock)
+						.Text(FText::FromString(TEXT("ETAGE 0")))
+						.Font(VTTheme::Font(18, true))
+						.ColorAndOpacity(FLinearColor::White)
+					]
+					// Stylish Cyber Divider
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					.Padding(10.0f, 0.0f)
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(TEXT("//")))
+						.Font(VTTheme::Font(13, true))
+						.ColorAndOpacity(FLinearColor(0.25f, 0.45f, 0.70f))
+					]
+					// Large Bold Altitude In Meters
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					[
+						SAssignNew(TxtLiveAltitudeMeters, STextBlock)
+						.Text(FText::FromString(TEXT("0 METER")))
+						.Font(VTTheme::Font(14, true))
+						.ColorAndOpacity(VTTheme::Cyan)
+					]
+				]
 			]
 		]
 
@@ -1641,26 +1710,56 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 4.0f)
 					[
-						SNew(SButton)
-						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
-						.ContentPadding(FMargin(0.0f))
-						.OnClicked_Lambda([this]() { if (AVTTowerGameMode* GM = GetTowerGM()) GM->PlayTowerSFX(TEXT("Click")); OpenModal(EVTModalOverlay::CharacterSelect); return FReply::Handled(); })
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(0.0f, 0.0f, 2.0f, 0.0f)
 						[
-							SNew(SBorder)
-							.BorderImage(WhiteBrush)
-							.BorderBackgroundColor(VTTheme::Purple)
-							.Padding(FMargin(1.5f))
+							SNew(SButton)
+							.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+							.ContentPadding(FMargin(0.0f))
+							.OnClicked_Lambda([this]() { if (AVTTowerGameMode* GM = GetTowerGM()) GM->PlayTowerSFX(TEXT("Click")); OpenModal(EVTModalOverlay::CharacterSelect); return FReply::Handled(); })
 							[
 								SNew(SBorder)
 								.BorderImage(WhiteBrush)
-								.BorderBackgroundColor(VTTheme::DarkBg)
-								.Padding(FMargin(10.0f, 5.0f))
-								.HAlign(HAlign_Center)
+								.BorderBackgroundColor(VTTheme::Purple)
+								.Padding(FMargin(1.5f))
 								[
-									SAssignNew(TxtHomeRosterProgress, STextBlock)
-									.Text(FText::FromString(TEXT("CHARAKTERE: 1 / 20 FREI")))
-									.Font(VTTheme::Font(8, true))
-									.ColorAndOpacity(VTTheme::Purple)
+									SNew(SBorder)
+									.BorderImage(WhiteBrush)
+									.BorderBackgroundColor(VTTheme::DarkBg)
+									.Padding(FMargin(6.0f, 5.0f))
+									.HAlign(HAlign_Center)
+									[
+										SAssignNew(TxtHomeRosterProgress, STextBlock)
+										.Text(FText::FromString(TEXT("HELDEN: 1 / 20")))
+										.Font(VTTheme::Font(7, true))
+										.ColorAndOpacity(VTTheme::Purple)
+									]
+								]
+							]
+						]
+						+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f, 0.0f, 0.0f, 0.0f)
+						[
+							SNew(SButton)
+							.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+							.ContentPadding(FMargin(0.0f))
+							.OnClicked_Lambda([this]() { if (AVTTowerGameMode* GM = GetTowerGM()) GM->PlayTowerSFX(TEXT("Click")); OpenModal(EVTModalOverlay::ThemeSelect); return FReply::Handled(); })
+							[
+								SNew(SBorder)
+								.BorderImage(WhiteBrush)
+								.BorderBackgroundColor(VTTheme::Gold)
+								.Padding(FMargin(1.5f))
+								[
+									SNew(SBorder)
+									.BorderImage(WhiteBrush)
+									.BorderBackgroundColor(VTTheme::DarkBg)
+									.Padding(FMargin(6.0f, 5.0f))
+									.HAlign(HAlign_Center)
+									[
+										SAssignNew(TxtHomeThemeProgress, STextBlock)
+										.Text(FText::FromString(TEXT("THEMES: 1 / 8")))
+										.Font(VTTheme::Font(7, true))
+										.ColorAndOpacity(VTTheme::Gold)
+									]
 								]
 							]
 						]
@@ -1814,7 +1913,7 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 							]
 						]
 
-						// 5 Clean, Guided Navigation Dock Cards (Including Global & Friends Leaderboard!)
+						// 6 Clean, Guided Navigation Dock Cards (Including 3D Themes & Leaderboards!)
 						+ SVerticalBox::Slot()
 						.AutoHeight()
 						[
@@ -1830,6 +1929,20 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 									{
 										if (AVTTowerGameMode* GM = GetTowerGM()) GM->PlayTowerSFX(TEXT("Click"));
 										OpenModal(EVTModalOverlay::CharacterSelect);
+										return FReply::Handled();
+									}))
+							]
+							+ SHorizontalBox::Slot().FillWidth(1.0f).Padding(2.0f, 0.0f)
+							[
+								VTTheme::MakeDockTabButton(
+									TEXT("TOWER DESIGN"),
+									TEXT("THEMES"),
+									TEXT("8 Welten"),
+									VTTheme::Gold,
+									FOnClicked::CreateLambda([this]()
+									{
+										if (AVTTowerGameMode* GM = GetTowerGM()) GM->PlayTowerSFX(TEXT("Click"));
+										OpenModal(EVTModalOverlay::ThemeSelect);
 										return FReply::Handled();
 									}))
 							]
@@ -2737,41 +2850,47 @@ void UVTMainHUDWidget::OpenModal(EVTModalOverlay ModalType)
 {
 	ActiveModal = ModalType;
 	AVTTowerGameMode* GM = GetTowerGM();
-	const bool bIsCharSelect3DStage = (ModalType == EVTModalOverlay::CharacterSelect);
+	const bool bIs3DStageModal = (ModalType == EVTModalOverlay::CharacterSelect || ModalType == EVTModalOverlay::ThemeSelect);
 
 	if (GM)
 	{
-		GM->bInCharacterSelectStage = bIsCharSelect3DStage;
-		if (bIsCharSelect3DStage)
+		GM->bInCharacterSelectStage = (ModalType == EVTModalOverlay::CharacterSelect);
+		GM->bInThemeSelectStage = (ModalType == EVTModalOverlay::ThemeSelect);
+		if (ModalType == EVTModalOverlay::CharacterSelect)
 		{
 			GM->PreviewClimberOnStage(GM->PreviewClimberId);
+		}
+		else if (ModalType == EVTModalOverlay::ThemeSelect)
+		{
+			GM->PreviewThemeOnStage(GM->PreviewThemeId);
 		}
 		else if (GM->TowerRunState == EVTGameState::Menu)
 		{
 			GM->PreviewClimberOnStage(GM->SelectedClimberId);
+			GM->ApplyThemeVisuals(GM->GetThemeInfo(GM->SelectedThemeId));
 		}
 	}
 
 	if (ModalBackdropBorder.IsValid())
 	{
 		ModalBackdropBorder->SetVisibility(ModalType == EVTModalOverlay::None ? EVisibility::Collapsed : EVisibility::Visible);
-		ModalBackdropBorder->SetBorderBackgroundColor(bIsCharSelect3DStage
+		ModalBackdropBorder->SetBorderBackgroundColor(bIs3DStageModal
 			? FLinearColor(0.002f, 0.005f, 0.015f, 0.08f)
 			: FLinearColor(0.005f, 0.010f, 0.030f, 0.90f));
-		ModalBackdropBorder->SetPadding(bIsCharSelect3DStage ? FMargin(8.0f, 4.0f) : FMargin(12.0f, 16.0f));
+		ModalBackdropBorder->SetPadding(bIs3DStageModal ? FMargin(8.0f, 4.0f) : FMargin(12.0f, 16.0f));
 	}
 	if (ModalOuterFrameBorder.IsValid())
 	{
-		ModalOuterFrameBorder->SetBorderBackgroundColor(bIsCharSelect3DStage ? FLinearColor::Transparent : VTTheme::Cyan);
+		ModalOuterFrameBorder->SetBorderBackgroundColor(bIs3DStageModal ? FLinearColor::Transparent : VTTheme::Cyan);
 	}
 	if (ModalInnerCardBorder.IsValid())
 	{
-		ModalInnerCardBorder->SetBorderBackgroundColor(bIsCharSelect3DStage ? FLinearColor::Transparent : VTTheme::DarkBg);
-		ModalInnerCardBorder->SetPadding(bIsCharSelect3DStage ? FMargin(0.0f) : FMargin(12.0f, 10.0f));
+		ModalInnerCardBorder->SetBorderBackgroundColor(bIs3DStageModal ? FLinearColor::Transparent : VTTheme::DarkBg);
+		ModalInnerCardBorder->SetPadding(bIs3DStageModal ? FMargin(0.0f) : FMargin(12.0f, 10.0f));
 	}
 	if (ModalMaxHeightBox.IsValid())
 	{
-		ModalMaxHeightBox->SetMaxDesiredHeight(bIsCharSelect3DStage ? 1150.0f : 670.0f);
+		ModalMaxHeightBox->SetMaxDesiredHeight(bIs3DStageModal ? 1150.0f : 670.0f);
 	}
 	RebuildModalContent();
 }
@@ -2782,6 +2901,8 @@ void UVTMainHUDWidget::CloseModal()
 	if (AVTTowerGameMode* GM = GetTowerGM())
 	{
 		GM->bInCharacterSelectStage = false;
+		GM->bInThemeSelectStage = false;
+		GM->ApplyThemeVisuals(GM->GetThemeInfo(GM->SelectedThemeId));
 		if (GM->TowerRunState == EVTGameState::Menu)
 		{
 			GM->PreviewClimberOnStage(GM->SelectedClimberId);
@@ -3637,7 +3758,7 @@ void UVTMainHUDWidget::RebuildModalContent()
 		RosterDockBox->AddSlot().AutoHeight().Padding(0.0f, 5.0f, 0.0f, 0.0f)
 		[
 			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth().Padding(0.0f, 0.0f, 5.0f, 0.0f)
+			+ SHorizontalBox::Slot().AutoWidth().Padding(0.0f, 0.0f, 4.0f, 0.0f)
 			[
 				VTTheme::MakeButton(
 					TEXT("<< MODUS"),
@@ -3646,6 +3767,18 @@ void UVTMainHUDWidget::RebuildModalContent()
 					{
 						GM->PlayTowerSFX(TEXT("Click"));
 						OpenModal(EVTModalOverlay::ModeSelect);
+						return FReply::Handled();
+					}))
+			]
+			+ SHorizontalBox::Slot().AutoWidth().Padding(0.0f, 0.0f, 5.0f, 0.0f)
+			[
+				VTTheme::MakeButton(
+					TEXT("THEMES >>"),
+					VTTheme::CardBg, VTTheme::Gold, 8, FMargin(8.0f, 8.0f),
+					FOnClicked::CreateLambda([this, GM]()
+					{
+						GM->PlayTowerSFX(TEXT("Click"));
+						OpenModal(EVTModalOverlay::ThemeSelect);
 						return FReply::Handled();
 					}))
 			]
@@ -3699,6 +3832,463 @@ void UVTMainHUDWidget::RebuildModalContent()
 				.Padding(FMargin(8.0f, 6.0f))
 				[
 					RosterDockBox
+				]
+			]
+		];
+	}
+
+	// =========================================================================
+	// MODAL B2: 3D THEME SELECTION (REAL-TIME 3D SHOWROOM & LEVEL THEME STAGE)
+	// =========================================================================
+	else if (ActiveModal == EVTModalOverlay::ThemeSelect)
+	{
+		const FVTGameThemeInfo Spot = GM->GetThemeInfo(GM->PreviewThemeId);
+		const bool bSpotUnlocked = GM->IsThemeUnlocked(Spot.Id);
+		const bool bSpotEquipped = (Spot.Id == GM->SelectedThemeId);
+
+		auto MakeColorChip = [WhiteBrush](const FString& ChipLabel, const FLinearColor& ChipCol) -> TSharedRef<SWidget>
+		{
+			return SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0.0f, 0.0f, 3.0f, 0.0f)
+				[
+					SNew(SBox).WidthOverride(12.0f).HeightOverride(10.0f)
+					[
+						SNew(SBorder)
+						.BorderImage(WhiteBrush)
+						.BorderBackgroundColor(ChipCol)
+					]
+				]
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0.0f, 0.0f, 8.0f, 0.0f)
+				[
+					SNew(STextBlock).Text(FText::FromString(ChipLabel)).Font(VTTheme::Font(6, true)).ColorAndOpacity(VTTheme::MutedText)
+				];
+		};
+
+		// 1. TOP CARD: Header + Spotlight Info
+		ModalBodyBox->AddSlot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 4.0f)
+		[
+			SNew(SBorder)
+			.BorderImage(WhiteBrush)
+			.BorderBackgroundColor(bSpotEquipped ? VTTheme::Cyan : (bSpotUnlocked ? VTTheme::Emerald : VTTheme::Gold))
+			.Padding(FMargin(1.5f))
+			[
+				SNew(SBorder)
+				.BorderImage(WhiteBrush)
+				.BorderBackgroundColor(FLinearColor(0.010f, 0.020f, 0.052f, 0.94f))
+				.Padding(FMargin(10.0f, 7.0f))
+				[
+					SNew(SVerticalBox)
+
+					// Compact Top Header Row
+					+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 5.0f)
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().FillWidth(1.0f).VAlign(VAlign_Center)
+						[
+							SNew(STextBlock)
+							.Text(FText::FromString(FString::Printf(TEXT("TURM-THEMES (%d/8 FREI) // AKTIV: %s"),
+								GM->GetUnlockedThemeCount(), *GM->GetThemeInfo(GM->SelectedThemeId).Name)))
+							.Font(VTTheme::Font(8, true))
+							.ColorAndOpacity(VTTheme::Gold)
+						]
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+						[
+							VTTheme::MakeButton(TEXT("X SCHLIESSEN"), VTTheme::CardBg, VTTheme::Pink, 7, FMargin(8.0f, 3.0f),
+								FOnClicked::CreateLambda([this, GM]() { GM->PlayTowerSFX(TEXT("Click")); CloseModal(); return FReply::Handled(); }))
+						]
+					]
+
+					// Theme Info Row
+					+ SVerticalBox::Slot().AutoHeight()
+					[
+						SNew(SHorizontalBox)
+
+						// Left Theme Swatch Box (layered mini tower block)
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0.0f, 0.0f, 10.0f, 0.0f)
+						[
+							SNew(SBorder)
+							.BorderImage(WhiteBrush)
+							.BorderBackgroundColor(bSpotUnlocked ? Spot.PrimaryColor : FLinearColor(0.25f, 0.35f, 0.50f, 0.85f))
+							.Padding(FMargin(1.5f))
+							[
+								SNew(SBorder)
+								.BorderImage(WhiteBrush)
+								.BorderBackgroundColor(FLinearColor(0.05f, 0.08f, 0.15f, 1.0f))
+								.Padding(FMargin(6.0f, 5.0f))
+								[
+									SNew(SVerticalBox)
+									// Top Wall Emissive Stripe
+									+ SVerticalBox::Slot().AutoHeight()
+									[
+										SNew(SBox).WidthOverride(38.0f).HeightOverride(6.0f)
+										[
+											SNew(SBorder).BorderImage(WhiteBrush).BorderBackgroundColor(Spot.WallEmissiveColor)
+										]
+									]
+									// Center Wall Block with Theme Index
+									+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 1.5f)
+									[
+										SNew(SBox).WidthOverride(38.0f).HeightOverride(22.0f)
+										[
+											SNew(SBorder)
+											.BorderImage(WhiteBrush)
+											.BorderBackgroundColor(Spot.WallBaseColor)
+											.HAlign(HAlign_Center).VAlign(VAlign_Center)
+											[
+												SNew(STextBlock)
+												.Text(FText::FromString(FString::Printf(TEXT("#%02d"), Spot.ThemeNumber)))
+												.Font(VTTheme::Font(8, true))
+												.ColorAndOpacity(Spot.PrimaryColor)
+											]
+										]
+									]
+									// Platform Glow Stripe
+									+ SVerticalBox::Slot().AutoHeight()
+									[
+										SNew(SBox).WidthOverride(38.0f).HeightOverride(5.0f)
+										[
+											SNew(SBorder).BorderImage(WhiteBrush).BorderBackgroundColor(Spot.PrimaryColor)
+										]
+									]
+								]
+							]
+						]
+
+						// Center Details & Color Palette
+						+ SHorizontalBox::Slot().FillWidth(1.0f).VAlign(VAlign_Center)
+						[
+							SNew(SVerticalBox)
+							+ SVerticalBox::Slot().AutoHeight()
+							[
+								SNew(SHorizontalBox)
+								+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+								[
+									SNew(STextBlock)
+									.Text(FText::FromString(FString::Printf(TEXT("#%02d %s"), Spot.ThemeNumber, *Spot.Name)))
+									.Font(VTTheme::Font(11, true))
+									.ColorAndOpacity(FLinearColor::White)
+								]
+								+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6.0f, 0.0f)
+								[
+									SNew(SBorder)
+									.BorderImage(WhiteBrush)
+									.BorderBackgroundColor(bSpotEquipped ? VTTheme::Cyan : (bSpotUnlocked ? VTTheme::Emerald : FLinearColor::Black))
+									.Padding(FMargin(5.0f, 1.5f))
+									[
+										SNew(STextBlock)
+										.Text(FText::FromString(bSpotEquipped
+											? TEXT("AKTIV AUSGERUESTET")
+											: (bSpotUnlocked ? TEXT("FREIGESCHALTET") : FString::Printf(TEXT("LOCKED (%d CORES)"), Spot.CostCores))))
+										.Font(VTTheme::Font(6, true))
+										.ColorAndOpacity(bSpotEquipped ? FLinearColor::White : (bSpotUnlocked ? FLinearColor(0.01f, 0.02f, 0.05f, 1.0f) : VTTheme::Gold))
+									]
+								]
+							]
+							+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 1.0f, 0.0f, 2.0f)
+							[
+								SNew(STextBlock)
+								.Text(FText::FromString(Spot.Subtitle))
+								.Font(VTTheme::Font(7, true))
+								.ColorAndOpacity(Spot.PrimaryColor)
+							]
+							+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 1.0f, 0.0f, 4.0f)
+							[
+								SNew(STextBlock)
+								.Text(FText::FromString(Spot.Description))
+								.Font(VTTheme::Font(6, false))
+								.ColorAndOpacity(VTTheme::MutedText)
+							]
+							+ SVerticalBox::Slot().AutoHeight()
+							[
+								SNew(SHorizontalBox)
+								+ SHorizontalBox::Slot().AutoWidth()
+								[
+									MakeColorChip(TEXT("WAND"), Spot.WallBaseColor)
+								]
+								+ SHorizontalBox::Slot().AutoWidth()
+								[
+									MakeColorChip(TEXT("PLATTFORM"), Spot.PrimaryColor)
+								]
+								+ SHorizontalBox::Slot().AutoWidth()
+								[
+									MakeColorChip(TEXT("EMISSIVE"), Spot.WallEmissiveColor)
+								]
+								+ SHorizontalBox::Slot().AutoWidth()
+								[
+									MakeColorChip(TEXT("AKZENT"), Spot.SecondaryColor)
+								]
+							]
+						]
+					]
+				]
+			]
+		];
+
+		// 2. MIDDLE OPEN 3D STAGE WINDOW (Large 330px unobstructed 3D Tower Viewport)
+		ModalBodyBox->AddSlot().AutoHeight().Padding(0.0f, 2.0f)
+		[
+			SNew(SBox)
+			.HeightOverride(330.0f)
+			[
+				SNew(SOverlay)
+
+				// Left / Right Prev / Next Theme Buttons
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+					[
+						VTTheme::MakeButton(
+							TEXT("<< VORHERIGES THEME"),
+							FLinearColor(0.01f, 0.03f, 0.08f, 0.85f), VTTheme::Gold, 8, FMargin(8.0f, 12.0f),
+							FOnClicked::CreateLambda([this, GM]()
+							{
+								GM->PlayTowerSFX(TEXT("Click"), 0.95f, 0.9f);
+								GM->SelectThemeDirection(-1);
+								RebuildModalContent();
+								return FReply::Handled();
+							}))
+					]
+					+ SHorizontalBox::Slot().FillWidth(1.0f)
+					[
+						SNew(SSpacer)
+					]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+					[
+						VTTheme::MakeButton(
+							TEXT("NAECHSTES THEME >>"),
+							FLinearColor(0.01f, 0.03f, 0.08f, 0.85f), VTTheme::Gold, 8, FMargin(8.0f, 12.0f),
+							FOnClicked::CreateLambda([this, GM]()
+							{
+								GM->PlayTowerSFX(TEXT("Click"), 1.08f, 0.9f);
+								GM->SelectThemeDirection(1);
+								RebuildModalContent();
+								return FReply::Handled();
+							}))
+					]
+				]
+
+				// Bottom Badge inside 3D Window
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Center)
+				.VAlign(VAlign_Bottom)
+				.Padding(0.0f, 0.0f, 0.0f, 2.0f)
+				[
+					SNew(SBorder)
+					.BorderImage(WhiteBrush)
+					.BorderBackgroundColor(bSpotEquipped ? VTTheme::Cyan : (bSpotUnlocked ? VTTheme::Emerald : VTTheme::Gold))
+					.Padding(FMargin(1.5f))
+					[
+						SNew(SBorder)
+						.BorderImage(WhiteBrush)
+						.BorderBackgroundColor(FLinearColor(0.01f, 0.02f, 0.06f, 0.92f))
+						.Padding(FMargin(10.0f, 2.5f))
+						[
+							SNew(STextBlock)
+							.Text(FText::FromString(FString::Printf(TEXT("3D-TURMVORSCHAU: #%02d %s (%s)"),
+								Spot.ThemeNumber, *Spot.Name,
+								bSpotEquipped ? TEXT("AKTIV AUSGERUESTET") : (bSpotUnlocked ? TEXT("FREIGESCHALTET") : TEXT("VORSCHAU-MODUS")))))
+							.Font(VTTheme::Font(7, true))
+							.ColorAndOpacity(bSpotEquipped ? VTTheme::Cyan : (bSpotUnlocked ? VTTheme::Emerald : VTTheme::Gold))
+						]
+					]
+				]
+			]
+		];
+
+		// 3. BOTTOM THEMES DOCK: 2x4 Grid + Action Bar
+		TSharedRef<SVerticalBox> ThemeDockBox = SNew(SVerticalBox);
+
+		for (int32 Row = 0; Row < 2; ++Row)
+		{
+			TSharedRef<SHorizontalBox> GridRow = SNew(SHorizontalBox);
+			for (int32 Col = 0; Col < 4; ++Col)
+			{
+				const int32 Idx = Row * 4 + Col;
+				if (!GM->Themes.IsValidIndex(Idx)) continue;
+
+				const FVTGameThemeInfo T = GM->Themes[Idx];
+				const bool bUnlocked = GM->IsThemeUnlocked(T.Id);
+				const bool bEquipped = (T.Id == GM->SelectedThemeId);
+				const bool bSelected = (GM->PreviewThemeId == T.Id);
+
+				GridRow->AddSlot()
+				.FillWidth(1.0f)
+				.Padding(2.0f)
+				[
+					SNew(SButton)
+					.IsFocusable(false)
+					.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+					.ContentPadding(FMargin(0.0f))
+					.OnClicked_Lambda([this, GM, T]()
+					{
+						GM->PlayTowerSFX(TEXT("Click"), 1.0f + float(T.ThemeNumber) * 0.03f, 0.9f);
+						GM->PreviewThemeOnStage(T.Id);
+						RebuildModalContent();
+						return FReply::Handled();
+					})
+					[
+						SNew(SBorder)
+						.BorderImage(WhiteBrush)
+						.BorderBackgroundColor(bSelected ? FLinearColor::White : (bEquipped ? VTTheme::Cyan : (bUnlocked ? VTTheme::Emerald : FLinearColor(0.20f, 0.28f, 0.42f, 0.75f))))
+						.Padding(FMargin(bSelected ? 2.0f : 1.0f))
+						[
+							SNew(SBorder)
+							.BorderImage(WhiteBrush)
+							.BorderBackgroundColor(bSelected
+								? FLinearColor(0.06f, 0.16f, 0.32f, 0.98f)
+								: (bUnlocked ? FLinearColor(0.022f, 0.045f, 0.105f, 0.96f) : FLinearColor(0.08f, 0.11f, 0.18f, 0.95f)))
+							.Padding(FMargin(4.0f, 5.0f))
+							[
+								SNew(SVerticalBox)
+
+								// 4-Color Palette Bar
+								+ SVerticalBox::Slot().AutoHeight().Padding(0.0f, 0.0f, 0.0f, 3.0f)
+								[
+									SNew(SHorizontalBox)
+									+ SHorizontalBox::Slot().FillWidth(1.0f)
+									[
+										SNew(SBox).HeightOverride(4.0f)
+										[
+											SNew(SBorder).BorderImage(WhiteBrush).BorderBackgroundColor(T.WallBaseColor)
+										]
+									]
+									+ SHorizontalBox::Slot().FillWidth(1.0f)
+									[
+										SNew(SBox).HeightOverride(4.0f)
+										[
+											SNew(SBorder).BorderImage(WhiteBrush).BorderBackgroundColor(T.PrimaryColor)
+										]
+									]
+									+ SHorizontalBox::Slot().FillWidth(1.0f)
+									[
+										SNew(SBox).HeightOverride(4.0f)
+										[
+											SNew(SBorder).BorderImage(WhiteBrush).BorderBackgroundColor(T.WallEmissiveColor)
+										]
+									]
+									+ SHorizontalBox::Slot().FillWidth(1.0f)
+									[
+										SNew(SBox).HeightOverride(4.0f)
+										[
+											SNew(SBorder).BorderImage(WhiteBrush).BorderBackgroundColor(T.SecondaryColor)
+										]
+									]
+								]
+
+								// Theme Title
+								+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 1.0f, 0.0f, 0.0f)
+								[
+									SNew(STextBlock)
+									.Text(FText::FromString(FString::Printf(TEXT("#%02d %s"), T.ThemeNumber, *T.Name)))
+									.Font(VTTheme::Font(7, true))
+									.ColorAndOpacity(bSelected ? FLinearColor::White : (bUnlocked ? VTTheme::Cyan : FLinearColor(0.55f, 0.62f, 0.72f, 1.0f)))
+								]
+
+								// Theme Subtitle
+								+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 0.5f, 0.0f, 0.0f)
+								[
+									SNew(STextBlock)
+									.Text(FText::FromString(T.Subtitle))
+									.Font(VTTheme::Font(5, false))
+									.ColorAndOpacity(VTTheme::MutedText)
+								]
+
+								// Status Badge
+								+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 2.0f, 0.0f, 0.0f)
+								[
+									SNew(STextBlock)
+									.Text(FText::FromString(bEquipped ? TEXT("[AKTIV]") : (bUnlocked ? TEXT("[FREI]") : FString::Printf(TEXT("[%d C]"), T.CostCores))))
+									.Font(VTTheme::Font(6, true))
+									.ColorAndOpacity(bEquipped ? VTTheme::Cyan : (bUnlocked ? VTTheme::Emerald : VTTheme::Gold))
+								]
+							]
+						]
+					]
+				];
+			}
+
+			ThemeDockBox->AddSlot().AutoHeight().Padding(0.0f, 1.0f)
+			[
+				GridRow
+			];
+		}
+
+		// Action Bar inside Theme Dock
+		ThemeDockBox->AddSlot().AutoHeight().Padding(0.0f, 6.0f, 0.0f, 0.0f)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth().Padding(0.0f, 0.0f, 5.0f, 0.0f)
+			[
+				VTTheme::MakeButton(
+					TEXT("<< CHARAKTERE"),
+					VTTheme::CardBg, VTTheme::Cyan, 8, FMargin(8.0f, 8.0f),
+					FOnClicked::CreateLambda([this, GM]()
+					{
+						GM->PlayTowerSFX(TEXT("Click"));
+						OpenModal(EVTModalOverlay::CharacterSelect);
+						return FReply::Handled();
+					}))
+			]
+			+ SHorizontalBox::Slot().FillWidth(1.0f)
+			[
+				VTTheme::MakeButton(
+					bSpotEquipped
+						? FString::Printf(TEXT("THEME '%s' IST AKTIV // JETZT KLETTERN >>"), *Spot.Name)
+						: (bSpotUnlocked
+							? FString::Printf(TEXT("THEME '%s' AUSRUESTEN & KLETTERN >>"), *Spot.Name)
+							: FString::Printf(TEXT("THEME '%s' FREISCHALTEN (%d CORES) & AUSRUESTEN!"), *Spot.Name, Spot.CostCores)),
+					bSpotEquipped ? VTTheme::Emerald : (bSpotUnlocked ? VTTheme::Cyan : VTTheme::Gold),
+					FLinearColor::White,
+					9, FMargin(10.0f, 8.0f),
+					FOnClicked::CreateLambda([this, GM, Spot, bSpotUnlocked, bSpotEquipped]()
+					{
+						if (bSpotEquipped)
+						{
+							GM->PlayTowerSFX(TEXT("SuperLaunch"), 1.05f, 1.0f);
+							CloseModal();
+							GM->StartNewRun();
+						}
+						else if (bSpotUnlocked)
+						{
+							GM->BuyOrEquipTheme(Spot.Id);
+							GM->PlayTowerSFX(TEXT("SuperLaunch"), 1.05f, 1.0f);
+							CloseModal();
+							GM->StartNewRun();
+						}
+						else
+						{
+							if (GM->BuyOrEquipTheme(Spot.Id))
+							{
+								GM->PlayTowerSFX(TEXT("LevelUp"), 1.0f, 1.0f);
+								RebuildModalContent();
+							}
+							else
+							{
+								GM->PlayTowerSFX(TEXT("Click"), 0.8f, 1.0f);
+								RebuildModalContent();
+							}
+						}
+						return FReply::Handled();
+					}))
+			]
+		];
+
+		ModalBodyBox->AddSlot().AutoHeight()
+		[
+			SNew(SBorder)
+			.BorderImage(WhiteBrush)
+			.BorderBackgroundColor(VTTheme::Gold)
+			.Padding(FMargin(1.5f))
+			[
+				SNew(SBorder)
+				.BorderImage(WhiteBrush)
+				.BorderBackgroundColor(FLinearColor(0.010f, 0.020f, 0.052f, 0.95f))
+				.Padding(FMargin(8.0f, 6.0f))
+				[
+					ThemeDockBox
 				]
 			]
 		];
@@ -5547,6 +6137,43 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	if (TxtBpmVal.IsValid()) TxtBpmVal->SetText(FText::AsNumber(GM->CurrentBpm));
 	if (TxtCoresVal.IsValid()) TxtCoresVal->SetText(FText::AsNumber(GM->NeonCores));
 
+	// Update Dedicated Live Tower Altitude & Height Overlay
+	if (LiveAltitudeHudBorder.IsValid())
+	{
+		const bool bInGamePlay = (GM->TowerRunState == EVTGameState::Play && !GM->bIsDeathSequenceActive);
+		LiveAltitudeHudBorder->SetVisibility(bInGamePlay ? EVisibility::Visible : EVisibility::Collapsed);
+
+		if (bInGamePlay)
+		{
+			if (GM->MaxFloor > LastRecordedFloorForAltitudePulse)
+			{
+				LastRecordedFloorForAltitudePulse = GM->MaxFloor;
+				AltitudePulseTimerSec = 0.45f; // Flash border when ascending to higher floor!
+			}
+
+			if (AltitudePulseTimerSec > 0.0f)
+			{
+				AltitudePulseTimerSec = FMath::Max(0.0f, AltitudePulseTimerSec - InDeltaTime);
+				const float PulseAlpha = AltitudePulseTimerSec / 0.45f;
+				const FLinearColor PulseCol = FMath::Lerp(FLinearColor(0.0f, 0.961f, 0.831f, 0.85f), FLinearColor::White, PulseAlpha);
+				LiveAltitudeHudBorder->SetBorderBackgroundColor(PulseCol);
+			}
+			else
+			{
+				LiveAltitudeHudBorder->SetBorderBackgroundColor(FLinearColor(0.0f, 0.961f, 0.831f, 0.85f));
+			}
+
+			if (TxtLiveFloorNumber.IsValid())
+			{
+				TxtLiveFloorNumber->SetText(FText::FromString(FString::Printf(TEXT("ETAGE %d"), GM->MaxFloor)));
+			}
+			if (TxtLiveAltitudeMeters.IsValid())
+			{
+				TxtLiveAltitudeMeters->SetText(FText::FromString(FString::Printf(TEXT("%d METER"), GM->MaxFloor * 3)));
+			}
+		}
+	}
+
 	// 1. TOP LEFT: COMBO-STICK // CONSECUTIVE COMBO STREAK & ESCALATION BAR
 	const float ComboRatio = FMath::Clamp(float(GM->CurrentCombo) / 20.0f, 0.0f, 1.0f);
 	if (TxtTopComboBadge.IsValid())
@@ -5775,7 +6402,11 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	}
 	if (TxtHomeRosterProgress.IsValid())
 	{
-		TxtHomeRosterProgress->SetText(FText::FromString(FString::Printf(TEXT("CHARAKTERE: %d / %d FREI"), GM->GetUnlockedClimberCount(), GM->Climbers.Num())));
+		TxtHomeRosterProgress->SetText(FText::FromString(FString::Printf(TEXT("HELDEN: %d / %d"), GM->GetUnlockedClimberCount(), GM->Climbers.Num())));
+	}
+	if (TxtHomeThemeProgress.IsValid())
+	{
+		TxtHomeThemeProgress->SetText(FText::FromString(FString::Printf(TEXT("THEMES: %d / %d"), GM->GetUnlockedThemeCount(), GM->Themes.Num())));
 	}
 	if (TxtHomeBestRecord.IsValid() && GM->ActiveSaveGame)
 	{
@@ -5784,8 +6415,9 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	}
 	if (TxtHomeEquippedSummary.IsValid())
 	{
-		TxtHomeEquippedSummary->SetText(FText::FromString(FString::Printf(TEXT("AKTIV: #%02d %s // %s"),
-			EquippedInfo.RosterNumber, *EquippedInfo.Name, *VTTheme::GetGameModeShortName(GM->CurrentGameMode))));
+		const FVTGameThemeInfo CurrentTheme = GM->GetThemeInfo(GM->SelectedThemeId);
+		TxtHomeEquippedSummary->SetText(FText::FromString(FString::Printf(TEXT("AKTIV: #%02d %s // %s // %s"),
+			EquippedInfo.RosterNumber, *EquippedInfo.Name, *VTTheme::GetGameModeShortName(GM->CurrentGameMode), *CurrentTheme.Name)));
 	}
 
 	// 6. Update Game Over Stats + Live Post-Game Leaderboard Placement (Global & Friends!)

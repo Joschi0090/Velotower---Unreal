@@ -184,6 +184,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VelocityTower|Economy")
 	void SelectClimberDirection(int32 StepDir);
 
+	UFUNCTION(BlueprintCallable, Category = "VelocityTower|Themes")
+	bool BuyOrEquipTheme(EVTGameThemeId ThemeId);
+
+	UFUNCTION(BlueprintCallable, Category = "VelocityTower|Themes")
+	void PreviewThemeOnStage(EVTGameThemeId ThemeId);
+
+	UFUNCTION(BlueprintCallable, Category = "VelocityTower|Themes")
+	void SelectThemeDirection(int32 StepDir);
+
+	UFUNCTION(BlueprintCallable, Category = "VelocityTower|Themes")
+	bool IsThemeUnlocked(EVTGameThemeId Id) const;
+
+	UFUNCTION(BlueprintCallable, Category = "VelocityTower|Themes")
+	int32 GetUnlockedThemeCount() const;
+
+	FVTGameThemeInfo GetThemeInfo(EVTGameThemeId Id) const;
+	void ApplyThemeVisuals(const FVTGameThemeInfo& ThemeInfo);
+
 	UFUNCTION(BlueprintCallable, Category = "VelocityTower|Economy")
 	void SaveGameToDisk();
 
@@ -270,6 +288,15 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
 	bool bInCharacterSelectStage = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
+	EVTGameThemeId SelectedThemeId = EVTGameThemeId::CyberpunkDefault;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
+	EVTGameThemeId PreviewThemeId = EVTGameThemeId::CyberpunkDefault;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
+	bool bInThemeSelectStage = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
 	FString SelectedTrailId = TEXT("cyan");
@@ -477,6 +504,9 @@ public:
 	TArray<FVTBiomeInfo> Biomes;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Data")
+	TArray<FVTGameThemeInfo> Themes;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Data")
 	TArray<FVTClimberInfo> Climbers;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|Data")
@@ -559,6 +589,19 @@ private:
 
 	UPROPERTY()
 	UPointLightComponent* TowerMainLight = nullptr;
+
+	// Theme Specific 3D World Scenery (Outrun Sun, Jellyfish, Hanging Vines, Rotating Gears, Candy Canes, etc.)
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> ThemeSceneryMeshes;
+
+	UPROPERTY()
+	TArray<UMaterialInstanceDynamic*> ThemeSceneryMIDs;
+
+	UPROPERTY()
+	TArray<UPointLightComponent*> ThemeSceneryLights;
+
+	void BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo);
+	void UpdateThemeScenery(float DeltaTime, float TimeSec);
 
 	UPROPERTY()
 	TArray<FVTIceShardSim> IceShardPool;

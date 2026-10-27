@@ -201,6 +201,67 @@ struct FVTTrailInfo
 	int32 CostCores = 0;
 };
 
+UENUM(BlueprintType)
+enum class EVTGameThemeId : uint8
+{
+	CyberpunkDefault UMETA(DisplayName = "01 // CYBERPUNK VICE & ICE"),
+	RetroSynthwave   UMETA(DisplayName = "02 // RETRO SYNTHWAVE 80S"),
+	AncientRuins     UMETA(DisplayName = "03 // ANCIENT MYSTICAL RUINS"),
+	DeepSea          UMETA(DisplayName = "04 // BIOLUMINESCENT DEEP SEA"),
+	PapercraftToybox UMETA(DisplayName = "05 // HAND-CRAFTED PAPERCRAFT"),
+	IndustrialForge  UMETA(DisplayName = "06 // INDUSTRIAL FORGE & LAVA"),
+	DeepSpaceOrbit   UMETA(DisplayName = "07 // DEEP SPACE ORBIT"),
+	CandyLand        UMETA(DisplayName = "08 // CANDY LAND DESSERT")
+};
+
+USTRUCT(BlueprintType)
+struct FVTGameThemeInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EVTGameThemeId Id = EVTGameThemeId::CyberpunkDefault;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 ThemeNumber = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Name = TEXT("CYBERPUNK VICE & ICE");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Subtitle = TEXT("Neon Apex Core");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Description = TEXT("Dunkle Megastruktur, leuchtendes Cyan- & Pink-Neon, holografischer Sound-Equalizer.");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor PrimaryColor = FLinearColor(0.0f, 0.961f, 0.831f, 1.0f); // Top Deck & Rails
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor SecondaryColor = FLinearColor(0.02f, 0.52f, 0.78f, 1.0f); // Accent & Body
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor WallBaseColor = FLinearColor(0.03f, 0.05f, 0.12f, 1.0f); // Pillars & Backplate
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor WallEmissiveColor = FLinearColor(0.0f, 0.961f, 0.831f, 1.0f); // Rails & Runes
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor LightColor = FLinearColor(0.0f, 0.961f, 0.831f, 1.0f); // Tower Main Light
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float LightIntensity = 18000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor EqualizerColor = FLinearColor(0.0f, 0.961f, 0.831f, 1.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CostCores = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUnlockedInitially = true;
+};
+
 USTRUCT(BlueprintType)
 struct FVTHudConfig
 {
