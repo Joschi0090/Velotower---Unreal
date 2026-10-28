@@ -34,7 +34,8 @@ enum class EVTModalOverlay : uint8
 	AccountCloudSync,
 	RatePrompt,
 	AdPlayer,
-	AdminGodMode
+	AdminGodMode,
+	PauseMenu
 };
 
 UCLASS()
@@ -80,7 +81,9 @@ private:
 
 	EVTModalOverlay ActiveModal = EVTModalOverlay::None;
 	EVTControlMode PreviewedControlMode = EVTControlMode::VirtualJoystick;
-	int32 ActiveShopTab = 2; // Default to 20-Character Roster Tab! (0=Gratis Cores, 1=Deals, 2=20 Climbers, 3=Trails, 4=VIP)
+	int32 ActiveShopTab = 2; // Default to 20-Character Roster Tab! (0=Gratis Cores, 1=Boosts/Themes, 2=20 Climbers, 3=Trails, 4=VIP)
+	int32 ActiveSettingsTab = 0; // 0=Steuerung & Tempo, 1=Touch-HUD & Layout, 2=Audio & Anzeige
+	int32 ActiveRewardsTab = 0; // 0=Gluecksrad & Streak, 1=Tages-Quests, 2=Trophaeen, 3=Announcer Soundboard
 	bool bLeaderboardFriendsOnly = false;
 	int32 LastBuiltLeaderboardScore = -1;
 	bool bLastBuiltFriendsMode = false;
@@ -111,6 +114,12 @@ private:
 	TSharedPtr<FSlateDynamicImageBrush> BrushFeverFrame;
 	TSharedPtr<FSlateDynamicImageBrush> BrushDeadBanner;
 
+	UPROPERTY()
+	TMap<EVTGameThemeId, UTexture2D*> ThemeFrameTextures;
+
+	TMap<EVTGameThemeId, TSharedPtr<FSlateDynamicImageBrush>> ThemeFrameBrushes;
+	TSharedPtr<STextBlock> TxtLiveThemeSwitcherLabel;
+
 	TSharedPtr<SBorder> DeadBannerOverlayBorder;
 	TSharedPtr<SBorder> HighScoreBannerOverlayBorder;
 	TSharedPtr<SBorder> TopBestScoreBorder;
@@ -135,6 +144,7 @@ private:
 	TSharedPtr<STextBlock> TxtTeaserHeadline;
 	TSharedPtr<STextBlock> TxtTeaserSubline;
 	TSharedPtr<STextBlock> TxtTeaserPhaseBadge;
+	TSharedPtr<SBox> TeaserProgressFillBox;
 
 	TSharedPtr<SBorder> AccountGateOverlayBorder;
 
@@ -202,6 +212,9 @@ private:
 	TSharedPtr<SBorder> VirtualJoystickModeBox;
 	TSharedPtr<SBorder> ClassicDpadModeBox;
 	TSharedPtr<SBorder> JoystickKnobBorder;
+	TSharedPtr<SBorder> GestureModeHintBorder;
+	TSharedPtr<STextBlock> TxtGestureModeHint;
+	TSharedPtr<STextBlock> TxtJumpButtonLabel;
 	TSharedPtr<STextBlock> TxtEditorOpacity;
 	TSharedPtr<STextBlock> TxtEditorSize;
 	TSharedPtr<SBorder> TabBorderBtnLinks;
@@ -225,9 +238,16 @@ private:
 	TSharedPtr<STextBlock> TxtHomeBestRecord;
 	TSharedPtr<STextBlock> TxtHomeEquippedSummary;
 	TSharedPtr<STextBlock> TxtHomePlayBtnSub;
+	TSharedPtr<STextBlock> TxtHomeQuickMode;
+	TSharedPtr<STextBlock> TxtHomeQuickChar;
+	TSharedPtr<STextBlock> TxtHomeQuickTheme;
+	TSharedPtr<STextBlock> TxtDockCharSub;
+	TSharedPtr<STextBlock> TxtDockThemeSub;
+	TSharedPtr<STextBlock> TxtDockRewardsSub;
 
 	// Game Over Overlay Pointers + Post-Game Leaderboard & Friends Comparison
 	TSharedPtr<SBorder> GameOverOverlayBorder;
+	TSharedPtr<SBorder> GameOverOuterFrameBorder;
 	TSharedPtr<STextBlock> TxtOverBadge;
 	TSharedPtr<STextBlock> TxtOverSubtext;
 	TSharedPtr<STextBlock> TxtOverScore;
@@ -240,6 +260,7 @@ private:
 	TSharedPtr<SVerticalBox> GameOverLeaderboardListBox;
 	TSharedPtr<SBorder> ReviveButtonContainer;
 	TSharedPtr<STextBlock> TxtReviveCountdown;
+	TSharedPtr<SBox> ReviveProgressFillBox;
 
 	// Universal Modal Backdrop & Dynamic Host Box
 	TSharedPtr<SBorder> ModalBackdropBorder;

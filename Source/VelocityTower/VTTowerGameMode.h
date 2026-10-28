@@ -263,13 +263,16 @@ public:
 
 	// --- Boot & Live Telemetry State ---
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Boot")
-	EVTBootFlowState BootFlowState = EVTBootFlowState::EngineSplash;
+	EVTBootFlowState BootFlowState = EVTBootFlowState::Ready;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Boot")
 	float BootTimerSec = 0.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
 	EVTGameState TowerRunState = EVTGameState::Menu;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
+	bool bIsGamePaused = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
 	EVTControlMode CurrentControlMode = EVTControlMode::ClassicButtons;
@@ -290,10 +293,10 @@ public:
 	bool bInCharacterSelectStage = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
-	EVTGameThemeId SelectedThemeId = EVTGameThemeId::CyberpunkDefault;
+	EVTGameThemeId SelectedThemeId = EVTGameThemeId::PapercraftToybox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
-	EVTGameThemeId PreviewThemeId = EVTGameThemeId::CyberpunkDefault;
+	EVTGameThemeId PreviewThemeId = EVTGameThemeId::PapercraftToybox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|State")
 	bool bInThemeSelectStage = false;
@@ -530,9 +533,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VelocityTower|UI")
 	TArray<FVTFloatingTextEntry> FloatingTexts;
 
-	// Constants matching HTML (1px = 2.0cm in 3D space)
+	// Constants matching 1:1 Reference Layout (10 visible floors in 9:16 frame)
 	static constexpr float PlayfieldHalfWidthCm = 344.0f;
-	static constexpr float FloorVerticalSpacingCm = 148.0f;
+	static constexpr float FloorVerticalSpacingCm = 118.0f;
 	static constexpr float FixedStepSeconds = 1.0f / 60.0f;
 
 private:
@@ -599,6 +602,9 @@ private:
 
 	UPROPERTY()
 	TArray<UPointLightComponent*> ThemeSceneryLights;
+
+	TArray<FVector> ThemeSceneryBasePos;
+	TArray<FRotator> ThemeSceneryBaseRot;
 
 	void BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo);
 	void UpdateThemeScenery(float DeltaTime, float TimeSec);

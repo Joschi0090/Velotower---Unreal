@@ -24,7 +24,11 @@ public:
 
 	void ResetClimberForStart(float StartX, float StartZ, int32 InStartFloor, const FVTClimberInfo& InClimberInfo, const FLinearColor& InTrailColor);
 	void ApplyClimberVisuals(const FVTClimberInfo& InClimberInfo, const FLinearColor& InTrailColor, bool bLockedSilhouette = false);
+	void ApplyThemeCharacterCostume(EVTGameThemeId InThemeId);
 	void SetShieldVisualActive(bool bActive);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "VelocityTower|Climber")
+	EVTGameThemeId ActiveThemeId = EVTGameThemeId::PapercraftToybox;
 	void UpdateVisualState(float DeltaTime, bool bShowJumpGuide, float SpeedRatio, bool bNearWallReady);
 	void UpdateShowroomStagePose(float TimeSec, float ShowroomYawDeg, bool bInCharSelect);
 	void PlayAbyssFallPose(float FallProgress, float DeltaTime);

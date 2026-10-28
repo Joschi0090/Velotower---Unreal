@@ -204,14 +204,16 @@ struct FVTTrailInfo
 UENUM(BlueprintType)
 enum class EVTGameThemeId : uint8
 {
-	CyberpunkDefault UMETA(DisplayName = "01 // CYBERPUNK VICE & ICE"),
+	CyberpunkDefault UMETA(DisplayName = "01 // CYBERPUNK METROPOLIS"),
 	RetroSynthwave   UMETA(DisplayName = "02 // RETRO SYNTHWAVE 80S"),
-	AncientRuins     UMETA(DisplayName = "03 // ANCIENT MYSTICAL RUINS"),
+	AncientRuins     UMETA(DisplayName = "03 // ANCIENT FANTASY RUINS"),
 	DeepSea          UMETA(DisplayName = "04 // BIOLUMINESCENT DEEP SEA"),
 	PapercraftToybox UMETA(DisplayName = "05 // HAND-CRAFTED PAPERCRAFT"),
 	IndustrialForge  UMETA(DisplayName = "06 // INDUSTRIAL FORGE & LAVA"),
 	DeepSpaceOrbit   UMETA(DisplayName = "07 // DEEP SPACE ORBIT"),
-	CandyLand        UMETA(DisplayName = "08 // CANDY LAND DESSERT")
+	CandyLand        UMETA(DisplayName = "08 // CANDY LAND DESSERT"),
+	PixelDungeon     UMETA(DisplayName = "09 // 8-BIT PIXEL DUNGEON"),
+	WhimsicalToybox  UMETA(DisplayName = "10 // WHIMSICAL TOYBOX")
 };
 
 USTRUCT(BlueprintType)

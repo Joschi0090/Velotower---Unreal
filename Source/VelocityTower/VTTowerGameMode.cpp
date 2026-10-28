@@ -257,7 +257,7 @@ void AVTTowerGameMode::InitializeStaticCatalogs()
 		AddAch(TEXT("core_tycoon"), TEXT("Core-Millionaer"), TEXT("Sammle insgesamt 100 Neon Cores"), TEXT("GEM"), 50);
 	}
 
-	// 5. 8 Distinct Game Themes based on Levelreferenzen (Outrun, Ancient Ruins, Deep Sea, Papercraft, etc.)
+	// 5. All 10 Distinct 1:1 Game Themes based on Levelreferenzen (All unlocked & free!)
 	Themes.Empty();
 	{
 		auto AddTheme = [this](EVTGameThemeId Id, int32 Num, const FString& Name, const FString& Subtitle, const FString& Desc,
@@ -282,53 +282,65 @@ void AVTTowerGameMode::InitializeStaticCatalogs()
 			Themes.Add(T);
 		};
 
-		// 1. Cyberpunk Vice & Ice (Standard)
-		AddTheme(EVTGameThemeId::CyberpunkDefault, 1, TEXT("CYBERPUNK VICE & ICE"), TEXT("Apex Core // Neon Metropolis"),
-			TEXT("Dunkle Megastruktur, leuchtendes Cyan- & Pink-Neon, holografischer Sound-Equalizer."),
-			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.02f, 0.52f, 0.78f), FLinearColor(0.03f, 0.05f, 0.12f),
-			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.0f, 0.961f, 0.831f), 18000.0f, FLinearColor(0.0f, 0.961f, 0.831f), 0, true);
+		// 1. Hand-Crafted Papercraft & Toybox (1:1 Vorlage Mobile_game_papercraft_UI_theme_20261027193244)
+		AddTheme(EVTGameThemeId::PapercraftToybox, 1, TEXT("HAND-CRAFTED PAPERCRAFT"), TEXT("Crafted // Cardboard & Popsicle Sticks"),
+			TEXT("1:1 Bastel-Turm im offenen Pappkarton mit bunten Holz-Eisstielen, Xylophon, Stern-Post-It, Tape-Notizzettel und gestrickter Stoffpuppe."),
+			FLinearColor(0.961f, 0.620f, 0.043f), FLinearColor(0.925f, 0.282f, 0.600f), FLinearColor(0.64f, 0.45f, 0.27f),
+			FLinearColor(0.76f, 0.56f, 0.35f), FLinearColor(1.0f, 0.95f, 0.84f), 22000.0f, FLinearColor(0.961f, 0.620f, 0.043f), 0, true);
 
-		// 2. Retro Synthwave 80s (Outrun Sunset)
-		AddTheme(EVTGameThemeId::RetroSynthwave, 2, TEXT("RETRO SYNTHWAVE 80S"), TEXT("Outrun // Grid Sunset"),
-			TEXT("Ikonisches 80er-Jahre Wireframe-Gitter, grelle Magenta- & Neon-Pink-Rails mit glühender Retro-Sonne."),
-			FLinearColor(0.969f, 0.145f, 0.522f), FLinearColor(0.447f, 0.035f, 0.718f), FLinearColor(0.08f, 0.02f, 0.14f),
-			FLinearColor(0.969f, 0.145f, 0.522f), FLinearColor(0.97f, 0.15f, 0.52f), 19500.0f, FLinearColor(0.969f, 0.145f, 0.522f), 50, false);
+		// 2. Ancient Mystical Ruins (1:1 Vorlage Ancient_fantasy_ruins_game_interface)
+		AddTheme(EVTGameThemeId::AncientRuins, 2, TEXT("ANCIENT MYSTICAL RUINS"), TEXT("Fantasy // Overgrown Temple"),
+			TEXT("1:1 Uralte bemooste Tempelruinen mit leuchtenden Runen, Steintreppen, Fackelschein, Magie-Bändern und kleinem Magier."),
+			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.290f, 0.871f, 0.502f), FLinearColor(0.14f, 0.18f, 0.20f),
+			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.45f, 0.85f, 1.0f), 19500.0f, FLinearColor(0.290f, 0.871f, 0.502f), 0, true);
 
-		// 3. Ancient Mystical Ruins (Fantasy Overgrown)
-		AddTheme(EVTGameThemeId::AncientRuins, 3, TEXT("ANCIENT MYSTICAL RUINS"), TEXT("Fantasy // Overgrown Basalt"),
-			TEXT("Uralte bemooste Steinruinen mit magisch leuchtenden Runen, Fackelschein und azurblauen Aether-Partikeln."),
-			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.290f, 0.871f, 0.502f), FLinearColor(0.08f, 0.12f, 0.10f),
-			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.35f, 0.82f, 0.98f), 17500.0f, FLinearColor(0.290f, 0.871f, 0.502f), 100, false);
+		// 3. Bioluminescent Deep Sea (1:1 Vorlage Deep_sea_mobile_game_interface)
+		AddTheme(EVTGameThemeId::DeepSea, 3, TEXT("BIOLUMINESCENT DEEP SEA"), TEXT("Aquatic // Oceanic Trench"),
+			TEXT("1:1 Tiefsee-Graben mit leuchtenden Riesenquallen, Korallenriffen, Kelp-Algen, Luftblasen und Taucher."),
+			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.012f, 0.412f, 0.631f), FLinearColor(0.03f, 0.14f, 0.24f),
+			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.15f, 0.90f, 0.85f), 19500.0f, FLinearColor(0.0f, 0.961f, 0.831f), 0, true);
 
-		// 4. Bioluminescent Deep Sea (Oceanic Abyss)
-		AddTheme(EVTGameThemeId::DeepSea, 4, TEXT("BIOLUMINESCENT DEEP SEA"), TEXT("Aquatic // Oceanic Trench"),
-			TEXT("Tiefsee-Abgrund mit leuchtenden Quallen-Silhouetten, fluoreszierenden Korallenriffen und Meeresleuchten."),
-			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.012f, 0.412f, 0.631f), FLinearColor(0.012f, 0.065f, 0.120f),
-			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.05f, 0.85f, 0.75f), 16500.0f, FLinearColor(0.0f, 0.961f, 0.831f), 150, false);
+		// 4. Retro Synthwave 80s (1:1 Vorlage Outrun Grid Sunset)
+		AddTheme(EVTGameThemeId::RetroSynthwave, 4, TEXT("RETRO SYNTHWAVE 80S"), TEXT("Outrun // Grid Sunset"),
+			TEXT("1:1 80er-Jahre Wireframe-Gitter, grelle Magenta- & Cyan-Neon-Balken, Equalizer-Treppe und glühende Outrun-Sonne."),
+			FLinearColor(0.969f, 0.145f, 0.522f), FLinearColor(0.0f, 0.95f, 1.0f), FLinearColor(0.08f, 0.02f, 0.16f),
+			FLinearColor(0.969f, 0.145f, 0.522f), FLinearColor(0.97f, 0.25f, 0.62f), 20500.0f, FLinearColor(0.969f, 0.145f, 0.522f), 0, true);
 
-		// 5. Hand-Crafted Papercraft & Toybox
-		AddTheme(EVTGameThemeId::PapercraftToybox, 5, TEXT("HAND-CRAFTED PAPERCRAFT"), TEXT("Crafted // Cardboard & Sticks"),
-			TEXT("Kreativer Bastel-Turm aus Wellpappe mit Wachsmalkreide, bunten Holz-Eisstielen und verspieltem Washi-Tape."),
-			FLinearColor(0.961f, 0.620f, 0.043f), FLinearColor(0.925f, 0.282f, 0.600f), FLinearColor(0.28f, 0.18f, 0.08f),
-			FLinearColor(0.961f, 0.620f, 0.043f), FLinearColor(1.0f, 0.88f, 0.65f), 16000.0f, FLinearColor(0.961f, 0.620f, 0.043f), 200, false);
+		// 5. Candy Land Dessert (1:1 Vorlage Sweet Kingdom)
+		AddTheme(EVTGameThemeId::CandyLand, 5, TEXT("CANDY LAND DESSERT"), TEXT("Sugar Apex // Sweet Kingdom"),
+			TEXT("1:1 Zuckerwatte- und Waffelturm mit gestreiften Zuckerstangen, Marshmallow-Böden, Zuckerguss-Keksen und rosa Teddybär."),
+			FLinearColor(0.957f, 0.247f, 0.369f), FLinearColor(0.984f, 0.808f, 0.910f), FLinearColor(0.68f, 0.38f, 0.52f),
+			FLinearColor(0.98f, 0.45f, 0.68f), FLinearColor(1.0f, 0.90f, 0.94f), 21500.0f, FLinearColor(0.957f, 0.247f, 0.369f), 0, true);
 
-		// 6. Industrial Forge & Lava
+		// 6. Industrial Forge & Lava (1:1 Vorlage Molten Iron)
 		AddTheme(EVTGameThemeId::IndustrialForge, 6, TEXT("INDUSTRIAL FORGE & LAVA"), TEXT("Heavy Metal // Molten Iron"),
-			TEXT("Massive Gusseisen-Pfeiler, rotglühende Stahlgitter, zischender Dampf und brodelnde Magma im Turmschacht."),
-			FLinearColor(0.918f, 0.345f, 0.047f), FLinearColor(0.980f, 0.800f, 0.082f), FLinearColor(0.11f, 0.10f, 0.09f),
-			FLinearColor(0.918f, 0.345f, 0.047f), FLinearColor(1.0f, 0.38f, 0.05f), 21000.0f, FLinearColor(0.918f, 0.345f, 0.047f), 250, false);
+			TEXT("1:1 Massive Gusseisen-Pfeiler, rotglühende Stahlgitter, rotierende Zahnräder, Dampfrohre und brodelnde Magma."),
+			FLinearColor(0.918f, 0.345f, 0.047f), FLinearColor(0.980f, 0.800f, 0.082f), FLinearColor(0.14f, 0.12f, 0.11f),
+			FLinearColor(0.918f, 0.345f, 0.047f), FLinearColor(1.0f, 0.48f, 0.12f), 21500.0f, FLinearColor(0.918f, 0.345f, 0.047f), 0, true);
 
-		// 7. Deep Space Orbit (Cosmic Starfield)
+		// 7. Deep Space Orbit (1:1 Vorlage Cosmic Starfield)
 		AddTheme(EVTGameThemeId::DeepSpaceOrbit, 7, TEXT("DEEP SPACE ORBIT"), TEXT("Cosmic // Orbital Station"),
-			TEXT("Grenzenlose Sternennacht mit fernen Nebelfeldern, Ionen-Triebwerken und Hard-Light Hologramm-Plattformen."),
-			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.506f, 0.549f, 0.973f), FLinearColor(0.04f, 0.06f, 0.11f),
-			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.45f, 0.75f, 1.0f), 18500.0f, FLinearColor(0.506f, 0.549f, 0.973f), 300, false);
+			TEXT("1:1 Orbitale Raumstation mit Ringplanet, Nebelfeldern, Ionen-Triebwerken und holografischen Solar-Brücken."),
+			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.506f, 0.549f, 0.973f), FLinearColor(0.06f, 0.09f, 0.16f),
+			FLinearColor(0.220f, 0.741f, 0.973f), FLinearColor(0.55f, 0.80f, 1.0f), 20000.0f, FLinearColor(0.506f, 0.549f, 0.973f), 0, true);
 
-		// 8. Candy Land Dessert (Sweet Kingdom)
-		AddTheme(EVTGameThemeId::CandyLand, 8, TEXT("CANDY LAND DESSERT"), TEXT("Sugar Apex // Sweet Kingdom"),
-			TEXT("Zuckerwatte- und Waffelturm mit gestreiften Zuckerstangen, Marshmallow-Böden und buntem Regenbogenhimmel."),
-			FLinearColor(0.957f, 0.247f, 0.369f), FLinearColor(0.984f, 0.808f, 0.910f), FLinearColor(0.35f, 0.15f, 0.25f),
-			FLinearColor(0.957f, 0.247f, 0.369f), FLinearColor(1.0f, 0.75f, 0.85f), 17000.0f, FLinearColor(0.957f, 0.247f, 0.369f), 350, false);
+		// 8. 8-Bit Pixel Dungeon (1:1 Vorlage Voxel Castle)
+		AddTheme(EVTGameThemeId::PixelDungeon, 8, TEXT("8-BIT PIXEL DUNGEON"), TEXT("Retro Arcade // Voxel Keep"),
+			TEXT("1:1 8-Bit Voxel-Kerker mit bemoosten Pixel-Steinblöcken, Holzbalken, Eisenketten, Pixel-Fackeln und Voxel-Held."),
+			FLinearColor(0.35f, 0.88f, 0.32f), FLinearColor(0.98f, 0.62f, 0.12f), FLinearColor(0.16f, 0.16f, 0.24f),
+			FLinearColor(0.98f, 0.62f, 0.12f), FLinearColor(1.0f, 0.82f, 0.55f), 20000.0f, FLinearColor(0.35f, 0.88f, 0.32f), 0, true);
+
+		// 9. Whimsical Toybox (1:1 Vorlage LEGO & Rulers)
+		AddTheme(EVTGameThemeId::WhimsicalToybox, 9, TEXT("WHIMSICAL TOYBOX"), TEXT("Playroom // LEGO & Rulers"),
+			TEXT("1:1 Kinderzimmer-Kartonschacht mit gelben Holz-Linealen, bunten LEGO-Steinen mit Noppen, Wellpappe und Karton-Roboter."),
+			FLinearColor(0.95f, 0.78f, 0.10f), FLinearColor(0.90f, 0.16f, 0.15f), FLinearColor(0.62f, 0.44f, 0.26f),
+			FLinearColor(0.95f, 0.78f, 0.10f), FLinearColor(1.0f, 0.94f, 0.82f), 21500.0f, FLinearColor(0.14f, 0.42f, 0.86f), 0, true);
+
+		// 10. Cyberpunk Metropolis (1:1 Vorlage Neon Skyscrapers)
+		AddTheme(EVTGameThemeId::CyberpunkDefault, 10, TEXT("CYBERPUNK METROPOLIS"), TEXT("Apex Core // Neon Skyscrapers"),
+			TEXT("1:1 Dunkle Cyberpunk-Megastruktur mit leuchtenden Hologramm-Brücken, Stahlträgern, Kanji-Reklamen und fliegenden Autos."),
+			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.02f, 0.52f, 0.78f), FLinearColor(0.04f, 0.07f, 0.15f),
+			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.0f, 0.961f, 0.831f), 19500.0f, FLinearColor(0.0f, 0.961f, 0.831f), 0, true);
 	}
 }
 
@@ -402,18 +414,16 @@ void AVTTowerGameMode::BeginPlay()
 		CurrentGameMode = ActiveSaveGame->GameMode;
 		BaseSpeedRatio = ActiveSaveGame->BaseSpeedRatio;
 		SelectedClimberId = ActiveSaveGame->SelectedClimber;
-		PreviewClimberId = SelectedClimberId;
+		bIsGamePaused = false;
+	PreviewClimberId = SelectedClimberId;
 		SelectedTrailId = ActiveSaveGame->SelectedTrail;
 
-		if (ActiveSaveGame->UnlockedThemes.Num() == 0)
+		for (const FVTGameThemeInfo& T : Themes)
 		{
-			ActiveSaveGame->UnlockedThemes.AddUnique(EVTGameThemeId::CyberpunkDefault);
+			ActiveSaveGame->UnlockedThemes.AddUnique(T.Id);
 		}
-		if (!ActiveSaveGame->UnlockedThemes.Contains(ActiveSaveGame->SelectedTheme) && !ActiveSaveGame->bIsVip)
-		{
-			ActiveSaveGame->SelectedTheme = EVTGameThemeId::CyberpunkDefault;
-		}
-		SelectedThemeId = ActiveSaveGame->SelectedTheme;
+		ActiveSaveGame->SelectedTheme = EVTGameThemeId::PapercraftToybox;
+		SelectedThemeId = EVTGameThemeId::PapercraftToybox;
 		PreviewThemeId = SelectedThemeId;
 
 		StartFloor = ActiveSaveGame->StartFloor;
@@ -427,8 +437,8 @@ void AVTTowerGameMode::BeginPlay()
 	// Ensure PIE / Editor audio is ALWAYS audible even if the PIE viewport loses window focus!
 	FApp::SetUnfocusedVolumeMultiplier(1.0f);
 
-	BootFlowState = EVTBootFlowState::EngineSplash;
-	BootTimerSec = 0.0f;
+	BootFlowState = EVTBootFlowState::Ready;
+	BootTimerSec = 10.0f;
 
 	BuildTowerEnvironment3D();
 	InitializeAudioEngine();
@@ -507,9 +517,9 @@ void AVTTowerGameMode::BeginPlay()
 		}
 	}
 
-	// Build initial platforms for the 3D Showroom Menu background so the tower looks alive immediately!
+	// Launch directly into the 1:1 playable Level (Papercraft default, all 10 worlds switchable live!)
 	StartNewRun();
-	TowerRunState = EVTGameState::Menu;
+	TowerRunState = EVTGameState::Play;
 }
 
 void AVTTowerGameMode::BuildTowerEnvironment3D()
@@ -729,24 +739,52 @@ AVTPlatformActor* AVTTowerGameMode::SpawnPlatformForFloor(int32 Floor)
 	EVTPlatformType PlatType = EVTPlatformType::Normal;
 	EVTItemType ItemType = EVTItemType::None;
 
-	if (bIsCheckpoint)
+	// 1:1 Reference 10-Floor Repeating Layout (Screen Left = +X, Screen Right = -X)
+	// Matches Mobile_game_papercraft_UI_theme_20261027193244.jpg and all 9 other reference templates!
+	static const float RefCenterX[10] = {
+		-35.0f,  // Floor 0: Blue stick / Stone steps (Center-Right base)
+		-125.0f, // Floor 1: Red-Orange stick (Right)
+		 25.0f,  // Floor 2: Yellow stick with Blue Painter's Tape (Wide Center-Left bridge)
+		-10.0f,  // Floor 3: Pink stick with cardboard end-spacers (Center)
+		-15.0f,  // Floor 4: Green stick + 6-bar Xylophone / Equalizer Stairs / Jellyfish (Wide Center-Right)
+		 135.0f, // Floor 5: Orange stick (Left)
+		-120.0f, // Floor 6: Purple stick (Right)
+		 130.0f, // Floor 7: Forest-Green stick (Left)
+		 120.0f, // Floor 8: Golden-Yellow stick (Left)
+		-15.0f   // Floor 9: Pink-Red stick (Top Center)
+	};
+	static const float RefWidthCm[10] = {
+		430.0f,  // Floor 0
+		280.0f,  // Floor 1
+		460.0f,  // Floor 2
+		310.0f,  // Floor 3
+		490.0f,  // Floor 4
+		275.0f,  // Floor 5
+		285.0f,  // Floor 6
+		265.0f,  // Floor 7
+		275.0f,  // Floor 8
+		280.0f   // Floor 9
+	};
+
+	const int32 PatternIdx = FMath::Abs(RelFloor) % 10;
+	const float ScaleFactor = FMath::Clamp(float(Scaling.WidthPct) / 100.0f, 0.72f, 1.25f);
+	WidthCm = RefWidthCm[PatternIdx] * ((Floor < StartFloor + 20) ? 1.0f : ScaleFactor);
+	CenterX = RefCenterX[PatternIdx];
+
+	if (bIsCheckpoint && Floor > StartFloor)
 	{
 		WidthCm = InnerWidthCm;
 		CenterX = 0.0f;
 		PlatType = EVTPlatformType::Checkpoint;
 	}
-	else
+	else if (Floor >= StartFloor + 12)
 	{
-		const float ScaleFactor = float(Scaling.WidthPct) / 100.0f;
-		const float MinW = FMath::Max(92.0f, InnerWidthCm * 0.46f * ScaleFactor);
-		const float MaxW = FMath::Max(MinW + 28.0f, InnerWidthCm * 0.68f * ScaleFactor);
-		WidthCm = FMath::RandRange(MinW, MaxW);
-
+		// Subtle horizontal variation & moving platforms on higher floors (12+)
+		const float JitterX = FMath::Sin(float(Floor) * 1.7f) * 28.0f;
 		const float SafeMargin = 16.0f;
 		const float MaxAbsX = FMath::Max(0.0f, PlayfieldHalfWidthCm - WidthCm * 0.5f - SafeMargin);
-		CenterX = FMath::RandRange(-MaxAbsX, MaxAbsX);
+		CenterX = FMath::Clamp(CenterX + JitterX, -MaxAbsX, MaxAbsX);
 
-		// Moving ice platforms from Floor 80+
 		if (Floor >= 80 && FMath::FRand() < FMath::Min(0.45f, float(Floor - 60) * 0.002f))
 		{
 			const float Dir = (FMath::FRand() < 0.5f) ? -1.0f : 1.0f;
@@ -754,39 +792,18 @@ AVTPlatformActor* AVTTowerGameMode::SpawnPlatformForFloor(int32 Floor)
 			Vx = Dir * (0.9f + FMath::Min(2.4f, float(Floor) * 0.004f)) * ModeMult;
 		}
 
-		// Platform type probabilities matching HTML
-		if (Floor > StartFloor + 3)
+		// Collectibles & Power-Ups on Floor 12+ so Floors 0..9 remain 100% pure 1:1 reference look
+		if (FMath::FRand() < 0.14f)
 		{
-			const float R1 = FMath::FRand();
-			if (R1 < 0.08f)
-			{
-				PlatType = EVTPlatformType::Boost;
-			}
-			else if (FMath::FRand() < 0.16f)
-			{
-				PlatType = EVTPlatformType::MirrorIce;
-			}
-			else if (Floor >= 40 && FMath::FRand() < 0.25f)
-			{
-				PlatType = EVTPlatformType::QuantumPhase;
-			}
+			ItemType = EVTItemType::Core;
 		}
-
-		// Collectibles & Power-Ups matching HTML
-		if (Floor > StartFloor)
+		else if (FMath::FRand() < 0.18f)
 		{
-			if (FMath::FRand() < 0.14f)
-			{
-				ItemType = EVTItemType::Core;
-			}
-			else if (FMath::FRand() < 0.24f)
-			{
-				const int32 Pick = FMath::RandRange(0, 3);
-				if (Pick == 0) ItemType = EVTItemType::Magnet;
-				else if (Pick == 1) ItemType = EVTItemType::Spring;
-				else if (Pick == 2) ItemType = EVTItemType::Freeze;
-				else ItemType = EVTItemType::Shield;
-			}
+			const int32 Pick = FMath::RandRange(0, 3);
+			if (Pick == 0) ItemType = EVTItemType::Magnet;
+			else if (Pick == 1) ItemType = EVTItemType::Spring;
+			else if (Pick == 2) ItemType = EVTItemType::Freeze;
+			else ItemType = EVTItemType::Shield;
 		}
 	}
 
@@ -824,10 +841,11 @@ void AVTTowerGameMode::StartNewRun()
 
 	if (ClimberPawn)
 	{
-		ClimberPawn->ResetClimberForStart(0.0f, 44.0f, StartFloor, CInfo, TInfo.Color);
+		ClimberPawn->ResetClimberForStart(-20.0f, 44.0f, StartFloor, CInfo, TInfo.Color);
+		ClimberPawn->ApplyThemeCharacterCostume(SelectedThemeId);
 	}
 
-	CameraZ = 160.0f;
+	CameraZ = 450.0f;
 	BonusScoreAccumulated = 0;
 	LastComboVoiceTier = 0;
 	NearDeathVoiceCooldownSec = 0.0f;
@@ -868,6 +886,7 @@ void AVTTowerGameMode::StartNewRun()
 
 	bInCharacterSelectStage = false;
 	TowerRunState = EVTGameState::Play;
+	bIsGamePaused = false;
 	TriggerToast(TEXT("CLIMB NOW! NUTZE MOMENTUM & WALL-RICOCHETS!"));
 
 	// Display clear High Score to beat right on Game Start!
@@ -881,6 +900,7 @@ void AVTTowerGameMode::ReturnToMainMenu()
 {
 	bInCharacterSelectStage = false;
 	TowerRunState = EVTGameState::Menu;
+	bIsGamePaused = false;
 	PreviewClimberId = SelectedClimberId;
 	if (ClimberPawn)
 	{
@@ -894,6 +914,7 @@ void AVTTowerGameMode::ExecuteSecondChanceRevive()
 	if (!ClimberPawn) return;
 
 	TowerRunState = EVTGameState::Play;
+	bIsGamePaused = false;
 	bHasRevivedThisRun = true;
 
 	// Find safe platform near MaxFloor
@@ -1085,7 +1106,7 @@ void AVTTowerGameMode::CashOutCombo()
 
 void AVTTowerGameMode::StepFixedPhysics60Hz()
 {
-	if (TowerRunState != EVTGameState::Play || !ClimberPawn || bIsDeathSequenceActive) return;
+	if (TowerRunState != EVTGameState::Play || !ClimberPawn || bIsDeathSequenceActive || bIsGamePaused) return;
 
 	AVTPlayerController* PC = Cast<AVTPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 
@@ -1807,28 +1828,38 @@ void AVTTowerGameMode::Update3DEnvironmentAndCamera(float DeltaTime)
 		}
 	}
 
-	// Wall Neon Rail Dynamic Color matching Active Theme
+	// Wall Rail Dynamic Color matching Active Theme (Matte natural walls for Papercraft/Candy/Toybox/Dungeon!)
 	const FVTGameThemeInfo ActiveTheme = GetThemeInfo(bInThemeSelectStage ? PreviewThemeId : SelectedThemeId);
+	const bool bNeonWallTheme =
+		(ActiveTheme.Id == EVTGameThemeId::CyberpunkDefault ||
+		 ActiveTheme.Id == EVTGameThemeId::RetroSynthwave ||
+		 ActiveTheme.Id == EVTGameThemeId::DeepSpaceOrbit ||
+		 ActiveTheme.Id == EVTGameThemeId::IndustrialForge);
 	const bool bBounceReady = ClimberPawn ? !ClimberPawn->bWallBounceUsed : true;
-	const FLinearColor BaseRailCol = bBounceReady ? ActiveTheme.WallEmissiveColor : FLinearColor(0.937f, 0.267f, 0.267f);
+	const FLinearColor BaseRailCol = bNeonWallTheme
+		? (bBounceReady ? ActiveTheme.WallEmissiveColor : FLinearColor(0.937f, 0.267f, 0.267f))
+		: ActiveTheme.WallBaseColor;
+	const float BaseWallEmiss = bNeonWallTheme ? (6.0f + BeatPulse * 8.0f) : 0.26f;
 	if (LeftWallMID)
 	{
 		const FLinearColor LCol = FMath::Lerp(BaseRailCol, FLinearColor::White, FMath::Clamp(LeftWallFlash, 0.0f, 1.0f));
 		LeftWallMID->SetVectorParameterValue(TEXT("BaseColor"), LCol);
-		LeftWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), LCol * (6.0f + BeatPulse * 8.0f + LeftWallFlash * 20.0f));
+		LeftWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), LCol * (BaseWallEmiss + LeftWallFlash * (bNeonWallTheme ? 20.0f : 2.0f)));
 	}
 	if (RightWallMID)
 	{
 		const FLinearColor RCol = FMath::Lerp(BaseRailCol, FLinearColor::White, FMath::Clamp(RightWallFlash, 0.0f, 1.0f));
 		RightWallMID->SetVectorParameterValue(TEXT("BaseColor"), RCol);
-		RightWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), RCol * (6.0f + BeatPulse * 8.0f + RightWallFlash * 20.0f));
+		RightWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), RCol * (BaseWallEmiss + RightWallFlash * (bNeonWallTheme ? 20.0f : 2.0f)));
 	}
 
-	// Update 16-Band Dynamic Chromatic Audio Visualizer / Music Spectrum ANCHORED AT BOTTOM OF SCREEN
+	// Update 16-Band Dynamic Chromatic Audio Visualizer / Music Spectrum (Only visible in Cyber/Synthwave/Space themes)
 	const float BarWidthCm = (PlayfieldHalfWidthCm * 2.0f) / 16.0f;
 	for (int32 i = 0; i < EqualizerBarMeshes.Num(); ++i)
 	{
 		if (!EqualizerBarMeshes[i]) continue;
+		EqualizerBarMeshes[i]->SetVisibility(bNeonWallTheme);
+		if (!bNeonWallTheme) continue;
 
 		// Harmonic frequency bands & high-energy beat reaction
 		const float FreqSpread = FMath::Sin(TimeSec * 10.0f + float(i) * 0.65f) * 0.5f + 0.5f;
@@ -1864,6 +1895,8 @@ void AVTTowerGameMode::Update3DEnvironmentAndCamera(float DeltaTime)
 	for (int32 i = 0; i < BgMegastructurePillars.Num(); ++i)
 	{
 		if (!BgMegastructurePillars[i]) continue;
+		BgMegastructurePillars[i]->SetVisibility(bNeonWallTheme);
+		if (!bNeonWallTheme) continue;
 		const int32 Row = i / 2;
 		const float SideSign = (i % 2 == 0) ? -1.0f : 1.0f;
 		const float PillarX = SideSign * 220.0f;
@@ -2462,42 +2495,21 @@ int32 AVTTowerGameMode::GetUnlockedThemeCount() const
 void AVTTowerGameMode::PreviewThemeOnStage(EVTGameThemeId ThemeId)
 {
 	PreviewThemeId = ThemeId;
+	SelectedThemeId = ThemeId;
+	if (ActiveSaveGame)
+	{
+		ActiveSaveGame->SelectedTheme = ThemeId;
+	}
 	const FVTGameThemeInfo Info = GetThemeInfo(ThemeId);
 	ApplyThemeVisuals(Info);
+	SaveGameToDisk();
+	TriggerToast(FString::Printf(TEXT("1:1 LEVEL-WELT #%02d/10: %s"), Info.ThemeNumber, *Info.Name));
 }
 
 bool AVTTowerGameMode::BuyOrEquipTheme(EVTGameThemeId ThemeId)
 {
-	if (!ActiveSaveGame) return false;
-	const FVTGameThemeInfo Info = GetThemeInfo(ThemeId);
-	const bool bUnlocked = IsThemeUnlocked(ThemeId);
-
-	PreviewThemeId = ThemeId;
-
-	if (!bUnlocked)
-	{
-		if (NeonCores < Info.CostCores)
-		{
-			ApplyThemeVisuals(Info);
-			TriggerToast(FString::Printf(TEXT("Noch %d Neon Cores benoetigt fuer Theme %s!"), Info.CostCores - NeonCores, *Info.Name));
-			return false;
-		}
-		NeonCores -= Info.CostCores;
-		ActiveSaveGame->NeonCores = NeonCores;
-		ActiveSaveGame->UnlockedThemes.AddUnique(ThemeId);
-		TriggerToast(FString::Printf(TEXT("NEUES SPIEL-THEME FREIGESCHALTET: %s!"), *Info.Name));
-		PlayTowerSFX(TEXT("CorePickup"), 1.25f);
-	}
-	else
-	{
-		TriggerToast(FString::Printf(TEXT("Theme %s ausgeruestet!"), *Info.Name));
-		PlayTowerSFX(TEXT("Click"), 1.1f);
-	}
-
-	SelectedThemeId = ThemeId;
-	ActiveSaveGame->SelectedTheme = ThemeId;
-	ApplyThemeVisuals(Info);
-	SaveGameToDisk();
+	PreviewThemeOnStage(ThemeId);
+	PlayTowerSFX(TEXT("Click"), 1.1f);
 	return true;
 }
 
@@ -2507,7 +2519,7 @@ void AVTTowerGameMode::SelectThemeDirection(int32 StepDir)
 	int32 CurrentIdx = 0;
 	for (int32 i = 0; i < Themes.Num(); ++i)
 	{
-		if (Themes[i].Id == PreviewThemeId)
+		if (Themes[i].Id == SelectedThemeId)
 		{
 			CurrentIdx = i;
 			break;
@@ -2515,59 +2527,81 @@ void AVTTowerGameMode::SelectThemeDirection(int32 StepDir)
 	}
 	const int32 NewIdx = (CurrentIdx + StepDir + Themes.Num()) % Themes.Num();
 	PreviewThemeOnStage(Themes[NewIdx].Id);
+	PlayTowerSFX(TEXT("Click"), 1.12f);
 }
 
 void AVTTowerGameMode::ApplyThemeVisuals(const FVTGameThemeInfo& ThemeInfo)
 {
+	UMaterialInterface* CustomNeonMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/VelocityTower/Materials/M_NeonEmissive_Master.M_NeonEmissive_Master"));
+	UMaterialInterface* FallbackMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	UMaterialInterface* BaseMat = CustomNeonMat ? CustomNeonMat : FallbackMat;
+
+	const bool bNeonWallTheme =
+		(ThemeInfo.Id == EVTGameThemeId::CyberpunkDefault ||
+		 ThemeInfo.Id == EVTGameThemeId::RetroSynthwave ||
+		 ThemeInfo.Id == EVTGameThemeId::DeepSpaceOrbit ||
+		 ThemeInfo.Id == EVTGameThemeId::IndustrialForge);
+
 	// 1. Wall Emissive Rails & Accents
 	if (LeftWallMID)
 	{
-		LeftWallMID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.PrimaryColor);
-		LeftWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.WallEmissiveColor * 6.0f);
+		const FLinearColor RailCol = bNeonWallTheme ? ThemeInfo.PrimaryColor : ThemeInfo.WallBaseColor;
+		LeftWallMID->SetVectorParameterValue(TEXT("BaseColor"), RailCol);
+		LeftWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), RailCol * (bNeonWallTheme ? 6.0f : 0.28f));
 	}
 	if (RightWallMID)
 	{
-		RightWallMID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.PrimaryColor);
-		RightWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.WallEmissiveColor * 6.0f);
+		const FLinearColor RailCol = bNeonWallTheme ? ThemeInfo.PrimaryColor : ThemeInfo.WallBaseColor;
+		RightWallMID->SetVectorParameterValue(TEXT("BaseColor"), RailCol);
+		RightWallMID->SetVectorParameterValue(TEXT("EmissiveColor"), RailCol * (bNeonWallTheme ? 6.0f : 0.28f));
 	}
 
-	// 2. Structural Wall Pillars & Backplate
+	// 2. Structural Wall Pillars & Backplate (Warm Cardboard / Stone / Reef / Candy / Voxel / Cyber)
+	const float BackEmissBoost = (ThemeInfo.Id == EVTGameThemeId::PapercraftToybox || ThemeInfo.Id == EVTGameThemeId::CandyLand || ThemeInfo.Id == EVTGameThemeId::WhimsicalToybox)
+		? 0.34f
+		: 0.16f;
 	for (UStaticMeshComponent* Pillar : LeftWallPillars)
 	{
-		if (Pillar)
+		if (Pillar && BaseMat)
 		{
-			UMaterialInstanceDynamic* MID = Cast<UMaterialInstanceDynamic>(Pillar->GetMaterial(0));
-			if (!MID) MID = Pillar->CreateAndSetMaterialInstanceDynamic(0);
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(BaseMat, this);
 			if (MID)
 			{
 				MID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.WallBaseColor);
 				MID->SetVectorParameterValue(TEXT("Color"), ThemeInfo.WallBaseColor);
+				MID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.WallBaseColor * BackEmissBoost);
+				Pillar->SetMaterial(0, MID);
 			}
 		}
 	}
 	for (UStaticMeshComponent* Pillar : RightWallPillars)
 	{
-		if (Pillar)
+		if (Pillar && BaseMat)
 		{
-			UMaterialInstanceDynamic* MID = Cast<UMaterialInstanceDynamic>(Pillar->GetMaterial(0));
-			if (!MID) MID = Pillar->CreateAndSetMaterialInstanceDynamic(0);
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(BaseMat, this);
 			if (MID)
 			{
 				MID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.WallBaseColor);
 				MID->SetVectorParameterValue(TEXT("Color"), ThemeInfo.WallBaseColor);
+				MID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.WallBaseColor * BackEmissBoost);
+				Pillar->SetMaterial(0, MID);
 			}
 		}
 	}
 	for (UStaticMeshComponent* BackPanel : BackWallPanels)
 	{
-		if (BackPanel)
+		if (BackPanel && BaseMat)
 		{
-			UMaterialInstanceDynamic* MID = Cast<UMaterialInstanceDynamic>(BackPanel->GetMaterial(0));
-			if (!MID) MID = BackPanel->CreateAndSetMaterialInstanceDynamic(0);
+			UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(BaseMat, this);
 			if (MID)
 			{
-				MID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.WallBaseColor * 0.7f);
-				MID->SetVectorParameterValue(TEXT("Color"), ThemeInfo.WallBaseColor * 0.7f);
+				const FLinearColor BackCol = (ThemeInfo.Id == EVTGameThemeId::PapercraftToybox)
+					? FLinearColor(0.68f, 0.49f, 0.30f)
+					: ThemeInfo.WallBaseColor * 0.82f;
+				MID->SetVectorParameterValue(TEXT("BaseColor"), BackCol);
+				MID->SetVectorParameterValue(TEXT("Color"), BackCol);
+				MID->SetVectorParameterValue(TEXT("EmissiveColor"), BackCol * BackEmissBoost);
+				BackPanel->SetMaterial(0, MID);
 			}
 		}
 	}
@@ -2598,24 +2632,28 @@ void AVTTowerGameMode::ApplyThemeVisuals(const FVTGameThemeInfo& ThemeInfo)
 		}
 	}
 
-	// 6. Showroom Stage Pedestal & Holo Ring
-	if (ClimberPawn && ClimberPawn->ShowroomPedestalMesh && ClimberPawn->ShowroomHoloRingMesh)
+	// 6. Apply 1:1 Theme Character Costume (Knitted Ragdoll, Wizard, Scuba Diver, Pink Bear, Voxel Hero, Cyber Runner)
+	if (ClimberPawn)
 	{
-		UMaterialInstanceDynamic* PedMID = Cast<UMaterialInstanceDynamic>(ClimberPawn->ShowroomPedestalMesh->GetMaterial(0));
-		if (PedMID)
+		ClimberPawn->ApplyThemeCharacterCostume(ThemeInfo.Id);
+		if (ClimberPawn->ShowroomPedestalMesh && ClimberPawn->ShowroomHoloRingMesh)
 		{
-			PedMID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.WallBaseColor);
-			PedMID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.PrimaryColor * 2.5f);
-		}
-		UMaterialInstanceDynamic* RingMID = Cast<UMaterialInstanceDynamic>(ClimberPawn->ShowroomHoloRingMesh->GetMaterial(0));
-		if (RingMID)
-		{
-			RingMID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.PrimaryColor);
-			RingMID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.PrimaryColor * 10.0f);
+			UMaterialInstanceDynamic* PedMID = Cast<UMaterialInstanceDynamic>(ClimberPawn->ShowroomPedestalMesh->GetMaterial(0));
+			if (PedMID)
+			{
+				PedMID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.WallBaseColor);
+				PedMID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.PrimaryColor * 2.5f);
+			}
+			UMaterialInstanceDynamic* RingMID = Cast<UMaterialInstanceDynamic>(ClimberPawn->ShowroomHoloRingMesh->GetMaterial(0));
+			if (RingMID)
+			{
+				RingMID->SetVectorParameterValue(TEXT("BaseColor"), ThemeInfo.PrimaryColor);
+				RingMID->SetVectorParameterValue(TEXT("EmissiveColor"), ThemeInfo.PrimaryColor * 10.0f);
+			}
 		}
 	}
 
-	// 7. Build Rich Distinct 3D World Scenery (Matching Reference Images!)
+	// 7. Build Rich Distinct 3D World Scenery (Matching All 10 Reference Images 1:1!)
 	BuildThemeScenery(ThemeInfo);
 }
 
@@ -2633,6 +2671,8 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 	}
 	ThemeSceneryMeshes.Empty();
 	ThemeSceneryMIDs.Empty();
+	ThemeSceneryBasePos.Empty();
+	ThemeSceneryBaseRot.Empty();
 
 	for (UPointLightComponent* Light : ThemeSceneryLights)
 	{
@@ -2650,7 +2690,9 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 	UMaterialInterface* FallbackMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 	UMaterialInterface* BaseMat = CustomNeonMat ? CustomNeonMat : (CustomWallMat ? CustomWallMat : FallbackMat);
 
-	auto AddSceneryMesh = [this, Root, BaseMat](UStaticMesh* Mesh, const FVector& RelLoc, const FRotator& RelRot, const FVector& RelScale, const FLinearColor& BaseCol, const FLinearColor& EmissCol) -> UStaticMeshComponent*
+	// Note: RelLoc.Z is stored as an offset relative to CameraZ so UpdateThemeScenery scrolls all props cleanly!
+	const float RefCamZ = FMath::Max(160.0f, CameraZ);
+	auto AddSceneryMesh = [this, Root, BaseMat, RefCamZ](UStaticMesh* Mesh, const FVector& RelLoc, const FRotator& RelRot, const FVector& RelScale, const FLinearColor& BaseCol, const FLinearColor& EmissCol) -> UStaticMeshComponent*
 	{
 		if (!Mesh || !EnvironmentHostActor) return nullptr;
 		UStaticMeshComponent* Comp = NewObject<UStaticMeshComponent>(EnvironmentHostActor);
@@ -2675,6 +2717,8 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 		}
 		Comp->RegisterComponent();
 		ThemeSceneryMeshes.Add(Comp);
+		ThemeSceneryBasePos.Add(FVector(RelLoc.X, RelLoc.Y, RelLoc.Z - RefCamZ));
+		ThemeSceneryBaseRot.Add(RelRot);
 		return Comp;
 	};
 
@@ -2694,21 +2738,108 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 	};
 
 	// -------------------------------------------------------------------------
-	// 1. RETRO SYNTHWAVE 80s (Outrun Sun, Palm Trees, Laser Wall Grids)
+	// 1. HAND-CRAFTED PAPERCRAFT 1:1 (Mobile_game_papercraft_UI_theme_20261027193244.jpg)
+	//    Corrugated cardboard shoebox, Yellow Star Sticky Note, Pink "tape." patch + Blue Crayon,
+	//    diagonal side-wall popsicle sticks with masking tape, and 3D sewing buttons!
 	// -------------------------------------------------------------------------
-	if (ThemeInfo.Id == EVTGameThemeId::RetroSynthwave)
+	if (ThemeInfo.Id == EVTGameThemeId::PapercraftToybox)
+	{
+		const FLinearColor KraftDark(0.55f, 0.37f, 0.20f);
+		const FLinearColor TapeWhite(0.95f, 0.93f, 0.86f);
+
+		// A. Corrugated Cardboard Vertical Flute Ribs on the Shoebox Back Wall
+		for (int32 f = -6; f <= 6; ++f)
+		{
+			AddSceneryMesh(CubeMesh, FVector(float(f) * 52.0f, 250.0f, RefCamZ), FRotator::ZeroRotator,
+				FVector(0.08f, 0.04f, 16.0f), KraftDark, KraftDark * 0.25f);
+		}
+		// Horizontal cardboard box crease seams
+		for (int32 h = -2; h <= 2; ++h)
+		{
+			AddSceneryMesh(CubeMesh, FVector(0.0f, 248.0f, RefCamZ + float(h) * 260.0f), FRotator::ZeroRotator,
+				FVector(6.8f, 0.05f, 0.04f), KraftDark * 0.85f, KraftDark * 0.18f);
+		}
+
+		// B. 1:1 YELLOW STAR STICKY NOTE on Upper-Left Back Wall (Screen Left = +X)
+		const FVector StickyCenter(150.0f, 238.0f, RefCamZ + 150.0f);
+		const FLinearColor StickyYellow(0.98f, 0.84f, 0.22f);
+		const FLinearColor StarBrown(0.68f, 0.38f, 0.12f);
+		AddSceneryMesh(CubeMesh, StickyCenter, FRotator(0.0f, 0.0f, -6.0f),
+			FVector(1.05f, 0.04f, 1.05f), StickyYellow, StickyYellow * 0.35f);
+		// Translucent Scotch Tape strip at top of sticky note
+		AddSceneryMesh(CubeMesh, StickyCenter + FVector(-4.0f, -3.0f, 52.0f), FRotator(0.0f, 0.0f, 4.0f),
+			FVector(0.48f, 0.05f, 0.16f), TapeWhite, TapeWhite * 0.40f);
+		// 5-Point Star drawn on the sticky note
+		for (int32 s = 0; s < 5; ++s)
+		{
+			AddSceneryMesh(CubeMesh, StickyCenter + FVector(0.0f, -4.0f, -4.0f), FRotator(0.0f, 0.0f, float(s) * 36.0f),
+				FVector(0.52f, 0.05f, 0.11f), StarBrown, StarBrown * 0.25f);
+		}
+
+		// C. 1:1 PINK "tape." PAPER PATCH + BLUE CRAYON PENCIL on Lower-Right Back Wall (Screen Right = -X)
+		const FVector PinkNoteCenter(-125.0f, 238.0f, RefCamZ - 95.0f);
+		const FLinearColor PinkPaper(0.95f, 0.56f, 0.62f);
+		const FLinearColor InkDark(0.24f, 0.18f, 0.16f);
+		AddSceneryMesh(CubeMesh, PinkNoteCenter, FRotator(0.0f, 0.0f, 2.0f),
+			FVector(1.55f, 0.04f, 1.15f), PinkPaper, PinkPaper * 0.34f);
+		// White masking tape strips across top-left and bottom-right corners of pink patch
+		AddSceneryMesh(CubeMesh, PinkNoteCenter + FVector(68.0f, -3.0f, 48.0f), FRotator(0.0f, 0.0f, -38.0f),
+			FVector(0.55f, 0.05f, 0.16f), TapeWhite, TapeWhite * 0.40f);
+		AddSceneryMesh(CubeMesh, PinkNoteCenter + FVector(-68.0f, -3.0f, -48.0f), FRotator(0.0f, 0.0f, -38.0f),
+			FVector(0.55f, 0.05f, 0.16f), TapeWhite, TapeWhite * 0.40f);
+		// Handwritten "tape." & ruled notebook lines on pink patch
+		for (int32 ln = 0; ln < 3; ++ln)
+		{
+			AddSceneryMesh(CubeMesh, PinkNoteCenter + FVector(10.0f, -4.0f, 22.0f - float(ln) * 22.0f), FRotator(0.0f, 0.0f, 2.0f),
+				FVector(0.95f - float(ln) * 0.18f, 0.05f, 0.045f), InkDark, FLinearColor::Black);
+		}
+		// Blue Crayon / Colored Pencil resting diagonally across bottom-left of pink patch
+		const FVector CrayonPos = PinkNoteCenter + FVector(52.0f, -8.0f, -36.0f);
+		const FLinearColor CrayonBlue(0.18f, 0.45f, 0.85f);
+		const FLinearColor WoodConeCol(0.88f, 0.72f, 0.50f);
+		AddSceneryMesh(CylinderMesh, CrayonPos, FRotator(0.0f, 0.0f, 54.0f),
+			FVector(0.16f, 0.16f, 0.95f), CrayonBlue, CrayonBlue * 0.28f);
+		AddSceneryMesh(ConeMesh, CrayonPos + FVector(38.0f, 0.0f, 28.0f), FRotator(0.0f, 0.0f, -36.0f),
+			FVector(0.16f, 0.16f, 0.28f), WoodConeCol, WoodConeCol * 0.25f);
+
+		// D. Diagonal Wooden Popsicle Sticks Taped to the Left & Right Cardboard Shoebox Side Walls
+		const FLinearColor SideStickCols[6] = {
+			FLinearColor(0.90f, 0.22f, 0.18f), // Red
+			FLinearColor(0.20f, 0.68f, 0.30f), // Green
+			FLinearColor(0.96f, 0.78f, 0.12f), // Yellow
+			FLinearColor(0.16f, 0.52f, 0.86f), // Blue
+			FLinearColor(0.62f, 0.28f, 0.76f), // Purple
+			FLinearColor(0.95f, 0.48f, 0.14f)  // Orange
+		};
+		for (int32 s = 0; s < 6; ++s)
+		{
+			const float SideSign = (s % 2 == 0) ? 1.0f : -1.0f; // +X = Left wall, -X = Right wall
+			const float WallX = SideSign * (PlayfieldHalfWidthCm - 6.0f);
+			const float StickZ = RefCamZ - 380.0f + float(s) * 155.0f;
+			const float TiltPitch = (s % 2 == 0) ? 28.0f : -26.0f;
+			AddSceneryMesh(CubeMesh, FVector(WallX, 40.0f, StickZ), FRotator(TiltPitch, 0.0f, 0.0f),
+				FVector(0.08f, 1.25f, 0.20f), SideStickCols[s], SideStickCols[s] * 0.28f);
+			// White masking tape holding each side stick to the cardboard wall
+			AddSceneryMesh(CubeMesh, FVector(WallX - SideSign * 2.0f, 40.0f, StickZ), FRotator(0.0f, 0.0f, 12.0f),
+				FVector(0.09f, 0.36f, 0.42f), TapeWhite, TapeWhite * 0.38f);
+		}
+	}
+	// -------------------------------------------------------------------------
+	// 2. RETRO SYNTHWAVE 80s (Outrun Sun, Palm Trees, Laser Wall Grids)
+	// -------------------------------------------------------------------------
+	else if (ThemeInfo.Id == EVTGameThemeId::RetroSynthwave)
 	{
 		// Iconic 5-tier horizontal sliced Outrun Sun
-		const FVector SunCenter(0.0f, 680.0f, CameraZ - 80.0f);
+		const FVector SunCenter(0.0f, 680.0f, RefCamZ - 80.0f);
 		const float SunRadii[5] = { 400.0f, 430.0f, 410.0f, 370.0f, 310.0f };
 		const float SunZOffsets[5] = { 90.0f, 25.0f, -35.0f, -85.0f, -125.0f };
 		const float SunThickness[5] = { 0.40f, 0.26f, 0.20f, 0.16f, 0.12f };
 		const FLinearColor SunColors[5] = {
-			FLinearColor(1.0f, 0.95f, 0.20f), // Neon Yellow Sun Top
-			FLinearColor(1.0f, 0.65f, 0.05f), // Orange
-			FLinearColor(1.0f, 0.25f, 0.15f), // Red-Orange
-			FLinearColor(0.95f, 0.10f, 0.55f), // Hot Magenta
-			FLinearColor(0.75f, 0.05f, 0.70f)  // Deep Outrun Purple
+			FLinearColor(1.0f, 0.95f, 0.20f),
+			FLinearColor(1.0f, 0.65f, 0.05f),
+			FLinearColor(1.0f, 0.25f, 0.15f),
+			FLinearColor(0.95f, 0.10f, 0.55f),
+			FLinearColor(0.75f, 0.05f, 0.70f)
 		};
 		for (int32 s = 0; s < 5; ++s)
 		{
@@ -2720,73 +2851,76 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 		for (int32 Side = -1; Side <= 1; Side += 2)
 		{
 			const float PalmX = float(Side) * 260.0f;
-			AddSceneryMesh(CylinderMesh, FVector(PalmX, 580.0f, CameraZ - 180.0f), FRotator(0.0f, 0.0f, float(Side) * -8.0f),
+			AddSceneryMesh(CylinderMesh, FVector(PalmX, 580.0f, RefCamZ - 180.0f), FRotator(0.0f, 0.0f, float(Side) * -8.0f),
 				FVector(0.12f, 0.12f, 3.2f), FLinearColor(0.02f, 0.01f, 0.04f), FLinearColor(0.95f, 0.10f, 0.55f) * 1.5f);
 			for (int32 f = 0; f < 4; ++f)
 			{
 				const float Angle = float(f) * 45.0f - 45.0f;
-				AddSceneryMesh(CubeMesh, FVector(PalmX + float(Side) * 35.0f, 570.0f, CameraZ - 20.0f), FRotator(0.0f, 0.0f, Angle),
+				AddSceneryMesh(CubeMesh, FVector(PalmX + float(Side) * 35.0f, 570.0f, RefCamZ - 20.0f), FRotator(0.0f, 0.0f, Angle),
 					FVector(0.70f, 0.05f, 0.08f), FLinearColor(0.02f, 0.01f, 0.04f), FLinearColor(0.95f, 0.10f, 0.55f) * 2.0f);
 			}
 		}
 
-		// Wireframe Neon Laser Corner Rails
-		AddSceneryMesh(CylinderMesh, FVector(-PlayfieldHalfWidthCm - 10.0f, -20.0f, CameraZ), FRotator::ZeroRotator,
+		// Wireframe Neon Laser Corner Rails & Horizon Grid Lines
+		AddSceneryMesh(CylinderMesh, FVector(-PlayfieldHalfWidthCm - 10.0f, -20.0f, RefCamZ), FRotator::ZeroRotator,
 			FVector(0.08f, 0.08f, 18.0f), ThemeInfo.WallEmissiveColor, ThemeInfo.WallEmissiveColor * 16.0f);
-		AddSceneryMesh(CylinderMesh, FVector(PlayfieldHalfWidthCm + 10.0f, -20.0f, CameraZ), FRotator::ZeroRotator,
-			FVector(0.08f, 0.08f, 18.0f), ThemeInfo.WallEmissiveColor, ThemeInfo.WallEmissiveColor * 16.0f);
+		AddSceneryMesh(CylinderMesh, FVector(PlayfieldHalfWidthCm + 10.0f, -20.0f, RefCamZ), FRotator::ZeroRotator,
+			FVector(0.08f, 0.08f, 18.0f), FLinearColor(0.0f, 0.95f, 1.0f), FLinearColor(0.0f, 0.95f, 1.0f) * 16.0f);
 	}
 	// -------------------------------------------------------------------------
-	// 2. ANCIENT MYSTICAL RUINS (Hanging Ivy, Wall Torches, Glowing Runes)
+	// 3. ANCIENT MYSTICAL RUINS (Hanging Ivy, Wall Torches, Glowing Runes, Crystals)
 	// -------------------------------------------------------------------------
 	else if (ThemeInfo.Id == EVTGameThemeId::AncientRuins)
 	{
-		// Cascading Ivy foliage along pillars
 		for (int32 Side = -1; Side <= 1; Side += 2)
 		{
-			const float PillarX = float(Side) * (PlayfieldHalfWidthCm + 18.0f);
+			const float PillarX = float(Side) * (PlayfieldHalfWidthCm + 14.0f);
 			for (int32 v = 0; v < 6; ++v)
 			{
-				const float VineZ = CameraZ - 400.0f + float(v) * 160.0f;
+				const float VineZ = RefCamZ - 400.0f + float(v) * 160.0f;
 				AddSceneryMesh(SphereMesh, FVector(PillarX, -10.0f, VineZ), FRotator(15.0f, float(v * 40), 0.0f),
-					FVector(0.28f, 0.28f, 0.55f), FLinearColor(0.08f, 0.38f, 0.12f), FLinearColor(0.08f, 0.38f, 0.12f) * 0.4f);
+					FVector(0.32f, 0.32f, 0.62f), FLinearColor(0.10f, 0.46f, 0.16f), FLinearColor(0.10f, 0.46f, 0.16f) * 0.5f);
 			}
 		}
-		// 4 Wall Torches with warm amber flicker light
 		const float TorchOffsetsZ[2] = { -220.0f, 220.0f };
 		for (int32 t = 0; t < 2; ++t)
 		{
 			for (int32 Side = -1; Side <= 1; Side += 2)
 			{
 				const float TorchX = float(Side) * (PlayfieldHalfWidthCm - 12.0f);
-				const float TorchZ = CameraZ + TorchOffsetsZ[t];
+				const float TorchZ = RefCamZ + TorchOffsetsZ[t];
 				AddSceneryMesh(ConeMesh, FVector(TorchX, -15.0f, TorchZ), FRotator(180.0f, 0.0f, 0.0f),
-					FVector(0.12f, 0.12f, 0.22f), FLinearColor(0.20f, 0.16f, 0.12f), FLinearColor::Black);
-				AddSceneryMesh(SphereMesh, FVector(TorchX, -15.0f, TorchZ + 12.0f), FRotator::ZeroRotator,
-					FVector(0.12f, 0.12f, 0.16f), FLinearColor(1.0f, 0.45f, 0.05f), FLinearColor(1.0f, 0.45f, 0.05f) * 16.0f);
+					FVector(0.14f, 0.14f, 0.26f), FLinearColor(0.24f, 0.18f, 0.12f), FLinearColor::Black);
+				AddSceneryMesh(SphereMesh, FVector(TorchX, -15.0f, TorchZ + 14.0f), FRotator::ZeroRotator,
+					FVector(0.14f, 0.14f, 0.20f), FLinearColor(1.0f, 0.50f, 0.08f), FLinearColor(1.0f, 0.50f, 0.08f) * 16.0f);
 				AddSceneryLight(FVector(TorchX, -30.0f, TorchZ + 15.0f), FLinearColor(1.0f, 0.52f, 0.10f), 5500.0f, 480.0f);
 			}
 		}
-		// Glowing ancient wall runes
-		for (int32 r = 0; r < 4; ++r)
+		for (int32 r = 0; r < 5; ++r)
 		{
-			const float RuneZ = CameraZ - 300.0f + float(r) * 200.0f;
-			AddSceneryMesh(CubeMesh, FVector(-PlayfieldHalfWidthCm - 24.0f, -8.0f, RuneZ), FRotator::ZeroRotator,
-				FVector(0.04f, 0.14f, 0.32f), ThemeInfo.WallEmissiveColor, ThemeInfo.WallEmissiveColor * 12.0f);
-			AddSceneryMesh(CubeMesh, FVector(PlayfieldHalfWidthCm + 24.0f, -8.0f, RuneZ + 80.0f), FRotator::ZeroRotator,
-				FVector(0.04f, 0.14f, 0.32f), ThemeInfo.WallEmissiveColor, ThemeInfo.WallEmissiveColor * 12.0f);
+			const float RuneZ = RefCamZ - 340.0f + float(r) * 180.0f;
+			AddSceneryMesh(CubeMesh, FVector(-PlayfieldHalfWidthCm - 18.0f, -8.0f, RuneZ), FRotator::ZeroRotator,
+				FVector(0.06f, 0.16f, 0.36f), ThemeInfo.WallEmissiveColor, ThemeInfo.WallEmissiveColor * 12.0f);
+			AddSceneryMesh(CubeMesh, FVector(PlayfieldHalfWidthCm + 18.0f, -8.0f, RuneZ + 80.0f), FRotator::ZeroRotator,
+				FVector(0.06f, 0.16f, 0.36f), FLinearColor(0.25f, 0.95f, 0.55f), FLinearColor(0.25f, 0.95f, 0.55f) * 12.0f);
 		}
 	}
 	// -------------------------------------------------------------------------
-	// 3. BIOLUMINESCENT DEEP SEA (Floating Jellyfish, Coral Formations)
+	// 4. BIOLUMINESCENT DEEP SEA (Sunbeams, Floating Jellyfish, Coral Reefs, Bubbles)
 	// -------------------------------------------------------------------------
 	else if (ThemeInfo.Id == EVTGameThemeId::DeepSea)
 	{
-		// 3 Floating translucent Jellyfish
+		// Diagonal cyan underwater light rays piercing from above
+		for (int32 ray = -1; ray <= 1; ++ray)
+		{
+			AddSceneryMesh(CubeMesh, FVector(float(ray) * 140.0f, 240.0f, RefCamZ + 80.0f), FRotator(0.0f, 0.0f, -14.0f),
+				FVector(0.45f, 0.02f, 12.0f), FLinearColor(0.05f, 0.55f, 0.72f), FLinearColor(0.05f, 0.65f, 0.82f) * 1.6f);
+		}
+		// 3 Floating translucent Jellyfish in background trench
 		const FVector JellyPos[3] = {
-			FVector(-140.0f, 340.0f, CameraZ - 120.0f),
-			FVector(160.0f, 420.0f, CameraZ + 160.0f),
-			FVector(-30.0f, 480.0f, CameraZ + 360.0f)
+			FVector(-140.0f, 340.0f, RefCamZ - 120.0f),
+			FVector(160.0f, 420.0f, RefCamZ + 160.0f),
+			FVector(-30.0f, 480.0f, RefCamZ + 360.0f)
 		};
 		for (int32 j = 0; j < 3; ++j)
 		{
@@ -2800,46 +2934,16 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 					FVector(0.035f, 0.035f, 0.75f), FLinearColor(0.85f, 0.30f, 0.90f), FLinearColor(0.85f, 0.30f, 0.90f) * 6.0f);
 			}
 		}
-		// Coral Horns along the cavern walls
-		for (int32 c = 0; c < 5; ++c)
+		// Bioluminescent Coral Horns & Bubbles along cavern walls
+		for (int32 c = 0; c < 6; ++c)
 		{
-			const float CoralZ = CameraZ - 350.0f + float(c) * 180.0f;
-			AddSceneryMesh(ConeMesh, FVector(-PlayfieldHalfWidthCm - 15.0f, 10.0f, CoralZ), FRotator(0.0f, 0.0f, -55.0f),
-				FVector(0.22f, 0.22f, 0.48f), FLinearColor(0.0f, 0.92f, 0.82f), FLinearColor(0.0f, 0.92f, 0.82f) * 6.0f);
-			AddSceneryMesh(ConeMesh, FVector(PlayfieldHalfWidthCm + 15.0f, 10.0f, CoralZ + 90.0f), FRotator(0.0f, 0.0f, 55.0f),
-				FVector(0.22f, 0.22f, 0.48f), FLinearColor(0.85f, 0.25f, 0.75f), FLinearColor(0.85f, 0.25f, 0.75f) * 6.0f);
-		}
-	}
-	// -------------------------------------------------------------------------
-	// 4. HAND-CRAFTED PAPERCRAFT (Cardboard Walls, Big 3D Buttons, Tape)
-	// -------------------------------------------------------------------------
-	else if (ThemeInfo.Id == EVTGameThemeId::PapercraftToybox)
-	{
-		const FLinearColor ButtonCols[6] = {
-			FLinearColor(0.95f, 0.18f, 0.22f), // Red
-			FLinearColor(0.15f, 0.42f, 0.95f), // Blue
-			FLinearColor(0.98f, 0.85f, 0.10f), // Yellow
-			FLinearColor(0.20f, 0.82f, 0.65f), // Mint
-			FLinearColor(0.98f, 0.45f, 0.75f), // Pink
-			FLinearColor(0.65f, 0.20f, 0.90f)  // Purple
-		};
-		for (int32 b = 0; b < 6; ++b)
-		{
-			const float SideSign = (b % 2 == 0) ? -1.0f : 1.0f;
-			const float ButtonX = SideSign * (PlayfieldHalfWidthCm + 22.0f);
-			const float ButtonZ = CameraZ - 360.0f + float(b) * 140.0f;
-			AddSceneryMesh(CylinderMesh, FVector(ButtonX, -10.0f, ButtonZ), FRotator(90.0f, 0.0f, 0.0f),
-				FVector(0.24f, 0.24f, 0.05f), ButtonCols[b], ButtonCols[b] * 0.5f);
-			AddSceneryMesh(CubeMesh, FVector(ButtonX, -15.0f, ButtonZ), FRotator(0.0f, 0.0f, 45.0f),
-				FVector(0.05f, 0.05f, 0.02f), FLinearColor(0.98f, 0.98f, 0.95f), FLinearColor::Black);
-		}
-		for (int32 tp = 0; tp < 4; ++tp)
-		{
-			const float TapeZ = CameraZ - 280.0f + float(tp) * 200.0f;
-			AddSceneryMesh(CubeMesh, FVector(-PlayfieldHalfWidthCm - 18.0f, -8.0f, TapeZ), FRotator(0.0f, 20.0f, 15.0f),
-				FVector(0.22f, 0.48f, 0.015f), FLinearColor(0.92f, 0.94f, 0.96f), FLinearColor::Black);
-			AddSceneryMesh(CubeMesh, FVector(PlayfieldHalfWidthCm + 18.0f, -8.0f, TapeZ + 60.0f), FRotator(0.0f, -20.0f, -15.0f),
-				FVector(0.22f, 0.48f, 0.015f), FLinearColor(0.92f, 0.94f, 0.96f), FLinearColor::Black);
+			const float CoralZ = RefCamZ - 380.0f + float(c) * 160.0f;
+			AddSceneryMesh(ConeMesh, FVector(-PlayfieldHalfWidthCm - 12.0f, 10.0f, CoralZ), FRotator(0.0f, 0.0f, -55.0f),
+				FVector(0.24f, 0.24f, 0.52f), FLinearColor(0.0f, 0.92f, 0.82f), FLinearColor(0.0f, 0.92f, 0.82f) * 6.0f);
+			AddSceneryMesh(ConeMesh, FVector(PlayfieldHalfWidthCm + 12.0f, 10.0f, CoralZ + 80.0f), FRotator(0.0f, 0.0f, 55.0f),
+				FVector(0.24f, 0.24f, 0.52f), FLinearColor(0.95f, 0.28f, 0.78f), FLinearColor(0.95f, 0.28f, 0.78f) * 6.0f);
+			AddSceneryMesh(SphereMesh, FVector(FMath::Sin(float(c) * 2.1f) * 220.0f, 120.0f, CoralZ + 40.0f), FRotator::ZeroRotator,
+				FVector(0.12f, 0.12f, 0.12f), FLinearColor(0.65f, 0.98f, 1.0f), FLinearColor(0.65f, 0.98f, 1.0f) * 4.0f);
 		}
 	}
 	// -------------------------------------------------------------------------
@@ -2851,7 +2955,7 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 		{
 			const float SideSign = (g % 2 == 0) ? -1.0f : 1.0f;
 			const float GearX = SideSign * (PlayfieldHalfWidthCm + 35.0f);
-			const float GearZ = CameraZ - 300.0f + float(g) * 220.0f;
+			const float GearZ = RefCamZ - 300.0f + float(g) * 220.0f;
 			AddSceneryMesh(CylinderMesh, FVector(GearX, 15.0f, GearZ), FRotator(90.0f, 0.0f, 0.0f),
 				FVector(1.4f, 1.4f, 0.22f), FLinearColor(0.18f, 0.16f, 0.15f), FLinearColor::Black);
 			AddSceneryMesh(CubeMesh, FVector(GearX, 15.0f, GearZ), FRotator(0.0f, 0.0f, 0.0f),
@@ -2861,22 +2965,20 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 			AddSceneryMesh(CylinderMesh, FVector(GearX, 5.0f, GearZ), FRotator(90.0f, 0.0f, 0.0f),
 				FVector(0.35f, 0.35f, 0.26f), FLinearColor(1.0f, 0.40f, 0.02f), FLinearColor(1.0f, 0.40f, 0.02f) * 8.0f);
 		}
-		// Vertical steam pipes
-		AddSceneryMesh(CylinderMesh, FVector(-PlayfieldHalfWidthCm - 45.0f, 25.0f, CameraZ), FRotator::ZeroRotator,
+		AddSceneryMesh(CylinderMesh, FVector(-PlayfieldHalfWidthCm - 45.0f, 25.0f, RefCamZ), FRotator::ZeroRotator,
 			FVector(0.24f, 0.24f, 18.0f), FLinearColor(0.15f, 0.13f, 0.12f), FLinearColor::Black);
-		AddSceneryMesh(CylinderMesh, FVector(PlayfieldHalfWidthCm + 45.0f, 25.0f, CameraZ), FRotator::ZeroRotator,
+		AddSceneryMesh(CylinderMesh, FVector(PlayfieldHalfWidthCm + 45.0f, 25.0f, RefCamZ), FRotator::ZeroRotator,
 			FVector(0.24f, 0.24f, 18.0f), FLinearColor(0.15f, 0.13f, 0.12f), FLinearColor::Black);
-		// Molten Lava Lake at the base
-		AddSceneryMesh(CubeMesh, FVector(0.0f, 80.0f, CameraZ - 520.0f), FRotator::ZeroRotator,
+		AddSceneryMesh(CubeMesh, FVector(0.0f, 80.0f, RefCamZ - 520.0f), FRotator::ZeroRotator,
 			FVector(8.5f, 4.0f, 0.8f), FLinearColor(1.0f, 0.25f, 0.01f), FLinearColor(1.0f, 0.25f, 0.01f) * 16.0f);
-		AddSceneryLight(FVector(0.0f, 0.0f, CameraZ - 460.0f), FLinearColor(1.0f, 0.35f, 0.05f), 12000.0f, 900.0f);
+		AddSceneryLight(FVector(0.0f, 0.0f, RefCamZ - 460.0f), FLinearColor(1.0f, 0.35f, 0.05f), 12000.0f, 900.0f);
 	}
 	// -------------------------------------------------------------------------
-	// 6. DEEP SPACE ORBIT (Ringed Planet, Elevator Thrusters)
+	// 6. DEEP SPACE ORBIT (Ringed Planet, Nebula, Elevator Thrusters)
 	// -------------------------------------------------------------------------
 	else if (ThemeInfo.Id == EVTGameThemeId::DeepSpaceOrbit)
 	{
-		const FVector PlanetPos(80.0f, 820.0f, CameraZ + 140.0f);
+		const FVector PlanetPos(80.0f, 820.0f, RefCamZ + 140.0f);
 		AddSceneryMesh(SphereMesh, PlanetPos, FRotator(25.0f, 35.0f, 0.0f),
 			FVector(4.8f, 4.8f, 4.8f), FLinearColor(0.12f, 0.25f, 0.58f), FLinearColor(0.05f, 0.18f, 0.42f) * 1.5f);
 		AddSceneryMesh(CylinderMesh, PlanetPos, FRotator(65.0f, 25.0f, 0.0f),
@@ -2884,40 +2986,94 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 		for (int32 Side = -1; Side <= 1; Side += 2)
 		{
 			const float PodX = float(Side) * (PlayfieldHalfWidthCm + 25.0f);
-			AddSceneryMesh(ConeMesh, FVector(PodX, -10.0f, CameraZ + 180.0f), FRotator(180.0f, 0.0f, 0.0f),
+			AddSceneryMesh(ConeMesh, FVector(PodX, -10.0f, RefCamZ + 180.0f), FRotator(180.0f, 0.0f, 0.0f),
 				FVector(0.28f, 0.28f, 0.55f), ThemeInfo.PrimaryColor, ThemeInfo.PrimaryColor * 18.0f);
-			AddSceneryMesh(ConeMesh, FVector(PodX, -10.0f, CameraZ - 180.0f), FRotator(180.0f, 0.0f, 0.0f),
+			AddSceneryMesh(ConeMesh, FVector(PodX, -10.0f, RefCamZ - 180.0f), FRotator(180.0f, 0.0f, 0.0f),
 				FVector(0.28f, 0.28f, 0.55f), ThemeInfo.PrimaryColor, ThemeInfo.PrimaryColor * 18.0f);
 		}
 	}
 	// -------------------------------------------------------------------------
-	// 7. CANDY LAND DESSERT (Spiral Candy Canes, Dripping Frosting)
+	// 7. CANDY LAND DESSERT (Spiral Candy Canes, Dripping Frosting, Pastel Rainbow)
 	// -------------------------------------------------------------------------
 	else if (ThemeInfo.Id == EVTGameThemeId::CandyLand)
 	{
 		for (int32 Side = -1; Side <= 1; Side += 2)
 		{
 			const float CaneX = float(Side) * (PlayfieldHalfWidthCm + 8.0f);
-			AddSceneryMesh(CylinderMesh, FVector(CaneX, -12.0f, CameraZ), FRotator::ZeroRotator,
-				FVector(0.26f, 0.26f, 18.0f), FLinearColor(0.98f, 0.98f, 0.96f), FLinearColor(0.98f, 0.98f, 0.96f) * 1.2f);
+			AddSceneryMesh(CylinderMesh, FVector(CaneX, -12.0f, RefCamZ), FRotator::ZeroRotator,
+				FVector(0.26f, 0.26f, 18.0f), FLinearColor(0.98f, 0.98f, 0.96f), FLinearColor(0.98f, 0.98f, 0.96f) * 0.45f);
 			for (int32 st = 0; st < 8; ++st)
 			{
-				const float StripeZ = CameraZ - 420.0f + float(st) * 120.0f;
+				const float StripeZ = RefCamZ - 420.0f + float(st) * 120.0f;
 				AddSceneryMesh(CylinderMesh, FVector(CaneX, -12.0f, StripeZ), FRotator(25.0f, float(Side) * 30.0f, 0.0f),
-					FVector(0.28f, 0.28f, 0.45f), FLinearColor(0.98f, 0.12f, 0.25f), FLinearColor(0.98f, 0.12f, 0.25f) * 3.0f);
+					FVector(0.28f, 0.28f, 0.45f), FLinearColor(0.98f, 0.16f, 0.32f), FLinearColor(0.98f, 0.16f, 0.32f) * 0.65f);
 			}
 		}
 		for (int32 f = 0; f < 6; ++f)
 		{
-			const float FrostZ = CameraZ - 360.0f + float(f) * 150.0f;
+			const float FrostZ = RefCamZ - 360.0f + float(f) * 150.0f;
 			AddSceneryMesh(SphereMesh, FVector(-PlayfieldHalfWidthCm - 12.0f, -8.0f, FrostZ), FRotator::ZeroRotator,
-				FVector(0.22f, 0.32f, 0.38f), FLinearColor(1.0f, 0.62f, 0.78f), FLinearColor(1.0f, 0.62f, 0.78f) * 1.5f);
+				FVector(0.26f, 0.34f, 0.42f), FLinearColor(1.0f, 0.62f, 0.78f), FLinearColor(1.0f, 0.62f, 0.78f) * 0.5f);
 			AddSceneryMesh(SphereMesh, FVector(PlayfieldHalfWidthCm + 12.0f, -8.0f, FrostZ + 75.0f), FRotator::ZeroRotator,
-				FVector(0.22f, 0.32f, 0.38f), FLinearColor(1.0f, 0.62f, 0.78f), FLinearColor(1.0f, 0.62f, 0.78f) * 1.5f);
+				FVector(0.26f, 0.34f, 0.42f), FLinearColor(0.55f, 0.92f, 0.85f), FLinearColor(0.55f, 0.92f, 0.85f) * 0.5f);
 		}
 	}
 	// -------------------------------------------------------------------------
-	// 8. CYBERPUNK METROPOLIS (Holographic Billboards, Flying Traffic)
+	// 8. 8-BIT PIXEL DUNGEON (Stepped Voxel Brick Walls, Pixel Torches, Moss & Chains)
+	// -------------------------------------------------------------------------
+	else if (ThemeInfo.Id == EVTGameThemeId::PixelDungeon)
+	{
+		const FLinearColor VoxelStone(0.24f, 0.24f, 0.34f);
+		const FLinearColor VoxelMoss(0.22f, 0.76f, 0.25f);
+		const FLinearColor VoxelFlame(1.0f, 0.62f, 0.10f);
+		for (int32 b = 0; b < 8; ++b)
+		{
+			const float SideSign = (b % 2 == 0) ? 1.0f : -1.0f;
+			const float BrickX = SideSign * (PlayfieldHalfWidthCm - 8.0f);
+			const float BrickZ = RefCamZ - 420.0f + float(b) * 120.0f;
+			AddSceneryMesh(CubeMesh, FVector(BrickX, 10.0f, BrickZ), FRotator::ZeroRotator,
+				FVector(0.32f, 0.45f, 0.45f), VoxelStone, VoxelStone * 0.22f);
+			AddSceneryMesh(CubeMesh, FVector(BrickX, 8.0f, BrickZ + 24.0f), FRotator::ZeroRotator,
+				FVector(0.34f, 0.46f, 0.12f), VoxelMoss, VoxelMoss * 0.35f);
+		}
+		// 4 Blocky 8-Bit Wall Torches
+		for (int32 t = 0; t < 4; ++t)
+		{
+			const float SideSign = (t % 2 == 0) ? 1.0f : -1.0f;
+			const float TorchX = SideSign * 190.0f;
+			const float TorchZ = RefCamZ - 240.0f + float(t) * 180.0f;
+			AddSceneryMesh(CubeMesh, FVector(TorchX, 235.0f, TorchZ), FRotator::ZeroRotator,
+				FVector(0.12f, 0.12f, 0.38f), FLinearColor(0.45f, 0.26f, 0.12f), FLinearColor::Black);
+			AddSceneryMesh(CubeMesh, FVector(TorchX, 232.0f, TorchZ + 26.0f), FRotator::ZeroRotator,
+				FVector(0.20f, 0.20f, 0.20f), VoxelFlame, VoxelFlame * 10.0f);
+		}
+	}
+	// -------------------------------------------------------------------------
+	// 9. WHIMSICAL TOYBOX (Taped Cardboard Box Walls, Giant LEGO Bricks, Toy Blocks)
+	// -------------------------------------------------------------------------
+	else if (ThemeInfo.Id == EVTGameThemeId::WhimsicalToybox)
+	{
+		const FLinearColor LegoCols[4] = {
+			FLinearColor(0.90f, 0.16f, 0.15f), // Red
+			FLinearColor(0.14f, 0.42f, 0.86f), // Blue
+			FLinearColor(0.96f, 0.78f, 0.10f), // Yellow
+			FLinearColor(0.18f, 0.72f, 0.28f)  // Green
+		};
+		for (int32 b = 0; b < 8; ++b)
+		{
+			const float SideSign = (b % 2 == 0) ? 1.0f : -1.0f;
+			const float WallX = SideSign * (PlayfieldHalfWidthCm - 4.0f);
+			const float BoxZ = RefCamZ - 400.0f + float(b) * 125.0f;
+			const FLinearColor Col = LegoCols[b % 4];
+			AddSceneryMesh(CubeMesh, FVector(WallX, 20.0f, BoxZ), FRotator::ZeroRotator,
+				FVector(0.28f, 0.55f, 0.42f), Col, Col * 0.28f);
+			// Cylindrical LEGO Studs protruding inward from wall bricks
+			AddSceneryMesh(CylinderMesh, FVector(WallX - SideSign * 16.0f, 20.0f, BoxZ), FRotator(0.0f, 0.0f, 90.0f),
+				FVector(0.16f, 0.16f, 0.10f), Col, Col * 0.32f);
+		}
+	}
+	// -------------------------------------------------------------------------
+	// 10. CYBERPUNK METROPOLIS (Holographic Billboards, Flying Traffic)
 	// -------------------------------------------------------------------------
 	else
 	{
@@ -2930,13 +3086,13 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 		for (int32 b = 0; b < 4; ++b)
 		{
 			const FLinearColor BoardCol = (b % 2 == 0) ? ThemeInfo.PrimaryColor : ThemeInfo.WallEmissiveColor;
-			AddSceneryMesh(CubeMesh, FVector(BoardOffsets[b].X, BoardOffsets[b].Y, CameraZ + BoardOffsets[b].Z), FRotator(0.0f, 15.0f, 0.0f),
+			AddSceneryMesh(CubeMesh, FVector(BoardOffsets[b].X, BoardOffsets[b].Y, RefCamZ + BoardOffsets[b].Z), FRotator(0.0f, 15.0f, 0.0f),
 				FVector(0.06f, 1.2f, 0.85f), BoardCol, BoardCol * 8.0f);
 		}
 		for (int32 car = 0; car < 2; ++car)
 		{
 			const float CarY = 560.0f + float(car) * 120.0f;
-			const float CarZ = CameraZ - 100.0f + float(car) * 240.0f;
+			const float CarZ = RefCamZ - 100.0f + float(car) * 240.0f;
 			AddSceneryMesh(CubeMesh, FVector(0.0f, CarY, CarZ), FRotator::ZeroRotator,
 				FVector(0.65f, 0.28f, 0.16f), FLinearColor(0.05f, 0.15f, 0.35f), ThemeInfo.PrimaryColor * 12.0f);
 		}
@@ -2947,28 +3103,28 @@ void AVTTowerGameMode::UpdateThemeScenery(float DeltaTime, float TimeSec)
 {
 	const EVTGameThemeId ActiveThemeId = bInThemeSelectStage ? PreviewThemeId : SelectedThemeId;
 
-	if (ActiveThemeId == EVTGameThemeId::IndustrialForge)
+	// Scroll all ThemeSceneryMeshes smoothly with CameraZ so props stay framed in the camera view as you climb!
+	for (int32 i = 0; i < ThemeSceneryMeshes.Num(); ++i)
 	{
-		for (UStaticMeshComponent* Mesh : ThemeSceneryMeshes)
+		UStaticMeshComponent* Mesh = ThemeSceneryMeshes[i];
+		if (!Mesh || !ThemeSceneryBasePos.IsValidIndex(i)) continue;
+
+		FVector TargetLoc = ThemeSceneryBasePos[i];
+		TargetLoc.Z += CameraZ;
+
+		if (ActiveThemeId == EVTGameThemeId::DeepSea && Mesh->GetRelativeScale3D().X > 0.5f)
 		{
-			if (Mesh && Mesh->GetRelativeScale3D().X > 1.2f)
-			{
-				Mesh->AddLocalRotation(FRotator(0.0f, 0.0f, 25.0f * DeltaTime));
-			}
+			TargetLoc.Z += FMath::Sin(TimeSec * 2.2f + float(i)) * 14.0f;
+		}
+		Mesh->SetRelativeLocation(TargetLoc);
+
+		if (ActiveThemeId == EVTGameThemeId::IndustrialForge && Mesh->GetRelativeScale3D().X > 1.2f)
+		{
+			Mesh->AddLocalRotation(FRotator(0.0f, 0.0f, 25.0f * DeltaTime));
 		}
 	}
-	else if (ActiveThemeId == EVTGameThemeId::DeepSea)
-	{
-		for (int32 i = 0; i < ThemeSceneryMeshes.Num(); ++i)
-		{
-			if (ThemeSceneryMeshes[i] && ThemeSceneryMeshes[i]->GetRelativeScale3D().X > 0.5f)
-			{
-				const float BobZ = FMath::Sin(TimeSec * 2.2f + float(i)) * 0.4f;
-				ThemeSceneryMeshes[i]->AddLocalOffset(FVector(0.0f, 0.0f, BobZ));
-			}
-		}
-	}
-	else if (ActiveThemeId == EVTGameThemeId::AncientRuins)
+
+	if (ActiveThemeId == EVTGameThemeId::AncientRuins)
 	{
 		for (UPointLightComponent* Light : ThemeSceneryLights)
 		{

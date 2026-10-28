@@ -530,6 +530,336 @@ void AVTClimberCharacter::ApplyClimberVisuals(const FVTClimberInfo& InClimberInf
 			ClimberBackLight->SetAttenuationRadius(650.0f);
 		}
 	}
+
+	if (!bLockedSilhouette)
+	{
+		ApplyThemeCharacterCostume(ActiveThemeId);
+	}
+}
+
+void AVTClimberCharacter::ApplyThemeCharacterCostume(EVTGameThemeId InThemeId)
+{
+	ActiveThemeId = InThemeId;
+
+	UStaticMesh* SphereMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	UStaticMesh* CylMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+	UStaticMesh* ConeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cone.Cone"));
+	UMaterialInterface* FallbackMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	UMaterialInterface* CustomNeonMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/VelocityTower/Materials/M_NeonEmissive_Master.M_NeonEmissive_Master"));
+	UMaterialInterface* MatToUse = FallbackMat ? FallbackMat : CustomNeonMat;
+
+	auto SetPartMat = [&](UStaticMeshComponent* Comp, const FLinearColor& Col, float EmissBoost = 0.16f)
+	{
+		if (!Comp || !MatToUse) return;
+		UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(EmissBoost > 1.0f && CustomNeonMat ? CustomNeonMat : MatToUse, this);
+		if (MID)
+		{
+			MID->SetVectorParameterValue(TEXT("BaseColor"), Col);
+			MID->SetVectorParameterValue(TEXT("Color"), Col);
+			MID->SetVectorParameterValue(TEXT("EmissiveColor"), Col * EmissBoost);
+			Comp->SetMaterial(0, MID);
+		}
+	};
+
+	// Reset default meshes before applying theme-specific 1:1 costume
+	if (HeadMesh && SphereMesh) HeadMesh->SetStaticMesh(SphereMesh);
+	if (ClimberMesh && CylMesh) ClimberMesh->SetStaticMesh(CylMesh);
+	if (HeadgearMesh && ConeMesh) HeadgearMesh->SetStaticMesh(ConeMesh);
+	if (HeadgearAccentMesh && CylMesh) HeadgearAccentMesh->SetStaticMesh(CylMesh);
+
+	const bool bIsStylizedThemeHero = (
+		InThemeId == EVTGameThemeId::PapercraftToybox ||
+		InThemeId == EVTGameThemeId::AncientRuins ||
+		InThemeId == EVTGameThemeId::DeepSea ||
+		InThemeId == EVTGameThemeId::CandyLand ||
+		InThemeId == EVTGameThemeId::PixelDungeon ||
+		InThemeId == EVTGameThemeId::WhimsicalToybox
+	);
+
+	if (bIsStylizedThemeHero)
+	{
+		bUsingSkeletalMesh = false;
+		if (SkeletalClimberMesh) SkeletalClimberMesh->SetVisibility(false);
+		if (ClimberMesh) ClimberMesh->SetVisibility(true, true);
+		if (HeadMesh) HeadMesh->SetVisibility(true, true);
+		if (HeadgearMesh) HeadgearMesh->SetVisibility(true);
+		if (HeadgearAccentMesh) HeadgearAccentMesh->SetVisibility(true);
+	}
+
+	// 1. PAPERCRAFT TOYBOX 1:1 -> Handmade Knitted Burlap Ragdoll with Orange Yarn Hair, Button Eyes & Blue/Patchwork Dress
+	if (InThemeId == EVTGameThemeId::PapercraftToybox)
+	{
+		const FLinearColor BurlapSkin(0.84f, 0.68f, 0.52f);
+		const FLinearColor YarnHair(0.78f, 0.30f, 0.14f);
+		const FLinearColor ButtonEye(0.12f, 0.08f, 0.06f);
+		const FLinearColor DenimDress(0.20f, 0.44f, 0.72f);
+		const FLinearColor PatchworkPink(0.88f, 0.44f, 0.64f);
+		const FLinearColor CuffWhite(0.95f, 0.93f, 0.88f);
+		const FLinearColor BootBrown(0.32f, 0.22f, 0.16f);
+
+		if (HeadMesh)
+		{
+			HeadMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 88.0f));
+			HeadMesh->SetRelativeScale3D(FVector(1.12f, 1.18f, 1.05f));
+			SetPartMat(HeadMesh, BurlapSkin, 0.15f);
+		}
+		// Parted orange yarn hair cap
+		if (HeadgearMesh && SphereMesh)
+		{
+			HeadgearMesh->SetStaticMesh(SphereMesh);
+			HeadgearMesh->SetRelativeLocation(FVector(-4.0f, 0.0f, 18.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, -8.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(1.06f, 1.12f, 0.78f));
+			SetPartMat(HeadgearMesh, YarnHair, 0.15f);
+		}
+		if (HeadgearAccentMesh && SphereMesh)
+		{
+			HeadgearAccentMesh->SetStaticMesh(SphereMesh);
+			HeadgearAccentMesh->SetRelativeLocation(FVector(18.0f, -18.0f, 22.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 24.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.55f, 0.82f, 0.36f));
+			SetPartMat(HeadgearAccentMesh, YarnHair, 0.15f);
+		}
+		// Cute stitched smile & two black button eyes
+		if (VisorWrapMesh)
+		{
+			VisorWrapMesh->SetVisibility(true);
+			VisorWrapMesh->SetRelativeLocation(FVector(46.0f, 0.0f, -12.0f));
+			VisorWrapMesh->SetRelativeScale3D(FVector(0.08f, 0.28f, 0.04f));
+			SetPartMat(VisorWrapMesh, ButtonEye, 0.05f);
+		}
+		if (LeftEyeGlowMesh && RightEyeGlowMesh)
+		{
+			LeftEyeGlowMesh->SetVisibility(true);
+			RightEyeGlowMesh->SetVisibility(true);
+			LeftEyeGlowMesh->SetRelativeLocation(FVector(12.0f, -68.0f, 320.0f));
+			RightEyeGlowMesh->SetRelativeLocation(FVector(12.0f, 68.0f, 320.0f));
+			LeftEyeGlowMesh->SetRelativeScale3D(FVector(2.2f, 0.65f, 4.2f));
+			RightEyeGlowMesh->SetRelativeScale3D(FVector(2.2f, 0.65f, 4.2f));
+			SetPartMat(LeftEyeGlowMesh, ButtonEye, 0.05f);
+			SetPartMat(RightEyeGlowMesh, ButtonEye, 0.05f);
+		}
+		// Patchwork dress torso
+		SetPartMat(ClimberMesh, DenimDress, 0.15f);
+		if (ChestCoreMesh)
+		{
+			ChestCoreMesh->SetVisibility(true);
+			ChestCoreMesh->SetRelativeLocation(FVector(38.0f, 14.0f, 4.0f));
+			ChestCoreMesh->SetRelativeScale3D(FVector(0.45f, 0.42f, 0.22f));
+			SetPartMat(ChestCoreMesh, PatchworkPink, 0.15f);
+		}
+		if (PelvisBeltMesh)
+		{
+			PelvisBeltMesh->SetVisibility(true);
+			SetPartMat(PelvisBeltMesh, FLinearColor(0.24f, 0.30f, 0.42f), 0.12f);
+		}
+		// Outstretched burlap arms & legs with white cuffs and dark stitched tips
+		SetPartMat(LeftShoulderMesh, BurlapSkin, 0.15f);
+		SetPartMat(RightShoulderMesh, BurlapSkin, 0.15f);
+		SetPartMat(LeftArmMesh, BurlapSkin, 0.15f);
+		SetPartMat(RightArmMesh, BurlapSkin, 0.15f);
+		SetPartMat(LeftGauntletMesh, BootBrown, 0.12f);
+		SetPartMat(RightGauntletMesh, BootBrown, 0.12f);
+		SetPartMat(LeftLegMesh, BurlapSkin, 0.15f);
+		SetPartMat(RightLegMesh, BurlapSkin, 0.15f);
+		SetPartMat(LeftShoeMesh, BootBrown, 0.12f);
+		SetPartMat(RightShoeMesh, BootBrown, 0.12f);
+
+		if (BackpackJetMesh) BackpackJetMesh->SetVisibility(false, true);
+		for (UStaticMeshComponent* Seg : ScarfSegmentMeshes)
+		{
+			if (Seg) Seg->SetVisibility(false);
+		}
+		if (ClimberRimLight)
+		{
+			ClimberRimLight->SetLightColor(FLinearColor(1.0f, 0.94f, 0.84f));
+			ClimberRimLight->SetIntensity(4500.0f);
+		}
+		if (ClimberBackLight) ClimberBackLight->SetIntensity(2000.0f);
+	}
+	// 2. ANCIENT FANTASY RUINS 1:1 -> Little Purple Wizard with Pointy Hat & Glowing Golden Spell Orb
+	else if (InThemeId == EVTGameThemeId::AncientRuins)
+	{
+		const FLinearColor WizardRobe(0.42f, 0.28f, 0.62f);
+		const FLinearColor WizardHatCol(0.36f, 0.22f, 0.54f);
+		const FLinearColor GoldSpellOrb(1.0f, 0.82f, 0.22f);
+
+		SetPartMat(ClimberMesh, WizardRobe, 0.35f);
+		SetPartMat(HeadMesh, FLinearColor(0.88f, 0.72f, 0.60f), 0.2f);
+		if (HeadgearMesh && ConeMesh)
+		{
+			HeadgearMesh->SetStaticMesh(ConeMesh);
+			HeadgearMesh->SetRelativeLocation(FVector(-4.0f, 0.0f, 64.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator(-10.0f, 0.0f, 0.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.95f, 0.95f, 1.05f));
+			SetPartMat(HeadgearMesh, WizardHatCol, 0.35f);
+		}
+		if (HeadgearAccentMesh && CylMesh)
+		{
+			// Wide wizard hat brim
+			HeadgearAccentMesh->SetStaticMesh(CylMesh);
+			HeadgearAccentMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 24.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(-6.0f, 0.0f, 0.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(1.85f, 1.85f, 0.06f));
+			SetPartMat(HeadgearAccentMesh, WizardHatCol, 0.35f);
+		}
+		SetPartMat(LeftShoulderMesh, WizardRobe, 0.3f);
+		SetPartMat(RightShoulderMesh, WizardRobe, 0.3f);
+		SetPartMat(LeftArmMesh, WizardRobe, 0.3f);
+		SetPartMat(RightArmMesh, WizardRobe, 0.3f);
+		// Glowing golden spell light in right hand!
+		SetPartMat(RightGauntletMesh, GoldSpellOrb, 18.0f);
+		SetPartMat(LeftGauntletMesh, FLinearColor(0.85f, 0.70f, 0.58f), 0.2f);
+		SetPartMat(LeftLegMesh, FLinearColor(0.22f, 0.16f, 0.32f), 0.2f);
+		SetPartMat(RightLegMesh, FLinearColor(0.22f, 0.16f, 0.32f), 0.2f);
+		SetPartMat(LeftShoeMesh, FLinearColor(0.28f, 0.18f, 0.12f), 0.2f);
+		SetPartMat(RightShoeMesh, FLinearColor(0.28f, 0.18f, 0.12f), 0.2f);
+		if (BackpackJetMesh) BackpackJetMesh->SetVisibility(false, true);
+		for (UStaticMeshComponent* Seg : ScarfSegmentMeshes)
+		{
+			if (Seg)
+			{
+				Seg->SetVisibility(true);
+				SetPartMat(Seg, WizardRobe, 0.6f);
+			}
+		}
+	}
+	// 3. BIOLUMINESCENT DEEP SEA 1:1 -> Scuba Diver with Glowing Goggles, Oxygen Tank & Long Flippers
+	else if (InThemeId == EVTGameThemeId::DeepSea)
+	{
+		const FLinearColor WetsuitCol(0.06f, 0.11f, 0.18f);
+		const FLinearColor CyanTrim(0.0f, 0.95f, 0.92f);
+		const FLinearColor TankYellow(0.95f, 0.82f, 0.15f);
+
+		SetPartMat(ClimberMesh, WetsuitCol, 0.25f);
+		SetPartMat(HeadMesh, WetsuitCol, 0.25f);
+		if (HeadgearMesh) HeadgearMesh->SetVisibility(false);
+		if (HeadgearAccentMesh) HeadgearAccentMesh->SetVisibility(false);
+		if (VisorWrapMesh)
+		{
+			VisorWrapMesh->SetVisibility(true);
+			SetPartMat(VisorWrapMesh, CyanTrim, 10.0f);
+		}
+		if (BackpackJetMesh)
+		{
+			BackpackJetMesh->SetVisibility(true, true);
+			SetPartMat(BackpackJetMesh, TankYellow, 1.5f);
+		}
+		// Long scuba swimming flippers
+		if (LeftShoeMesh && RightShoeMesh)
+		{
+			LeftShoeMesh->SetRelativeScale3D(FVector(2.35f, 1.18f, 0.22f));
+			RightShoeMesh->SetRelativeScale3D(FVector(2.35f, 1.18f, 0.22f));
+			SetPartMat(LeftShoeMesh, CyanTrim, 3.0f);
+			SetPartMat(RightShoeMesh, CyanTrim, 3.0f);
+		}
+		for (UStaticMeshComponent* Seg : ScarfSegmentMeshes)
+		{
+			if (Seg)
+			{
+				Seg->SetVisibility(true);
+				SetPartMat(Seg, FLinearColor(0.75f, 0.98f, 1.0f), 4.0f); // Bubble stream!
+			}
+		}
+	}
+	// 4. CANDY LAND DESSERT 1:1 -> Cute Chubby Bubblegum-Pink Plush/Gummy Bear
+	else if (InThemeId == EVTGameThemeId::CandyLand)
+	{
+		const FLinearColor BearPink(1.0f, 0.46f, 0.70f);
+		const FLinearColor BellyCream(1.0f, 0.94f, 0.65f);
+
+		if (HeadMesh)
+		{
+			HeadMesh->SetRelativeScale3D(FVector(1.18f, 1.24f, 1.08f));
+			SetPartMat(HeadMesh, BearPink, 0.25f);
+		}
+		// Two round pink bear ears
+		if (HeadgearMesh && SphereMesh && HeadgearAccentMesh)
+		{
+			HeadgearMesh->SetStaticMesh(SphereMesh);
+			HeadgearAccentMesh->SetStaticMesh(SphereMesh);
+			HeadgearMesh->SetRelativeLocation(FVector(0.0f, -38.0f, 44.0f));
+			HeadgearAccentMesh->SetRelativeLocation(FVector(0.0f, 38.0f, 44.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.42f, 0.42f, 0.42f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.42f, 0.42f, 0.42f));
+			SetPartMat(HeadgearMesh, BearPink, 0.25f);
+			SetPartMat(HeadgearAccentMesh, BearPink, 0.25f);
+		}
+		SetPartMat(ClimberMesh, BearPink, 0.25f);
+		if (ChestCoreMesh)
+		{
+			ChestCoreMesh->SetVisibility(true);
+			SetPartMat(ChestCoreMesh, BellyCream, 0.3f);
+		}
+		SetPartMat(LeftShoulderMesh, BearPink, 0.25f);
+		SetPartMat(RightShoulderMesh, BearPink, 0.25f);
+		SetPartMat(LeftArmMesh, BearPink, 0.25f);
+		SetPartMat(RightArmMesh, BearPink, 0.25f);
+		SetPartMat(LeftGauntletMesh, BearPink, 0.25f);
+		SetPartMat(RightGauntletMesh, BearPink, 0.25f);
+		SetPartMat(LeftLegMesh, BearPink, 0.25f);
+		SetPartMat(RightLegMesh, BearPink, 0.25f);
+		SetPartMat(LeftShoeMesh, BellyCream, 0.25f);
+		SetPartMat(RightShoeMesh, BellyCream, 0.25f);
+		if (BackpackJetMesh) BackpackJetMesh->SetVisibility(false, true);
+		for (UStaticMeshComponent* Seg : ScarfSegmentMeshes)
+		{
+			if (Seg) Seg->SetVisibility(false);
+		}
+	}
+	// 5. 8-BIT PIXEL DUNGEON & WHIMSICAL TOYBOX 1:1 -> Blocky Voxel Hero / Cardboard-Box Robot Kid
+	else if (InThemeId == EVTGameThemeId::PixelDungeon || InThemeId == EVTGameThemeId::WhimsicalToybox)
+	{
+		const bool bToyRobot = (InThemeId == EVTGameThemeId::WhimsicalToybox);
+		const FLinearColor HeadCol = bToyRobot ? FLinearColor(0.78f, 0.58f, 0.36f) : FLinearColor(0.95f, 0.74f, 0.58f);
+		const FLinearColor HairCol = bToyRobot ? FLinearColor(0.72f, 0.52f, 0.30f) : FLinearColor(0.42f, 0.24f, 0.12f);
+		const FLinearColor ShirtCol = bToyRobot ? FLinearColor(0.88f, 0.20f, 0.18f) : FLinearColor(0.32f, 0.26f, 0.78f);
+		const FLinearColor PantsCol = bToyRobot ? FLinearColor(0.18f, 0.44f, 0.78f) : FLinearColor(0.22f, 0.18f, 0.48f);
+
+		if (HeadMesh && CubeMesh)
+		{
+			HeadMesh->SetStaticMesh(CubeMesh);
+			HeadMesh->SetRelativeScale3D(FVector(0.86f, 0.92f, 0.82f));
+			SetPartMat(HeadMesh, HeadCol, 0.18f);
+		}
+		if (ClimberMesh && CubeMesh)
+		{
+			ClimberMesh->SetStaticMesh(CubeMesh);
+			SetPartMat(ClimberMesh, ShirtCol, 0.18f);
+		}
+		if (HeadgearMesh && CubeMesh)
+		{
+			HeadgearMesh->SetStaticMesh(CubeMesh);
+			HeadgearMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 46.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.92f, 0.96f, 0.28f));
+			SetPartMat(HeadgearMesh, HairCol, 0.18f);
+		}
+		if (HeadgearAccentMesh) HeadgearAccentMesh->SetVisibility(false);
+		SetPartMat(LeftShoulderMesh, ShirtCol, 0.18f);
+		SetPartMat(RightShoulderMesh, ShirtCol, 0.18f);
+		SetPartMat(LeftArmMesh, ShirtCol, 0.18f);
+		SetPartMat(RightArmMesh, ShirtCol, 0.18f);
+		SetPartMat(LeftGauntletMesh, HeadCol, 0.18f);
+		SetPartMat(RightGauntletMesh, HeadCol, 0.18f);
+		SetPartMat(LeftLegMesh, PantsCol, 0.18f);
+		SetPartMat(RightLegMesh, PantsCol, 0.18f);
+		SetPartMat(LeftShoeMesh, FLinearColor(0.92f, 0.88f, 0.82f), 0.18f);
+		SetPartMat(RightShoeMesh, FLinearColor(0.92f, 0.88f, 0.82f), 0.18f);
+		if (BackpackJetMesh) BackpackJetMesh->SetVisibility(false, true);
+		for (UStaticMeshComponent* Seg : ScarfSegmentMeshes)
+		{
+			if (Seg) Seg->SetVisibility(false);
+		}
+	}
+	else
+	{
+		// Sci-Fi / Synthwave / Industrial / Cyberpunk Runner: ensure scarf is visible
+		for (UStaticMeshComponent* Seg : ScarfSegmentMeshes)
+		{
+			if (Seg) Seg->SetVisibility(true);
+		}
+	}
 }
 
 void AVTClimberCharacter::UpdateShowroomStagePose(float TimeSec, float ShowroomYawDeg, bool bInCharSelect)
@@ -674,7 +1004,14 @@ void AVTClimberCharacter::UpdateVisualState(float DeltaTime, bool bShowJumpGuide
 
 	// Convert FlipAngleRad & FacingDir into 3D rotation
 	const float PitchDeg = FMath::RadiansToDegrees(FlipAngleRad);
-	const float YawDeg = (FacingDir >= 0) ? 18.0f : 162.0f;
+	const bool bFrontFacingDoll =
+		(ActiveThemeId == EVTGameThemeId::PapercraftToybox ||
+		 ActiveThemeId == EVTGameThemeId::CandyLand ||
+		 ActiveThemeId == EVTGameThemeId::PixelDungeon ||
+		 ActiveThemeId == EVTGameThemeId::WhimsicalToybox);
+	const float YawDeg = bFrontFacingDoll
+		? (-90.0f + float(FacingDir) * 18.0f)
+		: ((FacingDir >= 0) ? 18.0f : 162.0f);
 	const float RunBobRoll = bOnGround ? FMath::Sin(RunPhase) * 8.0f : 0.0f;
 
 	if (bUsingSkeletalMesh && SkeletalClimberMesh)
@@ -791,11 +1128,21 @@ void AVTClimberCharacter::UpdateVisualState(float DeltaTime, bool bShowJumpGuide
 
 				if (!bOnGround)
 				{
-					// Heroic Aerial Jump Pose
-					LeftShoulderMesh->SetRelativeRotation(FRotator(42.0f, 0.0f, 22.0f));
-					RightShoulderMesh->SetRelativeRotation(FRotator(-35.0f, 0.0f, -22.0f));
-					LeftLegMesh->SetRelativeRotation(FRotator(-24.0f, 0.0f, 0.0f));
-					RightLegMesh->SetRelativeRotation(FRotator(28.0f, 0.0f, 0.0f));
+					// Heroic Aerial Jump Pose (cheerful outstretched ragdoll/bear arms when bFrontFacingDoll)
+					if (bFrontFacingDoll)
+					{
+						LeftShoulderMesh->SetRelativeRotation(FRotator(18.0f, 0.0f, 44.0f));
+						RightShoulderMesh->SetRelativeRotation(FRotator(18.0f, 0.0f, -44.0f));
+						LeftLegMesh->SetRelativeRotation(FRotator(14.0f, 0.0f, 18.0f));
+						RightLegMesh->SetRelativeRotation(FRotator(14.0f, 0.0f, -18.0f));
+					}
+					else
+					{
+						LeftShoulderMesh->SetRelativeRotation(FRotator(42.0f, 0.0f, 22.0f));
+						RightShoulderMesh->SetRelativeRotation(FRotator(-35.0f, 0.0f, -22.0f));
+						LeftLegMesh->SetRelativeRotation(FRotator(-24.0f, 0.0f, 0.0f));
+						RightLegMesh->SetRelativeRotation(FRotator(28.0f, 0.0f, 0.0f));
+					}
 				}
 				else
 				{
@@ -820,11 +1167,16 @@ void AVTClimberCharacter::UpdateVisualState(float DeltaTime, bool bShowJumpGuide
 
 	// Note: Ghost spheres removed to prevent dummy ball artifact during rolls!
 
-	// Kinetic Jump Guide Ring under Climber
+	// Kinetic Jump Guide Ring under Climber (only in Cyber/Synthwave/Sci-Fi themes)
 	if (JumpGuideRingMesh)
 	{
+		const bool bAllowNeonGuideRing =
+			(ActiveThemeId == EVTGameThemeId::CyberpunkDefault ||
+			 ActiveThemeId == EVTGameThemeId::RetroSynthwave ||
+			 ActiveThemeId == EVTGameThemeId::DeepSpaceOrbit ||
+			 ActiveThemeId == EVTGameThemeId::IndustrialForge);
 		const bool bCanGroundJump = bOnGround || CoyoteFrames > 0;
-		if (bShowJumpGuide && bCanGroundJump)
+		if (bAllowNeonGuideRing && bShowJumpGuide && bCanGroundJump)
 		{
 			JumpGuideRingMesh->SetVisibility(true);
 			const float Pulse = (FMath::Sin(GetWorld()->GetTimeSeconds() * 15.0f) + 1.0f) * 0.5f;

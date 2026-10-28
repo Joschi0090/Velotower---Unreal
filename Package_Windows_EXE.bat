@@ -4,7 +4,14 @@ echo ===========================================================================
 echo   VELOCITY TOWER // VICE ^& ICE APEX - WINDOWS EXE PACKAGING
 echo ============================================================================
 echo.
-set "UAT_PATH=O:\Epic Games\UE_5.8\Engine\Build\BatchFiles\RunUAT.bat"
+if exist "E:\dev\AutoSDK" (
+    set "UE_SDKS_ROOT=E:\dev\AutoSDK"
+)
+if exist "E:\Unreal\UE_5.8\Engine\Build\BatchFiles\RunUAT.bat" (
+    set "UAT_PATH=E:\Unreal\UE_5.8\Engine\Build\BatchFiles\RunUAT.bat"
+) else (
+    set "UAT_PATH=O:\Epic Games\UE_5.8\Engine\Build\BatchFiles\RunUAT.bat"
+)
 set "PROJECT_PATH=%~dp0VelocityTower.uproject"
 set "OUTPUT_DIR=%~dp0Build\Windows_Release"
 
@@ -15,7 +22,7 @@ echo Starte Packaging nach: "%OUTPUT_DIR%"
 echo Bitte warten (dauert beim ersten Mal ca. 2-5 Minuten)...
 echo.
 
-call "%UAT_PATH%" BuildCookRun -project="%PROJECT_PATH%" -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development -cook -allmaps -build -nocompileeditor -skipbuildeditor -stage -pak -archive -archivedirectory="%OUTPUT_DIR%" -utf8output
+call "%UAT_PATH%" BuildCookRun -project="%PROJECT_PATH%" -noP4 -platform=Win64 -clientconfig=Development -serverconfig=Development -cook -allmaps -build -stage -pak -archive -archivedirectory="%OUTPUT_DIR%" -utf8output
 if errorlevel 1 (
     echo.
     echo [FEHLER] Build fehlgeschlagen! Falls der Unreal Editor noch offen ist, bitte kurz schliessen und erneut starten.
@@ -33,7 +40,7 @@ if exist "%~dp0RawAssets" (
 echo.
 echo ============================================================================
 echo   ERFOLGREICH! Deine fertige Version fuer deinen Kumpel liegt hier:
-echo   %OUTPUT_DIR%\VelocityTower.exe
+echo   %OUTPUT_DIR%\Windows\VelocityTower.exe
 echo   (WICHTIG: Immer den gesamten Ordner "Windows_Release" als .zip verschicken!)
 echo ============================================================================
 pause

@@ -297,6 +297,31 @@ void UVTMainHUDWidget::LoadNanoBananaTextures()
 			BrushDeadBanner = MakeShareable(new FSlateDynamicImageBrush(TexDeadBanner, FVector2D(580.0f, 320.0f), FName("VTDeadBannerBrush")));
 		}
 	}
+
+	// Load all 10 1:1 Theme Frame Textures from RawAssets/Themes/
+	auto LoadThemeTex = [this](EVTGameThemeId ThemeId, const FString& FileName, const FName& BrushName)
+	{
+		if (ThemeFrameBrushes.Contains(ThemeId)) return;
+		UTexture2D* Tex = LoadTextureFromDiskOrAsset(
+			FString::Printf(TEXT("/Game/VelocityTower/Themes/%s.%s"), *FPaths::GetBaseFilename(FileName), *FPaths::GetBaseFilename(FileName)),
+			FString::Printf(TEXT("RawAssets/Themes/%s"), *FileName));
+		if (Tex)
+		{
+			ThemeFrameTextures.Add(ThemeId, Tex);
+			ThemeFrameBrushes.Add(ThemeId, MakeShareable(new FSlateDynamicImageBrush(Tex, FVector2D(float(Tex->GetSizeX()), float(Tex->GetSizeY())), BrushName)));
+		}
+	};
+
+	LoadThemeTex(EVTGameThemeId::PapercraftToybox, TEXT("Theme_Papercraft.jpg"), FName("VTTheme_Papercraft"));
+	LoadThemeTex(EVTGameThemeId::AncientRuins, TEXT("Theme_AncientRuins.jpg"), FName("VTTheme_AncientRuins"));
+	LoadThemeTex(EVTGameThemeId::DeepSea, TEXT("Theme_DeepSea.jpg"), FName("VTTheme_DeepSea"));
+	LoadThemeTex(EVTGameThemeId::RetroSynthwave, TEXT("Theme_RetroSynthwave_Alt.jpg"), FName("VTTheme_RetroSynthwave"));
+	LoadThemeTex(EVTGameThemeId::CandyLand, TEXT("Theme_CandyLand.jpg"), FName("VTTheme_CandyLand"));
+	LoadThemeTex(EVTGameThemeId::IndustrialForge, TEXT("Theme_IndustrialForge.jpg"), FName("VTTheme_IndustrialForge"));
+	LoadThemeTex(EVTGameThemeId::DeepSpaceOrbit, TEXT("Theme_DeepSpaceOrbit.jpg"), FName("VTTheme_DeepSpaceOrbit"));
+	LoadThemeTex(EVTGameThemeId::PixelDungeon, TEXT("Theme_PixelDungeon.jpg"), FName("VTTheme_PixelDungeon"));
+	LoadThemeTex(EVTGameThemeId::WhimsicalToybox, TEXT("Theme_WhimsicalToybox.jpg"), FName("VTTheme_WhimsicalToybox"));
+	LoadThemeTex(EVTGameThemeId::CyberpunkDefault, TEXT("Theme_CyberpunkMetropolis.jpg"), FName("VTTheme_CyberpunkMetropolis"));
 }
 
 void UVTMainHUDWidget::NativeConstruct()
@@ -337,6 +362,9 @@ void UVTMainHUDWidget::OpenLeaderboardModal(bool bFriendsTab)
 	OpenModal(EVTModalOverlay::FriendsAndRivals);
 }
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4883)
+#endif
 TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 {
 	LoadNanoBananaTextures();
@@ -1584,7 +1612,7 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 									]
 									+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0.0f, 1.0f, 0.0f, 4.0f)
 									[
-										SNew(STextBlock)
+										SAssignNew(TxtJumpButtonLabel, STextBlock)
 										.Text(FText::FromString(TEXT("JUMP")))
 										.Font(VTTheme::Font(10, true))
 										.ColorAndOpacity(VTTheme::Pink)
@@ -1592,6 +1620,206 @@ TSharedRef<SWidget> UVTMainHUDWidget::RebuildWidget()
 								]
 							]
 						]
+					]
+				]
+			]
+
+			// 4. 1:1 INTERACTIVE BOTTOM CONTROL BAR HITBOXES (CRAZY CLIMBER < / > | GLUE | JUMP | SHOP | START!)
+			+ SOverlay::Slot()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Bottom)
+			[
+				SNew(SBox)
+				.HeightOverride(96.0f)
+				[
+					SNew(SHorizontalBox)
+
+					// 4A. Bottom-Left "<" (CRAZY CLIMBER Left)
+					+ SHorizontalBox::Slot().FillWidth(0.16f)
+					[
+						SNew(SButton)
+						.IsFocusable(false)
+						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+						.OnPressed_Lambda([this]()
+						{
+							if (AVTPlayerController* PC = GetTowerPC())
+							{
+								PC->bKeyLeft = true;
+								PC->bKeyRight = false;
+								PC->AnalogSteer = -1.0f;
+								PC->TriggerHapticFeedback(14);
+							}
+						})
+						.OnReleased_Lambda([this]()
+						{
+							if (AVTPlayerController* PC = GetTowerPC())
+							{
+								PC->bKeyLeft = false;
+								PC->AnalogSteer = 0.0f;
+							}
+						})
+						[ SNew(SSpacer) ]
+					]
+
+					// 4B. Bottom-Left ">" (CRAZY CLIMBER Right)
+					+ SHorizontalBox::Slot().FillWidth(0.16f)
+					[
+						SNew(SButton)
+						.IsFocusable(false)
+						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+						.OnPressed_Lambda([this]()
+						{
+							if (AVTPlayerController* PC = GetTowerPC())
+							{
+								PC->bKeyRight = true;
+								PC->bKeyLeft = false;
+								PC->AnalogSteer = 1.0f;
+								PC->TriggerHapticFeedback(14);
+							}
+						})
+						.OnReleased_Lambda([this]()
+						{
+							if (AVTPlayerController* PC = GetTowerPC())
+							{
+								PC->bKeyRight = false;
+								PC->AnalogSteer = 0.0f;
+							}
+						})
+						[ SNew(SSpacer) ]
+					]
+
+					// 4C. "GLUE" Button (Activates Time-Freeze / Glue Slowdown!)
+					+ SHorizontalBox::Slot().FillWidth(0.12f)
+					[
+						SNew(SButton)
+						.IsFocusable(false)
+						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+						.OnClicked_Lambda([this]()
+						{
+							if (AVTTowerGameMode* GM = GetTowerGM())
+							{
+								GM->FreezeFrames = 360;
+								GM->PlayTowerSFX(TEXT("PowerUp_Freeze"), 1.0f, 1.0f);
+								GM->SpawnFloatingText(TEXT("GLUE AKTIV! (KAMERA GESTOPPT)"), 0.0f, GM->CameraZ, FLinearColor(0.98f, 0.85f, 0.20f), 16);
+							}
+							return FReply::Handled();
+						})
+						[ SNew(SSpacer) ]
+					]
+
+					// 4D. Center Hanger-Tab "JUMP" Button
+					+ SHorizontalBox::Slot().FillWidth(0.24f)
+					[
+						SNew(SButton)
+						.IsFocusable(false)
+						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+						.OnPressed_Lambda([this]()
+						{
+							if (AVTPlayerController* PC = GetTowerPC())
+							{
+								PC->TriggerJumpAction();
+								PC->TriggerHapticFeedback(22);
+							}
+						})
+						.OnReleased_Lambda([this]()
+						{
+							if (AVTPlayerController* PC = GetTowerPC())
+							{
+								PC->ReleaseJumpAction();
+							}
+						})
+						[ SNew(SSpacer) ]
+					]
+
+					// 4E. "SHOP" Button (Opens 10-World Theme Selector / Shop)
+					+ SHorizontalBox::Slot().FillWidth(0.14f)
+					[
+						SNew(SButton)
+						.IsFocusable(false)
+						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+						.OnClicked_Lambda([this]()
+						{
+							OpenThemeSelectModal();
+							return FReply::Handled();
+						})
+						[ SNew(SSpacer) ]
+					]
+
+					// 4F. "START!" Button (Starts fresh run / Launches climber!)
+					+ SHorizontalBox::Slot().FillWidth(0.18f)
+					[
+						SNew(SButton)
+						.IsFocusable(false)
+						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+						.OnClicked_Lambda([this]()
+						{
+							if (AVTTowerGameMode* GM = GetTowerGM())
+							{
+								GM->StartNewRun();
+							}
+							if (AVTPlayerController* PC = GetTowerPC())
+							{
+								PC->TriggerJumpAction();
+							}
+							return FReply::Handled();
+						})
+						[ SNew(SSpacer) ]
+					]
+				]
+			]
+
+			// 5. COMPACT 1-CLICK LIVE WORLD SWITCHER BAR (Top-Center below Header so all 10 1:1 Worlds can be tested anytime!)
+			+ SOverlay::Slot()
+			.HAlign(HAlign_Center)
+			.VAlign(VAlign_Top)
+			.Padding(FMargin(0.0f, 88.0f, 0.0f, 0.0f))
+			[
+				SNew(SBorder)
+				.BorderImage(WhiteBrush)
+				.BorderBackgroundColor(FLinearColor(0.12f, 0.08f, 0.05f, 0.82f))
+				.Padding(FMargin(4.0f, 2.0f))
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().AutoWidth().Padding(2.0f, 0.0f)
+					[
+						VTTheme::MakeButton(TEXT("◀ WELT"), FLinearColor(0.20f, 0.14f, 0.08f, 0.95f), VTTheme::Gold, 8, FMargin(7.0f, 3.0f),
+							FOnClicked::CreateLambda([this]()
+							{
+								if (AVTTowerGameMode* GM = GetTowerGM())
+								{
+									GM->SelectThemeDirection(-1);
+								}
+								return FReply::Handled();
+							}))
+					]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6.0f, 0.0f)
+					[
+						SNew(SButton)
+						.IsFocusable(false)
+						.ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder"))
+						.OnClicked_Lambda([this]()
+						{
+							OpenThemeSelectModal();
+							return FReply::Handled();
+						})
+						[
+							SAssignNew(TxtLiveThemeSwitcherLabel, STextBlock)
+							.Text(FText::FromString(TEXT("WELT 1/10: PAPERCRAFT")))
+							.Font(VTTheme::Font(8, true))
+							.ColorAndOpacity(FLinearColor(1.0f, 0.95f, 0.80f, 1.0f))
+						]
+					]
+					+ SHorizontalBox::Slot().AutoWidth().Padding(2.0f, 0.0f)
+					[
+						VTTheme::MakeButton(TEXT("WELT ▶"), FLinearColor(0.20f, 0.14f, 0.08f, 0.95f), VTTheme::Gold, 8, FMargin(7.0f, 3.0f),
+							FOnClicked::CreateLambda([this]()
+							{
+								if (AVTTowerGameMode* GM = GetTowerGM())
+								{
+									GM->SelectThemeDirection(1);
+								}
+								return FReply::Handled();
+							}))
 					]
 				]
 			]
@@ -5873,10 +6101,16 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 	// 2. Main Lobby vs Play vs Game Over Visibility
 	const bool bBootReady = (GM->BootFlowState == EVTBootFlowState::Ready);
+	const bool bHas1to1ThemeFrame = ThemeFrameBrushes.Contains(GM->SelectedThemeId);
 	if (InGameTopHudBorder.IsValid())
 	{
-		const bool bShowInGame = bBootReady && (GM->TowerRunState == EVTGameState::Play);
+		const bool bShowInGame = bBootReady && (GM->TowerRunState == EVTGameState::Play) && !bHas1to1ThemeFrame;
 		InGameTopHudBorder->SetVisibility(bShowInGame ? EVisibility::Visible : EVisibility::Collapsed);
+	}
+	if (TxtLiveThemeSwitcherLabel.IsValid())
+	{
+		const FVTGameThemeInfo CurT = GM->GetThemeInfo(GM->SelectedThemeId);
+		TxtLiveThemeSwitcherLabel->SetText(FText::FromString(FString::Printf(TEXT("WELT %d/10: %s"), CurT.ThemeNumber, *CurT.Name)));
 	}
 	if (MainMenuOverlayBorder.IsValid())
 	{
@@ -6081,8 +6315,8 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 			}
 
 			const bool bUseDpadButtons = (GM->CurrentControlMode == EVTControlMode::ClassicButtons);
-			if (VirtualJoystickModeBox.IsValid()) VirtualJoystickModeBox->SetVisibility(bUseDpadButtons ? EVisibility::Collapsed : EVisibility::Visible);
-			if (ClassicDpadModeBox.IsValid()) ClassicDpadModeBox->SetVisibility(bUseDpadButtons ? EVisibility::Visible : EVisibility::Collapsed);
+			if (VirtualJoystickModeBox.IsValid()) VirtualJoystickModeBox->SetVisibility((!bHas1to1ThemeFrame && !bUseDpadButtons) ? EVisibility::Visible : EVisibility::Collapsed);
+			if (ClassicDpadModeBox.IsValid()) ClassicDpadModeBox->SetVisibility((bHudDragEditMode || (!bHas1to1ThemeFrame && bUseDpadButtons)) ? EVisibility::Visible : EVisibility::Collapsed);
 
 			if (JoystickKnobBorder.IsValid() && PC)
 			{
@@ -6140,7 +6374,7 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	// Update Dedicated Live Tower Altitude & Height Overlay
 	if (LiveAltitudeHudBorder.IsValid())
 	{
-		const bool bInGamePlay = (GM->TowerRunState == EVTGameState::Play && !GM->bIsDeathSequenceActive);
+		const bool bInGamePlay = (GM->TowerRunState == EVTGameState::Play && !GM->bIsDeathSequenceActive && !bHas1to1ThemeFrame);
 		LiveAltitudeHudBorder->SetVisibility(bInGamePlay ? EVisibility::Visible : EVisibility::Collapsed);
 
 		if (bInGamePlay)
@@ -6465,10 +6699,140 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 int32 UVTMainHUDWidget::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	int32 MaxLayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-
 	AVTTowerGameMode* GM = GetTowerGM();
 	AVTPlayerController* PC = GetTowerPC();
+
+	// 1. Draw 1:1 Theme Frame (Top Header, Left/Right Outer Craft/Stone/Coral Borders + Music Meter, and Bottom Control Bar)
+	if (GM && GM->BootFlowState == EVTBootFlowState::Ready && GM->TowerRunState == EVTGameState::Play && ActiveModal == EVTModalOverlay::None && !bHudDragEditMode)
+	{
+		const EVTGameThemeId ThemeId = GM->SelectedThemeId;
+		if (const TSharedPtr<FSlateDynamicImageBrush>* FoundBrushPtr = ThemeFrameBrushes.Find(ThemeId))
+		{
+			if (FoundBrushPtr->IsValid())
+			{
+				const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+				if (LocalSize.X > 10.0f && LocalSize.Y > 10.0f)
+				{
+					const FSlateBrush* BaseBrush = FoundBrushPtr->Get();
+					auto DrawUVSlice = [&](const FVector2D& Pos, const FVector2D& Size, const FVector2D& UV0, const FVector2D& UV1, int32 DrawLayer)
+					{
+						FSlateBrush SliceBrush = *BaseBrush;
+						SliceBrush.SetUVRegion(FBox2D(UV0, UV1));
+						FSlateDrawElement::MakeBox(
+							OutDrawElements,
+							DrawLayer,
+							AllottedGeometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)),
+							&SliceBrush,
+							ESlateDrawEffect::None,
+							FLinearColor::White
+						);
+					};
+
+					const bool bHasDedicatedBottomBar =
+						(ThemeId == EVTGameThemeId::PapercraftToybox ||
+						 ThemeId == EVTGameThemeId::AncientRuins ||
+						 ThemeId == EVTGameThemeId::DeepSea ||
+						 ThemeId == EVTGameThemeId::RetroSynthwave);
+
+					const float TopH = LocalSize.Y * 0.092f;
+					const float BotY = LocalSize.Y * 0.884f;
+					const float BotH = LocalSize.Y - BotY;
+					const float MidH = BotY - TopH;
+					const float LeftW = LocalSize.X * 0.112f;
+					const float RightW = LocalSize.X * 0.132f;
+					const float RightX = LocalSize.X - RightW;
+
+					// 1A. Left & Right Outer Theme Borders + Right Volume/Music Meter Widget
+					DrawUVSlice(FVector2D(0.0f, TopH), FVector2D(LeftW, MidH), FVector2D(0.0f, 0.092f), FVector2D(0.112f, 0.884f), LayerId);
+					DrawUVSlice(FVector2D(RightX, TopH), FVector2D(RightW, MidH), FVector2D(0.868f, 0.092f), FVector2D(1.0f, 0.884f), LayerId);
+
+					// 1B. Top 1:1 Theme Header Bar (SCORE / COMBO x25 / STAGE)
+					DrawUVSlice(FVector2D(0.0f, 0.0f), FVector2D(LocalSize.X, TopH), FVector2D(0.0f, 0.0f), FVector2D(1.0f, 0.092f), LayerId + 1);
+
+					// 1C. Bottom 1:1 Control Bar (CRAZY CLIMBER! | GLUE | JUMP | SHOP | START!)
+					if (bHasDedicatedBottomBar)
+					{
+						DrawUVSlice(FVector2D(0.0f, BotY), FVector2D(LocalSize.X, BotH), FVector2D(0.0f, 0.884f), FVector2D(1.0f, 1.0f), LayerId + 1);
+					}
+					else
+					{
+						// For the 6 grid-reference themes, draw their bottom border strip + themed control buttons
+						DrawUVSlice(FVector2D(0.0f, BotY), FVector2D(LocalSize.X, BotH), FVector2D(0.0f, 0.0f), FVector2D(1.0f, 0.092f), LayerId + 1);
+						const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush("GenericWhiteBox");
+						const FVTGameThemeInfo TInfo = GM->GetThemeInfo(ThemeId);
+						FSlateDrawElement::MakeBox(
+							OutDrawElements,
+							LayerId + 2,
+							AllottedGeometry.ToPaintGeometry(FVector2D(LocalSize.X, BotH), FSlateLayoutTransform(FVector2D(0.0f, BotY))),
+							WhiteBrush,
+							ESlateDrawEffect::None,
+							FLinearColor(TInfo.WallBaseColor.R * 0.35f, TInfo.WallBaseColor.G * 0.35f, TInfo.WallBaseColor.B * 0.35f, 0.90f)
+						);
+						FSlateFontInfo BtnFont = VTTheme::Font(11, true);
+						const FString BarText = TEXT("[ ◀ LINKS | RECHTS ▶ ]     [ GLUE ]     [ ▲ JUMP ]     [ SHOP ]     [ START! ]");
+						FSlateDrawElement::MakeText(
+							OutDrawElements,
+							LayerId + 3,
+							AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(FVector2D(LocalSize.X * 0.06f, BotY + BotH * 0.38f))),
+							BarText,
+							BtnFont,
+							ESlateDrawEffect::None,
+							TInfo.PrimaryColor
+						);
+					}
+
+					// 1D. Live Dynamic Score / Stage / Combo Overlay when climbing (MaxFloor > 0)
+					if (GM->MaxFloor > 0 || GM->CurrentCombo > 0)
+					{
+						const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush("GenericWhiteBox");
+						FSlateFontInfo HudFont = VTTheme::Font(11, true);
+						HudFont.OutlineSettings.OutlineSize = 2;
+						HudFont.OutlineSettings.OutlineColor = FLinearColor(0.08f, 0.05f, 0.02f, 0.95f);
+
+						const FString LiveScoreStr = FString::Printf(TEXT("SCORE: %s"), *FText::AsNumber(GM->CurrentScore).ToString());
+						const FString LiveStageStr = FString::Printf(TEXT("STAGE 1-%d (FLOOR %d)"), 1 + (GM->MaxFloor / 10), GM->MaxFloor);
+						FSlateDrawElement::MakeBox(
+							OutDrawElements,
+							LayerId + 2,
+							AllottedGeometry.ToPaintGeometry(FVector2D(LocalSize.X * 0.28f, 22.0f), FSlateLayoutTransform(FVector2D(LocalSize.X * 0.03f, TopH - 24.0f))),
+							WhiteBrush,
+							ESlateDrawEffect::None,
+							FLinearColor(0.14f, 0.09f, 0.05f, 0.82f)
+						);
+						FSlateDrawElement::MakeText(
+							OutDrawElements,
+							LayerId + 3,
+							AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(FVector2D(LocalSize.X * 0.045f, TopH - 21.0f))),
+							LiveScoreStr,
+							HudFont,
+							ESlateDrawEffect::None,
+							FLinearColor(1.0f, 0.95f, 0.78f, 1.0f)
+						);
+
+						FSlateDrawElement::MakeBox(
+							OutDrawElements,
+							LayerId + 2,
+							AllottedGeometry.ToPaintGeometry(FVector2D(LocalSize.X * 0.30f, 22.0f), FSlateLayoutTransform(FVector2D(LocalSize.X * 0.67f, TopH - 24.0f))),
+							WhiteBrush,
+							ESlateDrawEffect::None,
+							FLinearColor(0.14f, 0.09f, 0.05f, 0.82f)
+						);
+						FSlateDrawElement::MakeText(
+							OutDrawElements,
+							LayerId + 3,
+							AllottedGeometry.ToPaintGeometry(FSlateLayoutTransform(FVector2D(LocalSize.X * 0.685f, TopH - 21.0f))),
+							LiveStageStr,
+							HudFont,
+							ESlateDrawEffect::None,
+							FLinearColor(1.0f, 0.95f, 0.78f, 1.0f)
+						);
+					}
+				}
+			}
+		}
+	}
+
+	int32 MaxLayerId = Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId + 4, InWidgetStyle, bParentEnabled);
 	if (!GM || !PC) return MaxLayerId;
 
 	// Render Floating Score Texts in full 3D-to-2D projection!
