@@ -322,6 +322,7 @@ void UVTMainHUDWidget::LoadNanoBananaTextures()
 	LoadThemeTex(EVTGameThemeId::PixelDungeon, TEXT("Theme_PixelDungeon.jpg"), FName("VTTheme_PixelDungeon"));
 	LoadThemeTex(EVTGameThemeId::WhimsicalToybox, TEXT("Theme_WhimsicalToybox.jpg"), FName("VTTheme_WhimsicalToybox"));
 	LoadThemeTex(EVTGameThemeId::CyberpunkDefault, TEXT("Theme_CyberpunkMetropolis.jpg"), FName("VTTheme_CyberpunkMetropolis"));
+	LoadThemeTex(EVTGameThemeId::BioLumenArk, TEXT("Theme_BioLumenArk.jpg"), FName("VTTheme_BioLumenArk"));
 }
 
 void UVTMainHUDWidget::NativeConstruct()
@@ -6110,7 +6111,7 @@ void UVTMainHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	if (TxtLiveThemeSwitcherLabel.IsValid())
 	{
 		const FVTGameThemeInfo CurT = GM->GetThemeInfo(GM->SelectedThemeId);
-		TxtLiveThemeSwitcherLabel->SetText(FText::FromString(FString::Printf(TEXT("WELT %d/10: %s"), CurT.ThemeNumber, *CurT.Name)));
+		TxtLiveThemeSwitcherLabel->SetText(FText::FromString(FString::Printf(TEXT("WELT %d/%d: %s"), CurT.ThemeNumber, GM->Themes.Num(), *CurT.Name)));
 	}
 	if (MainMenuOverlayBorder.IsValid())
 	{
@@ -6732,6 +6733,7 @@ int32 UVTMainHUDWidget::NativePaint(const FPaintArgs& Args, const FGeometry& All
 						(ThemeId == EVTGameThemeId::PapercraftToybox ||
 						 ThemeId == EVTGameThemeId::AncientRuins ||
 						 ThemeId == EVTGameThemeId::DeepSea ||
+						 ThemeId == EVTGameThemeId::BioLumenArk ||
 						 ThemeId == EVTGameThemeId::RetroSynthwave);
 
 					const float TopH = LocalSize.Y * 0.092f;

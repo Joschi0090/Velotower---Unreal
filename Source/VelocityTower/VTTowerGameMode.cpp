@@ -341,6 +341,12 @@ void AVTTowerGameMode::InitializeStaticCatalogs()
 			TEXT("1:1 Dunkle Cyberpunk-Megastruktur mit leuchtenden Hologramm-Brücken, Stahlträgern, Kanji-Reklamen und fliegenden Autos."),
 			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.02f, 0.52f, 0.78f), FLinearColor(0.04f, 0.07f, 0.15f),
 			FLinearColor(0.0f, 0.961f, 0.831f), FLinearColor(0.0f, 0.961f, 0.831f), 19500.0f, FLinearColor(0.0f, 0.961f, 0.831f), 0, true);
+
+		// 11. Bio-Lumen Xenoverse Ark (1:1 Vorlage ref_08_bio_lumen_xenoverse_ark_1793214803988)
+		AddTheme(EVTGameThemeId::BioLumenArk, 11, TEXT("BIO-LUMEN XENOVERSE ARK"), TEXT("Organic Sci-Fi // Alien Flora Ark"),
+			TEXT("1:1 Organische Raumschiff-Arche mit Wand-Terrarien, leuchtenden Alien-Pflanzen, Ionen-Triebwerken, Cyan- & Violett-Hologrammbrücken mit Ranken und Ringplanet im All."),
+			FLinearColor(0.0f, 0.95f, 1.0f), FLinearColor(0.78f, 0.35f, 1.0f), FLinearColor(0.08f, 0.12f, 0.18f),
+			FLinearColor(0.0f, 0.95f, 1.0f), FLinearColor(0.12f, 0.92f, 1.0f), 21000.0f, FLinearColor(0.0f, 0.95f, 1.0f), 0, true);
 	}
 }
 
@@ -422,8 +428,8 @@ void AVTTowerGameMode::BeginPlay()
 		{
 			ActiveSaveGame->UnlockedThemes.AddUnique(T.Id);
 		}
-		ActiveSaveGame->SelectedTheme = EVTGameThemeId::PapercraftToybox;
-		SelectedThemeId = EVTGameThemeId::PapercraftToybox;
+		ActiveSaveGame->SelectedTheme = EVTGameThemeId::BioLumenArk;
+		SelectedThemeId = EVTGameThemeId::BioLumenArk;
 		PreviewThemeId = SelectedThemeId;
 
 		StartFloor = ActiveSaveGame->StartFloor;
@@ -2540,6 +2546,7 @@ void AVTTowerGameMode::ApplyThemeVisuals(const FVTGameThemeInfo& ThemeInfo)
 		(ThemeInfo.Id == EVTGameThemeId::CyberpunkDefault ||
 		 ThemeInfo.Id == EVTGameThemeId::RetroSynthwave ||
 		 ThemeInfo.Id == EVTGameThemeId::DeepSpaceOrbit ||
+		 ThemeInfo.Id == EVTGameThemeId::BioLumenArk ||
 		 ThemeInfo.Id == EVTGameThemeId::IndustrialForge);
 
 	// 1. Wall Emissive Rails & Accents
@@ -3075,7 +3082,7 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 	// -------------------------------------------------------------------------
 	// 10. CYBERPUNK METROPOLIS (Holographic Billboards, Flying Traffic)
 	// -------------------------------------------------------------------------
-	else
+	else if (ThemeInfo.Id == EVTGameThemeId::CyberpunkDefault)
 	{
 		const FVector BoardOffsets[4] = {
 			FVector(-PlayfieldHalfWidthCm - 35.0f, 120.0f, -180.0f),
@@ -3095,6 +3102,70 @@ void AVTTowerGameMode::BuildThemeScenery(const FVTGameThemeInfo& ThemeInfo)
 			const float CarZ = RefCamZ - 100.0f + float(car) * 240.0f;
 			AddSceneryMesh(CubeMesh, FVector(0.0f, CarY, CarZ), FRotator::ZeroRotator,
 				FVector(0.65f, 0.28f, 0.16f), FLinearColor(0.05f, 0.15f, 0.35f), ThemeInfo.PrimaryColor * 12.0f);
+		}
+	}
+	// -------------------------------------------------------------------------
+	// 11. BIO-LUMEN XENOVERSE ARK 1:1 (ref_08_bio_lumen_xenoverse_ark_1793214803988.jpg)
+	//     Colossal Teal Ringplanet, Purple Moon, 4 Wall Terrarium Flora Cylinders & Bio-Domes
+	// -------------------------------------------------------------------------
+	else
+	{
+		const FLinearColor CyanLumen(0.0f, 0.95f, 1.0f);
+		const FLinearColor VioletLumen(0.78f, 0.35f, 1.0f);
+		const FLinearColor EmeraldFlora(0.12f, 0.95f, 0.52f);
+		const FLinearColor CoralPink(1.0f, 0.38f, 0.72f);
+
+		// A. Colossal Turquoise-and-White Ocean Exoplanet in deep space (Y = +840cm)
+		const FVector PlanetPos(60.0f, 840.0f, RefCamZ + 120.0f);
+		AddSceneryMesh(SphereMesh, PlanetPos, FRotator(20.0f, 40.0f, 0.0f),
+			FVector(5.2f, 5.2f, 5.2f), FLinearColor(0.08f, 0.62f, 0.74f), FLinearColor(0.05f, 0.45f, 0.55f) * 1.8f);
+		// Diagonal sweeping glowing cyan planetary rings
+		AddSceneryMesh(CylinderMesh, PlanetPos, FRotator(68.0f, 28.0f, 0.0f),
+			FVector(8.8f, 8.8f, 0.035f), CyanLumen, CyanLumen * 3.5f);
+
+		// B. Purple/Magenta Companion Moon in the lower right background
+		const FVector MoonPos(220.0f, 760.0f, RefCamZ - 120.0f);
+		AddSceneryMesh(SphereMesh, MoonPos, FRotator::ZeroRotator,
+			FVector(1.8f, 1.8f, 1.8f), VioletLumen * 0.7f, VioletLumen * 2.2f);
+
+		// C. 4 Tall Vertical Cylindrical Wall-Terrariums embedded in the Left & Right Shaft Bulkheads
+		// Left Upper & Lower Terrariums (Screen Left = +X)
+		const float LeftWallX = PlayfieldHalfWidthCm - 12.0f;
+		const float RightWallX = -PlayfieldHalfWidthCm + 12.0f;
+		const float TerrariumZ[2] = { RefCamZ + 190.0f, RefCamZ - 140.0f };
+
+		for (int32 t = 0; t < 2; ++t)
+		{
+			// Left Wall Terrarium Cylinder & Alien Flora
+			AddSceneryMesh(CylinderMesh, FVector(LeftWallX, 15.0f, TerrariumZ[t]), FRotator::ZeroRotator,
+				FVector(0.36f, 0.36f, 1.55f), FLinearColor(0.06f, 0.12f, 0.18f), CyanLumen * 1.5f);
+			AddSceneryMesh(CylinderMesh, FVector(LeftWallX, 12.0f, TerrariumZ[t]), FRotator::ZeroRotator,
+				FVector(0.28f, 0.28f, 1.35f), FLinearColor(0.02f, 0.85f, 0.95f), CyanLumen * 8.0f);
+			AddSceneryMesh(ConeMesh, FVector(LeftWallX - 8.0f, 10.0f, TerrariumZ[t] - 20.0f), FRotator(0.0f, 0.0f, 18.0f),
+				FVector(0.18f, 0.18f, 0.65f), EmeraldFlora, EmeraldFlora * 10.0f);
+			AddSceneryMesh(SphereMesh, FVector(LeftWallX - 8.0f, 10.0f, TerrariumZ[t] + 28.0f), FRotator::ZeroRotator,
+				FVector(0.16f, 0.16f, 0.24f), CoralPink, CoralPink * 14.0f);
+
+			// Right Wall Terrarium Cylinder & Alien Flora (Screen Right = -X)
+			AddSceneryMesh(CylinderMesh, FVector(RightWallX, 15.0f, TerrariumZ[t]), FRotator::ZeroRotator,
+				FVector(0.36f, 0.36f, 1.55f), FLinearColor(0.06f, 0.12f, 0.18f), CyanLumen * 1.5f);
+			AddSceneryMesh(CylinderMesh, FVector(RightWallX, 12.0f, TerrariumZ[t]), FRotator::ZeroRotator,
+				FVector(0.28f, 0.28f, 1.35f), FLinearColor(0.02f, 0.85f, 0.95f), CyanLumen * 8.0f);
+			AddSceneryMesh(ConeMesh, FVector(RightWallX + 8.0f, 10.0f, TerrariumZ[t] - 20.0f), FRotator(0.0f, 0.0f, -18.0f),
+				FVector(0.18f, 0.18f, 0.65f), EmeraldFlora, EmeraldFlora * 10.0f);
+			AddSceneryMesh(SphereMesh, FVector(RightWallX + 8.0f, 10.0f, TerrariumZ[t] + 28.0f), FRotator::ZeroRotator,
+				FVector(0.16f, 0.16f, 0.24f), CoralPink, CoralPink * 14.0f);
+
+			// Terrarium Point Lights
+			AddSceneryLight(FVector(LeftWallX - 15.0f, -10.0f, TerrariumZ[t]), CyanLumen, 7500.0f, 450.0f);
+			AddSceneryLight(FVector(RightWallX + 15.0f, -10.0f, TerrariumZ[t]), CyanLumen, 7500.0f, 450.0f);
+		}
+
+		// D. Curved Panoramic Glass Dome Window Ribs in the background
+		for (int32 r = -2; r <= 2; ++r)
+		{
+			AddSceneryMesh(CylinderMesh, FVector(float(r) * 110.0f, 320.0f, RefCamZ), FRotator(0.0f, 0.0f, float(r * 4)),
+				FVector(0.04f, 0.04f, 16.0f), FLinearColor(0.15f, 0.22f, 0.32f), CyanLumen * 2.5f);
 		}
 	}
 }

@@ -213,7 +213,8 @@ enum class EVTGameThemeId : uint8
 	DeepSpaceOrbit   UMETA(DisplayName = "07 // DEEP SPACE ORBIT"),
 	CandyLand        UMETA(DisplayName = "08 // CANDY LAND DESSERT"),
 	PixelDungeon     UMETA(DisplayName = "09 // 8-BIT PIXEL DUNGEON"),
-	WhimsicalToybox  UMETA(DisplayName = "10 // WHIMSICAL TOYBOX")
+	WhimsicalToybox  UMETA(DisplayName = "10 // WHIMSICAL TOYBOX"),
+	BioLumenArk      UMETA(DisplayName = "11 // BIO-LUMEN XENOVERSE ARK")
 };
 
 USTRUCT(BlueprintType)

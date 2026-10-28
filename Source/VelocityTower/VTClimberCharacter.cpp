@@ -852,6 +852,77 @@ void AVTClimberCharacter::ApplyThemeCharacterCostume(EVTGameThemeId InThemeId)
 			if (Seg) Seg->SetVisibility(false);
 		}
 	}
+	// 6. BIO-LUMEN XENOVERSE ARK 1:1 -> Sleek Xenoverse Explorer with Dragonfly Energy Wings
+	else if (InThemeId == EVTGameThemeId::BioLumenArk)
+	{
+		const FLinearColor SuitWhite(0.92f, 0.94f, 0.98f);
+		const FLinearColor SuitSilver(0.24f, 0.28f, 0.36f);
+		const FLinearColor VisorViolet(0.88f, 0.20f, 0.96f);
+		const FLinearColor BioEmerald(0.12f, 0.98f, 0.55f);
+		const FLinearColor WingCyan(0.0f, 0.96f, 1.0f);
+		const FLinearColor WingViolet(0.85f, 0.35f, 1.0f);
+
+		SetPartMat(ClimberMesh, SuitWhite, 0.28f);
+		SetPartMat(HeadMesh, SuitWhite, 0.28f);
+		if (VisorWrapMesh)
+		{
+			VisorWrapMesh->SetVisibility(true);
+			VisorWrapMesh->SetRelativeLocation(FVector(18.0f, 0.0f, 2.0f));
+			VisorWrapMesh->SetRelativeScale3D(FVector(0.55f, 0.72f, 0.28f));
+			SetPartMat(VisorWrapMesh, VisorViolet, 16.0f);
+		}
+		if (ChestCoreMesh)
+		{
+			ChestCoreMesh->SetVisibility(true);
+			ChestCoreMesh->SetRelativeLocation(FVector(26.0f, 0.0f, 4.0f));
+			ChestCoreMesh->SetRelativeScale3D(FVector(0.35f, 0.35f, 0.35f));
+			SetPartMat(ChestCoreMesh, BioEmerald, 18.0f);
+		}
+		SetPartMat(LeftShoulderMesh, SuitSilver, 0.22f);
+		SetPartMat(RightShoulderMesh, SuitSilver, 0.22f);
+		SetPartMat(LeftArmMesh, SuitWhite, 0.25f);
+		SetPartMat(RightArmMesh, SuitWhite, 0.25f);
+		SetPartMat(LeftGauntletMesh, BioEmerald, 10.0f);
+		SetPartMat(RightGauntletMesh, BioEmerald, 10.0f);
+		SetPartMat(LeftLegMesh, SuitSilver, 0.22f);
+		SetPartMat(RightLegMesh, SuitSilver, 0.22f);
+		SetPartMat(LeftShoeMesh, SuitWhite, 0.3f);
+		SetPartMat(RightShoeMesh, SuitWhite, 0.3f);
+
+		// Aerodynamic wing/fin antennas on helmet
+		if (HeadgearMesh && CylinderMesh)
+		{
+			HeadgearMesh->SetStaticMesh(CylinderMesh);
+			HeadgearMesh->SetRelativeLocation(FVector(-8.0f, -22.0f, 26.0f));
+			HeadgearMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, -35.0f));
+			HeadgearMesh->SetRelativeScale3D(FVector(0.12f, 0.12f, 0.42f));
+			SetPartMat(HeadgearMesh, BioEmerald, 8.0f);
+		}
+		if (HeadgearAccentMesh && CylinderMesh)
+		{
+			HeadgearAccentMesh->SetStaticMesh(CylinderMesh);
+			HeadgearAccentMesh->SetRelativeLocation(FVector(-8.0f, 22.0f, 26.0f));
+			HeadgearAccentMesh->SetRelativeRotation(FRotator(0.0f, 0.0f, 35.0f));
+			HeadgearAccentMesh->SetRelativeScale3D(FVector(0.12f, 0.12f, 0.42f));
+			SetPartMat(HeadgearAccentMesh, BioEmerald, 8.0f);
+		}
+
+		// 4 Translucent Dragonfly Energy Wings (using Scarf segments or backpack)
+		if (BackpackJetMesh)
+		{
+			BackpackJetMesh->SetVisibility(true, true);
+			SetPartMat(BackpackJetMesh, SuitSilver, 0.35f);
+		}
+		for (int32 i = 0; i < ScarfSegmentMeshes.Num(); ++i)
+		{
+			if (ScarfSegmentMeshes[i])
+			{
+				ScarfSegmentMeshes[i]->SetVisibility(true);
+				const FLinearColor WingCol = (i % 2 == 0) ? WingCyan : WingViolet;
+				SetPartMat(ScarfSegmentMeshes[i], WingCol, 14.0f);
+			}
+		}
+	}
 	else
 	{
 		// Sci-Fi / Synthwave / Industrial / Cyberpunk Runner: ensure scarf is visible

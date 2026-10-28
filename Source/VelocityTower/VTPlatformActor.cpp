@@ -962,6 +962,117 @@ void AVTPlatformActor::ApplyTheme(const FVTGameThemeInfo& Theme)
 				FVector(0.28f, 0.16f, 0.28f), OrbCol, OrbCol * 22.0f);
 		}
 	}
+	// 6B. BIO-LUMEN XENOVERSE ARK 1:1 (ref_08_bio_lumen_xenoverse_ark_1793214803988.jpg)
+	else if (Theme.Id == EVTGameThemeId::BioLumenArk)
+	{
+		if (FloorLabelText) FloorLabelText->SetVisibility(false);
+		const int32 PatternIdx = FMath::Abs(FloorIndex) % 10;
+		const bool bVioletPlat = (PatternIdx == 2 || PatternIdx == 3 || PatternIdx == 7);
+		const FLinearColor CyanLumen(0.0f, 0.95f, 1.0f);
+		const FLinearColor VioletLumen(0.78f, 0.35f, 1.0f);
+		const FLinearColor SproutPink(1.0f, 0.42f, 0.78f);
+		const FLinearColor EmeraldFlora(0.12f, 0.95f, 0.52f);
+		const FLinearColor PlatColor = bVioletPlat ? VioletLumen : CyanLumen;
+
+		if (PatternIdx == 0)
+		{
+			// Floor 0: Heavy metallic starship bio-dock platform with warning hazard striping & 4 incubator pods
+			PlatformMesh->SetVisibility(true);
+			PlatformMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -14.0f));
+			PlatformMesh->SetRelativeScale3D(FVector(PlatformWidth / 100.0f, 0.58f, 0.28f));
+			if (BodyMID)
+			{
+				const FLinearColor DeckGrey(0.12f, 0.15f, 0.22f);
+				BodyMID->SetVectorParameterValue(TEXT("BaseColor"), DeckGrey);
+				BodyMID->SetVectorParameterValue(TEXT("Color"), DeckGrey);
+				BodyMID->SetVectorParameterValue(TEXT("EmissiveColor"), CyanLumen * 0.6f);
+			}
+			TopNeonTrimMesh->SetVisibility(true);
+			TopNeonTrimMesh->SetRelativeLocation(FVector(0.0f, -28.0f, -1.0f));
+			TopNeonTrimMesh->SetRelativeScale3D(FVector(PlatformWidth / 100.0f, 0.06f, 0.04f));
+			if (TrimMID)
+			{
+				const FLinearColor HazardYellow(1.0f, 0.78f, 0.08f);
+				TrimMID->SetVectorParameterValue(TEXT("BaseColor"), HazardYellow);
+				TrimMID->SetVectorParameterValue(TEXT("Color"), HazardYellow);
+				TrimMID->SetVectorParameterValue(TEXT("EmissiveColor"), HazardYellow * 12.0f);
+			}
+
+			// 4 Cylindrical Bio-Incubator Pods (2 Violet Coral on left, 2 Emerald Flora on right)
+			// Left Pod 1 & 2 (Violet)
+			AddDeco(CylinderMesh, FVector(PlatformWidth * 0.24f, -4.0f, 26.0f), FRotator::ZeroRotator,
+				FVector(0.24f, 0.24f, 0.56f), FLinearColor(0.18f, 0.22f, 0.28f), VioletLumen * 14.0f);
+			AddDeco(CylinderMesh, FVector(PlatformWidth * 0.14f, 8.0f, 32.0f), FRotator::ZeroRotator,
+				FVector(0.22f, 0.22f, 0.62f), FLinearColor(0.18f, 0.22f, 0.28f), VioletLumen * 14.0f);
+			// Right Pod 3 & 4 (Emerald)
+			AddDeco(CylinderMesh, FVector(-PlatformWidth * 0.24f, -4.0f, 26.0f), FRotator::ZeroRotator,
+				FVector(0.24f, 0.24f, 0.56f), FLinearColor(0.18f, 0.22f, 0.28f), EmeraldFlora * 14.0f);
+			AddDeco(CylinderMesh, FVector(-PlatformWidth * 0.14f, 8.0f, 32.0f), FRotator::ZeroRotator,
+				FVector(0.22f, 0.22f, 0.62f), FLinearColor(0.18f, 0.22f, 0.28f), EmeraldFlora * 14.0f);
+		}
+		else
+		{
+			// Floors 1..9: Translucent bioluminescent glass/hologram slab with central glowing node & circuits
+			PlatformMesh->SetVisibility(true);
+			PlatformMesh->SetRelativeLocation(FVector(0.0f, 0.0f, -8.0f));
+			PlatformMesh->SetRelativeScale3D(FVector(PlatformWidth / 100.0f, 0.46f, 0.16f));
+			if (BodyMID)
+			{
+				BodyMID->SetVectorParameterValue(TEXT("BaseColor"), PlatColor * 0.22f);
+				BodyMID->SetVectorParameterValue(TEXT("Color"), PlatColor * 0.22f);
+				BodyMID->SetVectorParameterValue(TEXT("EmissiveColor"), PlatColor * 3.8f);
+			}
+			TopNeonTrimMesh->SetVisibility(true);
+			TopNeonTrimMesh->SetRelativeLocation(FVector(0.0f, -24.0f, -1.0f));
+			TopNeonTrimMesh->SetRelativeScale3D(FVector(PlatformWidth / 100.0f, 0.045f, 0.035f));
+			if (TrimMID)
+			{
+				TrimMID->SetVectorParameterValue(TEXT("BaseColor"), PlatColor);
+				TrimMID->SetVectorParameterValue(TEXT("Color"), PlatColor);
+				TrimMID->SetVectorParameterValue(TEXT("EmissiveColor"), PlatColor * 18.0f);
+			}
+
+			// Central glowing circular node
+			AddDeco(SphereMesh, FVector(0.0f, -24.0f, -8.0f), FRotator::ZeroRotator,
+				FVector(0.16f, 0.12f, 0.16f), PlatColor, PlatColor * 22.0f);
+
+			// Internal cybernetic root circuits radiating outward
+			AddDeco(CylinderMesh, FVector(-PlatformWidth * 0.22f, -18.0f, -8.0f), FRotator(0.0f, 0.0f, 86.0f),
+				FVector(0.02f, 0.02f, (PlatformWidth * 0.38f) / 100.0f), PlatColor, PlatColor * 14.0f);
+			AddDeco(CylinderMesh, FVector(PlatformWidth * 0.22f, -18.0f, -8.0f), FRotator(0.0f, 0.0f, 94.0f),
+				FVector(0.02f, 0.02f, (PlatformWidth * 0.38f) / 100.0f), PlatColor, PlatColor * 14.0f);
+
+			// Hanging bioluminescent root-vines underneath (for Cyan platforms)
+			if (!bVioletPlat)
+			{
+				for (int32 v = -2; v <= 2; ++v)
+				{
+					const float VineX = float(v) * (PlatformWidth * 0.18f);
+					const float VineLen = (v % 2 == 0) ? 0.45f : 0.70f;
+					AddDeco(CylinderMesh, FVector(VineX, -16.0f, -24.0f), FRotator(0.0f, 0.0f, float(v * 4)),
+						FVector(0.025f, 0.025f, VineLen), CyanLumen, CyanLumen * 12.0f);
+				}
+			}
+
+			// Sprouting alien flora on top
+			if (PatternIdx == 1 || PatternIdx == 5 || PatternIdx == 8)
+			{
+				// Cyan glowing bulb sprouts on left
+				AddDeco(SphereMesh, FVector(PlatformWidth * 0.32f, -10.0f, 14.0f), FRotator::ZeroRotator,
+					FVector(0.14f, 0.14f, 0.24f), CyanLumen, CyanLumen * 16.0f);
+				AddDeco(SphereMesh, FVector(-PlatformWidth * 0.28f, -10.0f, 12.0f), FRotator::ZeroRotator,
+					FVector(0.12f, 0.12f, 0.18f), SproutPink, SproutPink * 16.0f);
+			}
+			else if (bVioletPlat)
+			{
+				// Violet/magenta crystal flower clusters on top
+				AddDeco(ConeMesh, FVector(PlatformWidth * 0.30f, -10.0f, 12.0f), FRotator(180.0f, 0.0f, 0.0f),
+					FVector(0.15f, 0.15f, 0.28f), VioletLumen, VioletLumen * 18.0f);
+				AddDeco(SphereMesh, FVector(-PlatformWidth * 0.26f, -10.0f, 10.0f), FRotator::ZeroRotator,
+					FVector(0.12f, 0.12f, 0.16f), SproutPink, SproutPink * 16.0f);
+			}
+		}
+	}
 	// 7. RETRO SYNTHWAVE 80s 1:1 (Extruded Hot-Magenta & Electric-Cyan Neon Bars + Floor 4 Equalizer Staircase)
 	else if (Theme.Id == EVTGameThemeId::RetroSynthwave)
 	{
